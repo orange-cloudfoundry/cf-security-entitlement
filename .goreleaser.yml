@@ -1,0 +1,74 @@
+# This is an example goreleaser.yaml file with some sane defaults.
+# Make sure to check the documentation at http://goreleaser.com
+before:
+  hooks:
+    - go mod download
+builds:
+  - goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+    env:
+      - CGO_ENABLED=0
+    id: server
+    main: server/main.go
+    binary: cfsecurity-server
+  - goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+    env:
+      - CGO_ENABLED=0
+    id: plugin
+    main: plugin/main.go
+    binary: cfsecurity-plugin
+  - goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+    env:
+      - CGO_ENABLED=0
+    id: provider
+    main: terraform-provider-cfsecurity/main.go
+    binary: terraform-provider-cfsecurity
+archives:
+  - id: zip-archive-server
+    builds: [server]
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    format: zip
+  - id: binary-archive-server
+    builds: [server]
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    format: binary
+  - id: zip-archive-plugin
+    builds: [plugin]
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    format: zip
+  - id: binary-archive-plugin
+    builds: [plugin]
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    format: binary
+  - id: zip-archive-provider
+    builds: [provider]
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    format: zip
+  - id: binary-archive-provider
+    builds: [provider]
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    format: binary
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
