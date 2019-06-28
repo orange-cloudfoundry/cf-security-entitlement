@@ -33,7 +33,6 @@ func (SecGroupMiddleware) Handler(proxyRoute gobis.ProxyRoute, params interface{
 		return next, nil
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-
 		path := req.URL.Path
 		if bindReqRegex.MatchString(path) && (req.Method == http.MethodPut || req.Method == http.MethodDelete) {
 			bindOrUnbindSecGroup(w, req, next)

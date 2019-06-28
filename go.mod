@@ -9,10 +9,10 @@ require (
 	github.com/cloudfoundry-community/gautocloud v1.1.3
 	github.com/cloudfoundry-community/go-cfclient v0.0.0-20190201205600-f136f9222381
 	github.com/gorilla/mux v1.7.2 // indirect
-	github.com/hashicorp/terraform v0.12.0 // indirect
+	github.com/hashicorp/go-uuid v1.0.1
+	github.com/hashicorp/terraform v0.12.0
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/jinzhu/gorm v1.9.8
-	github.com/kr/pty v1.1.3 // indirect
 	github.com/logrusorgru/aurora v0.0.0-20190428105938-cea283e61946
 	github.com/mattn/go-colorable v0.1.2
 	github.com/mattn/go-isatty v0.0.8

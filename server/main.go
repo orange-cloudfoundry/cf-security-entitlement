@@ -14,7 +14,6 @@ import (
 	"github.com/orange-cloudfoundry/gobis-middlewares/casbin"
 	"github.com/orange-cloudfoundry/gobis-middlewares/ceftrace"
 	"github.com/orange-cloudfoundry/gobis-middlewares/jwt"
-	"github.com/orange-cloudfoundry/gobis-middlewares/oauth2"
 	"github.com/orange-cloudfoundry/gobis-middlewares/trace"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -94,16 +93,6 @@ func boot() error {
 		return err
 	}
 
-	oauth2Config := oauth2.Oauth2Config{
-		Oauth2: &oauth2.Oauth2Options{
-			Enabled:          true,
-			ClientId:         config.CloudFoundry.ClientID,
-			ClientSecret:     config.CloudFoundry.ClientSecret,
-			AuthorizationUri: info.AuthorizationEndpoint,
-			AccessTokenUri:   info.TokenEndpoint + "/oauth/token",
-			AuthKey:          config.AuthKey + "/oauth/auth",
-		},
-	}
 	jwtConfig := jwt.JwtConfig{
 		Jwt: &jwt.JwtOptions{
 			Enabled: true,
@@ -147,22 +136,21 @@ func boot() error {
 	builder = builder.
 		AddRouteHandler("/v2/security_entitlement", http.HandlerFunc(handleEntitleSecGroup)).
 		WithMethods("POST").
-		WithMiddlewareParams(oauth2Config, jwtConfig, casbinConfig, traceConfig, cefConfig).
+		WithMiddlewareParams(jwtConfig, casbinConfig, traceConfig, cefConfig).
 		AddRouteHandler("/v2/security_entitlement", http.HandlerFunc(handleRevokeSecGroup)).
 		WithMethods("DELETE").
-		WithMiddlewareParams(oauth2Config, jwtConfig, casbinConfig, traceConfig, cefConfig).
+		WithMiddlewareParams(jwtConfig, casbinConfig, traceConfig, cefConfig).
 		AddRouteHandler("/v2/security_entitlement", http.HandlerFunc(handleListSecGroup)).
 		WithMethods("GET").
-		WithMiddlewareParams(oauth2Config, jwtConfig, casbinConfig, traceConfig, cefConfig).
+		WithMiddlewareParams(jwtConfig, casbinConfig, traceConfig, cefConfig).
 		AddRoute("/v2/security_groups/**", config.CloudFoundry.Endpoint+"/v2/security_groups").
 		WithMethods("PUT", "DELETE", "GET").
-		WithMiddlewareParams(oauth2Config, jwtConfig, bindingConfig, traceConfig, cefConfig)
+		WithMiddlewareParams(jwtConfig, bindingConfig, traceConfig, cefConfig)
 	if config.CloudFoundry.SkipSSLValidation {
 		builder = builder.WithInsecureSkipVerify()
 	}
 	routes := builder.Build()
 	r, err := gobis.NewHandler(routes,
-		oauth2.NewOauth2(),
 		jwt.NewJwt(),
 		casbin.NewCasbin(),
 		ceftrace.NewCefTrace(),
@@ -178,13 +166,13 @@ func boot() error {
 
 	port := gautocloud.GetAppInfo().Port
 	if port == 0 {
-		port = 8089
+		port = 8091
 	}
 	if (config.SSLCertFile != "") && (config.SSLKeyFile != "") {
-		log.Debugf("serving https on %s", fmt.Sprintf(":%d", port))
+		log.Infof("serving https on %s", fmt.Sprintf(":%d", port))
 		return http.ListenAndServeTLS(fmt.Sprintf(":%d", port), config.SSLCertFile, config.SSLKeyFile, r)
 	}
-	log.Debugf("serving http on %s", fmt.Sprintf(":%d", port))
+	log.Infof("serving http on %s", fmt.Sprintf(":%d", port))
 	return http.ListenAndServe(fmt.Sprintf(":%d", port), r)
 }
 

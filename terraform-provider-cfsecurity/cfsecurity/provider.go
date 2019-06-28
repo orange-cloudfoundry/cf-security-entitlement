@@ -55,7 +55,10 @@ func Provider() terraform.ResourceProvider {
 			"cfsecurity_asg": dataSourceAsg(),
 		},
 
-		ResourcesMap: map[string]*schema.Resource{},
+		ResourcesMap: map[string]*schema.Resource{
+			"cfsecurity_bind_asg":    resourceBindAsg(),
+			"cfsecurity_entitle_asg": resourceEntitleAsg(),
+		},
 
 		ConfigureFunc: providerConfigure,
 	}

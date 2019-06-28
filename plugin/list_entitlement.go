@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/olekukonko/tablewriter"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/clients"
@@ -16,7 +17,8 @@ type EntitleSecGroup struct {
 }
 
 type ListEntitlementCommand struct {
-	Api string `short:"a" long:"api" description:"api to cf security"`
+	Api    string `short:"a" long:"api" description:"api to cf security"`
+	InJson bool   `long:"json" description:"see in json"`
 }
 
 func entitlementsExtract(client *clients.Client, entitlements []model.EntitlementSecGroup) ([]EntitleSecGroup, error) {
@@ -65,7 +67,9 @@ func (c *ListEntitlementCommand) Execute(_ []string) error {
 	if err != nil {
 		return err
 	}
-	messages.Printf("Getting entitlements security groups as %s...\n", messages.C.Cyan(username))
+	if !c.InJson {
+		messages.Printf("Getting entitlements security groups as %s...\n", messages.C.Cyan(username))
+	}
 	cEntitlements, err := client.ListSecGroupEntitlements()
 	if err != nil {
 		return err
@@ -74,8 +78,15 @@ func (c *ListEntitlementCommand) Execute(_ []string) error {
 	if err != nil {
 		return err
 	}
-	messages.Println(messages.C.Green("OK\n"))
+	if !c.InJson {
+		messages.Println(messages.C.Green("OK\n"))
+	}
 
+	if c.InJson {
+		b, _ := json.MarshalIndent(entitlements, "", "\t")
+		messages.Println(string(b))
+		return nil
+	}
 	if len(entitlements) == 0 {
 		fmt.Println("Empty.")
 		return nil
@@ -84,7 +95,7 @@ func (c *ListEntitlementCommand) Execute(_ []string) error {
 	for _, entitlement := range entitlements {
 		subData := []string{
 			entitlement.Name,
-			strings.Join(entitlement.Orgs, ", "),
+			strings.Join(entitlement.Orgs, " "),
 		}
 		data = append(data, subData)
 	}

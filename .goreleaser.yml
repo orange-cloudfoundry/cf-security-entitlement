@@ -13,7 +13,7 @@ builds:
     env:
       - CGO_ENABLED=0
     id: server
-    main: server/main.go
+    main: ./server
     binary: cfsecurity-server
   - goos:
       - linux
@@ -24,7 +24,7 @@ builds:
     env:
       - CGO_ENABLED=0
     id: plugin
-    main: plugin/main.go
+    main: ./plugin
     binary: cfsecurity-plugin
   - goos:
       - linux
@@ -35,32 +35,32 @@ builds:
     env:
       - CGO_ENABLED=0
     id: provider
-    main: terraform-provider-cfsecurity/main.go
+    main: ./terraform-provider-cfsecurity
     binary: terraform-provider-cfsecurity
 archives:
   - id: zip-archive-server
     builds: [server]
-    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}"
     format: zip
   - id: binary-archive-server
     builds: [server]
-    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}"
     format: binary
   - id: zip-archive-plugin
     builds: [plugin]
-    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}"
     format: zip
   - id: binary-archive-plugin
     builds: [plugin]
-    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}"
     format: binary
   - id: zip-archive-provider
     builds: [provider]
-    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}"
     format: zip
   - id: binary-archive-provider
     builds: [provider]
-    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}"
     format: binary
 checksum:
   name_template: 'checksums.txt'
