@@ -3,6 +3,8 @@ go:
   - '1.12'
 install:
   - export GO111MODULE=on
+  - git diff > /tmp/diff.log
+  - cat /tmp/diff.log
 deploy:
   - provider: script
     skip_cleanup: true
