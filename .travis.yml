@@ -1,6 +1,8 @@
 language: go
 go:
   - '1.12'
+install:
+  - export GO111MODULE=on
 deploy:
   - provider: script
     skip_cleanup: true
