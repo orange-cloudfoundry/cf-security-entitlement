@@ -37,7 +37,7 @@ type SecurityPlugin struct{}
 
 func (p *SecurityPlugin) GetMetadata() plugin.PluginMetadata {
 	return plugin.PluginMetadata{
-		Name: "security",
+		Name: "cf-security-entitlement",
 		Version: plugin.VersionType{
 			Major: 1,
 			Minor: 0,
