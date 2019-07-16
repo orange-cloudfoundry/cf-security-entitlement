@@ -74,20 +74,21 @@ func resourceBindAsgRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	// wtf man ? add all spaces of all secgroups to resource ?
-	// if d.Get("force").(bool) {
-	// 	finalBinds := make([]map[string]interface{}, 0)
-	// 	for _, secGroup := range secGroups {
-	// 		for _, space := range secGroup.SpacesData {
-	// 			finalBinds = append(finalBinds, map[string]interface{}{
-	// 				"asg_id":   secGroup.Guid,
-	// 				"space_id": space.Entity.Guid,
-	// 			})
-	// 		}
-	// 	}
-	// 	d.Set("bind", finalBinds)
-	// 	return nil
-	// }
+	userIsAdmin, _ := client.CurrentUserIsAdmin()
+	// check if force and if user is not an admin
+	if d.Get("force").(bool) && !userIsAdmin {
+		finalBinds := make([]map[string]interface{}, 0)
+		for _, secGroup := range secGroups {
+			for _, space := range secGroup.SpacesData {
+				finalBinds = append(finalBinds, map[string]interface{}{
+					"asg_id":   secGroup.Guid,
+					"space_id": space.Entity.Guid,
+				})
+			}
+		}
+		d.Set("bind", finalBinds)
+		return nil
+	}
 
 	secGroupsTf := getListOfStructs(d.Get("bind"))
 	finalBinds := intersectSlices(secGroupsTf, secGroups, func(source, item interface{}) bool {
