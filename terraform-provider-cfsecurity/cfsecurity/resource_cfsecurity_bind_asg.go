@@ -69,33 +69,40 @@ func resourceBindAsgCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceBindAsgRead(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*clients.Client)
-
 	secGroups, err := client.ListSecGroups()
 	if err != nil {
 		return err
 	}
-	if d.Get("force").(bool) {
-		finalBinds := make([]map[string]interface{}, 0)
-		for _, secGroup := range secGroups {
-			for _, space := range secGroup.SpacesData {
-				finalBinds = append(finalBinds, map[string]interface{}{
-					"asg_id":   secGroup.Guid,
-					"space_id": space.Entity.Guid,
-				})
-			}
-		}
-		d.Set("bind", finalBinds)
-		return nil
-	}
+
+	// wtf man ? add all spaces of all secgroups to resource ?
+	// if d.Get("force").(bool) {
+	// 	finalBinds := make([]map[string]interface{}, 0)
+	// 	for _, secGroup := range secGroups {
+	// 		for _, space := range secGroup.SpacesData {
+	// 			finalBinds = append(finalBinds, map[string]interface{}{
+	// 				"asg_id":   secGroup.Guid,
+	// 				"space_id": space.Entity.Guid,
+	// 			})
+	// 		}
+	// 	}
+	// 	d.Set("bind", finalBinds)
+	// 	return nil
+	// }
+
 	secGroupsTf := getListOfStructs(d.Get("bind"))
 	finalBinds := intersectSlices(secGroupsTf, secGroups, func(source, item interface{}) bool {
 		secGroupTf := source.(map[string]interface{})
 		secGroup := item.(cfclient.SecGroup)
-		spaceInside := isInSlice(secGroup.SpacesData, func(object interface{}) bool {
-			space := object.(cfclient.SpaceResource)
-			return space.Entity.Guid == secGroupTf["space_id"].(string)
+		asgIDTf := secGroupTf["asg_id"].(string)
+		spaceIDTf := secGroupTf["space_id"].(string)
+		if asgIDTf != secGroup.Guid {
+			return false
+		}
+		spaces, _ := client.GetSecGroupSpaces(secGroup.Guid)
+		return isInSlice(spaces, func(object interface{}) bool {
+			space := object.(cfclient.Space)
+			return space.Guid == spaceIDTf
 		})
-		return secGroupTf["asg_id"].(string) == secGroup.Guid && spaceInside
 	})
 	d.Set("bind", finalBinds)
 	return nil
