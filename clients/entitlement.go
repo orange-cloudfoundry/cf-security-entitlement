@@ -75,3 +75,11 @@ func (c Client) ListSecGroupEntitlements() ([]model.EntitlementSecGroup, error) 
 	}
 	return entitlements, nil
 }
+
+func (c Client) OrgGUIDFromSpaceGUID(spaceGuid string) (string, error) {
+	s, err := c.cfClient.GetSpaceByGuid(spaceGuid)
+	if err != nil {
+		return "", err
+	}
+	return s.OrganizationGuid, nil
+}
