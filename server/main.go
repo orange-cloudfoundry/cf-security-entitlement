@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"github.com/cloudfoundry-community/gautocloud"
 	_ "github.com/cloudfoundry-community/gautocloud/connectors/databases/gorm"
@@ -75,7 +77,7 @@ func boot() error {
 	gautocloud.Inject(&config)
 
 	loadLogConfig(config)
-	err := loadClient(config)
+	err := loadClient(shallowDefaultTransport(config.TrustedCaCertificates, config.CloudFoundry.SkipSSLValidation), config)
 	if err != nil {
 		return err
 	}
@@ -146,17 +148,22 @@ func boot() error {
 		AddRoute("/v2/security_groups/**", config.CloudFoundry.Endpoint+"/v2/security_groups").
 		WithMethods("PUT", "DELETE", "GET").
 		WithMiddlewareParams(jwtConfig, bindingConfig, traceConfig, cefConfig)
-	if config.CloudFoundry.SkipSSLValidation {
-		builder = builder.WithInsecureSkipVerify()
-	}
+
 	routes := builder.Build()
-	r, err := gobis.NewHandler(routes,
+	factory := gobis.NewRouterFactory(
 		jwt.NewJwt(),
 		casbin.NewCasbin(),
 		ceftrace.NewCefTrace(),
 		trace.NewTrace(),
 		&SecGroupMiddleware{},
 	)
+	factory.(*gobis.RouterFactoryService).CreateTransportFunc = func(proxyRoute gobis.ProxyRoute) http.RoundTripper {
+		return gobis.NewRouteTransportWithHttpTransport(
+			proxyRoute,
+			shallowDefaultTransport(config.TrustedCaCertificates, config.CloudFoundry.SkipSSLValidation),
+		)
+	}
+	r, err := gobis.NewHandlerWithFactory(routes, factory)
 	if err != nil {
 		panic(err)
 	}
@@ -187,18 +194,23 @@ func checkDbConnection(db *gorm.DB) {
 	}
 }
 
-func loadClient(c model.ConfigServer) error {
+func loadClient(transport *http.Transport, c model.ConfigServer) error {
 	var err error
+	httpClient := &http.Client{
+		Transport: transport,
+	}
 	configClient := &cfclient.Config{
 		ApiAddress:        c.CloudFoundry.Endpoint,
 		ClientID:          c.CloudFoundry.ClientID,
 		ClientSecret:      c.CloudFoundry.ClientSecret,
 		SkipSslValidation: c.CloudFoundry.SkipSSLValidation,
+		HttpClient:        httpClient,
 	}
 	client, err = cfclient.NewClient(configClient)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -232,5 +244,29 @@ func loadLogConfig(c model.ConfigServer) {
 	case "FATAL":
 		log.SetLevel(log.FatalLevel)
 		return
+	}
+}
+
+func shallowDefaultTransport(certs []string, skipVerify bool) *http.Transport {
+	rootCAs, _ := x509.SystemCertPool()
+	if rootCAs == nil {
+		rootCAs = x509.NewCertPool()
+	}
+
+	for i, certs := range certs {
+		ok := rootCAs.AppendCertsFromPEM([]byte(certs))
+		if !ok {
+			log.Warn("Cannot append trusted ca certificates at %d", i)
+		}
+	}
+	defaultTransport := http.DefaultTransport.(*http.Transport)
+	return &http.Transport{
+		Proxy:                 defaultTransport.Proxy,
+		TLSHandshakeTimeout:   defaultTransport.TLSHandshakeTimeout,
+		ExpectContinueTimeout: defaultTransport.ExpectContinueTimeout,
+		TLSClientConfig: &tls.Config{
+			RootCAs:            rootCAs,
+			InsecureSkipVerify: skipVerify,
+		},
 	}
 }

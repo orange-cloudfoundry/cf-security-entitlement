@@ -15,21 +15,21 @@ func serverError(w http.ResponseWriter, err error) {
 
 func serverErrorCode(w http.ResponseWriter, code int, err error) {
 	w.Header().Add("Content-Type", "application/json")
-	if httpErr, ok := err.(cfclient.CloudFoundryHTTPError); ok {
-		w.WriteHeader(httpErr.StatusCode)
-		b, _ := json.Marshal(cfclient.CloudFoundryHTTPError{
-			StatusCode: httpErr.StatusCode,
-			Status:     httpErr.Status,
-			Body:       httpErr.Body,
+	if httpErr, ok := err.(cfclient.CloudFoundryError); ok {
+		w.WriteHeader(httpErr.Code)
+		b, _ := json.Marshal(cfclient.CloudFoundryError{
+			Code:        httpErr.Code,
+			ErrorCode:   httpErr.ErrorCode,
+			Description: httpErr.Description,
 		})
 		w.Write(b)
 		return
 	}
 	w.WriteHeader(code)
-	b, _ := json.Marshal(cfclient.CloudFoundryHTTPError{
-		StatusCode: code,
-		Status:     http.StatusText(code),
-		Body:       []byte(err.Error()),
+	b, _ := json.Marshal(cfclient.CloudFoundryError{
+		Code:        code,
+		ErrorCode:   http.StatusText(code),
+		Description: err.Error(),
 	})
 	w.Write(b)
 }

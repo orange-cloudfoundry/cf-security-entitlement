@@ -58,18 +58,7 @@ func resourceBindAsgCreate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	isUserAdmin, err := client.CurrentUserIsAdmin()
-	if err != nil {
-		return err
-	}
-
 	for _, elem := range getListOfStructs(d.Get("bind")) {
-		if isUserAdmin {
-			err := checkHasEntitlement(client, elem["asg_id"].(string), elem["space_id"].(string))
-			if err != nil {
-				return err
-			}
-		}
 		err := client.BindSecurityGroup(elem["asg_id"].(string), elem["space_id"].(string))
 		if err != nil {
 			return err
@@ -124,11 +113,6 @@ func resourceBindAsgRead(d *schema.ResourceData, meta interface{}) error {
 func resourceBindAsgUpdate(d *schema.ResourceData, meta interface{}) error {
 	client := meta.(*clients.Client)
 
-	isUserAdmin, err := client.CurrentUserIsAdmin()
-	if err != nil {
-		return err
-	}
-
 	old, now := d.GetChange("bind")
 	remove, add := getListMapChanges(old, now, func(source, item map[string]interface{}) bool {
 		return source["asg_id"] == item["asg_id"] &&
@@ -145,12 +129,6 @@ func resourceBindAsgUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 	if len(add) > 0 {
 		for _, bind := range add {
-			if isUserAdmin {
-				err := checkHasEntitlement(client, bind["asg_id"].(string), bind["space_id"].(string))
-				if err != nil {
-					return err
-				}
-			}
 			err := client.BindSecurityGroup(bind["asg_id"].(string), bind["space_id"].(string))
 			if err != nil {
 				return err

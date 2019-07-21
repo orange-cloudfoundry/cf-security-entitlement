@@ -60,11 +60,6 @@ func bindOrUnbindSecGroup(w http.ResponseWriter, req *http.Request, next http.Ha
 		serverErrorCode(w, http.StatusBadRequest, err)
 		return
 	}
-	if isAdmin(gobis.Groups(req)) {
-		gobis.UndirtHeader(req, "Authorization")
-		next.ServeHTTP(w, req)
-		return
-	}
 	pathSplit := strings.Split(path, "/")
 	secGroupGuid := pathSplit[3]
 	spaceGuid := pathSplit[5]
@@ -80,25 +75,24 @@ func bindOrUnbindSecGroup(w http.ResponseWriter, req *http.Request, next http.Ha
 		SecurityGroupGUID: secGroupGuid,
 	}).First(&entitlement)
 	if entitlement.OrganizationGUID == "" {
-		serverErrorCode(w, http.StatusUnauthorized, fmt.Errorf(""))
+		serverErrorCode(w, http.StatusUnauthorized, fmt.Errorf(
+			"Org %s not entitled with security group %s for space %s",
+			space.OrganizationGuid,
+			secGroupGuid,
+			spaceGuid,
+		))
 		return
 	}
-
-	users, err := client.ListOrgManagers(entitlement.OrganizationGUID)
-	if err != nil {
-		serverError(w, err)
-		return
-	}
-	found := false
-	for _, user := range users {
-		if user.Guid == userId {
-			found = true
-			break
+	if !isAdmin(gobis.Groups(req)) {
+		hasAccess, err := isUserOrgManager(userId, entitlement.OrganizationGUID)
+		if err != nil {
+			serverError(w, err)
+			return
 		}
-	}
-	if !found {
-		serverErrorCode(w, http.StatusUnauthorized, fmt.Errorf(""))
-		return
+		if !hasAccess {
+			serverErrorCode(w, http.StatusUnauthorized, fmt.Errorf(""))
+			return
+		}
 	}
 	if req.Method == http.MethodPut {
 		err = client.BindSecGroup(secGroupGuid, spaceGuid)
@@ -333,4 +327,19 @@ func feedSpaces(spaces []cfclient.SpaceResource, orgIds []string) []cfclient.Spa
 		finalSpaces = append(finalSpaces, space)
 	}
 	return finalSpaces
+}
+
+func isUserOrgManager(userId, orgId string) (bool, error) {
+	users, err := client.ListOrgManagers(orgId)
+	if err != nil {
+		return false, err
+	}
+	found := false
+	for _, user := range users {
+		if user.Guid == userId {
+			found = true
+			break
+		}
+	}
+	return found, nil
 }
