@@ -256,7 +256,7 @@ func shallowDefaultTransport(certs []string, skipVerify bool) *http.Transport {
 	for i, certs := range certs {
 		ok := rootCAs.AppendCertsFromPEM([]byte(certs))
 		if !ok {
-			log.Warn("Cannot append trusted ca certificates at %d", i)
+			log.Warnf("Cannot append trusted ca certificates at %d", i)
 		}
 	}
 	defaultTransport := http.DefaultTransport.(*http.Transport)
