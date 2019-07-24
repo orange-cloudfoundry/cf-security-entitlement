@@ -36,10 +36,27 @@ func handleRevokeSecGroup(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+
 	if entitlement.OrganizationGUID == "" || entitlement.SecurityGroupGUID == "" {
 		serverErrorCode(w, http.StatusBadRequest, fmt.Errorf("organization_guid or security_group_guid not found"))
 		return
 	}
+
+	secGroup, err := client.GetSecGroup(entitlement.SecurityGroupGUID)
+	if err != nil {
+		panic(err)
+	}
+	spaces, err := secGroup.ListSpaceResources()
+	if err != nil {
+		panic(err)
+	}
+	for _, space := range spaces {
+		if space.Entity.OrganizationGuid == entitlement.OrganizationGUID {
+			serverErrorCode(w, http.StatusBadRequest, fmt.Errorf("There is still bindings in this organization, please remove all bindings before revoke"))
+			return
+		}
+	}
+
 	DB.Delete(&entitlement)
 }
 

@@ -149,21 +149,3 @@ func resourceBindAsgDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 	return nil
 }
-
-func checkHasEntitlement(client *clients.Client, secGroupId, spaceId string) error {
-	entitlements, err := client.ListSecGroupEntitlements()
-	if err != nil {
-		return err
-	}
-	orgId, err := client.OrgGUIDFromSpaceGUID(spaceId)
-	if err != nil {
-		return err
-	}
-	for _, entitlement := range entitlements {
-		if entitlement.OrganizationGUID == orgId && entitlement.SecurityGroupGUID == secGroupId {
-			return nil
-		}
-	}
-
-	return fmt.Errorf("Security group %s is not entitled to org %s for space %s", secGroupId, orgId, spaceId)
-}
