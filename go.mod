@@ -7,8 +7,9 @@ replace github.com/ugorji/go => github.com/ugorji/go v0.0.0-20181204163529-d75b2
 require (
 	cloud.google.com/go v0.40.0 // indirect
 	code.cloudfoundry.org/cli v6.44.1+incompatible
+	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/cloudfoundry-community/gautocloud v1.1.4
-	github.com/cloudfoundry-community/go-cfclient v0.0.0-20190201205600-f136f9222381
+	github.com/cloudfoundry-community/go-cfclient v0.0.0-20190808214049-35bcce23fc5f
 	github.com/cloudfoundry-community/go-cfenv v1.18.0 // indirect
 	github.com/golang/mock v1.3.1 // indirect
 	github.com/golang/protobuf v1.3.2 // indirect
@@ -39,10 +40,10 @@ require (
 	github.com/vulcand/oxy v0.0.0-20190611100332-3d629cff40b7 // indirect
 	go.opencensus.io v0.22.0 // indirect
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
-	golang.org/x/net v0.0.0-20190628185345-da137c7871d7 // indirect
+	golang.org/x/net v0.0.0-20190916140828-c8589233b77d // indirect
 	golang.org/x/sys v0.0.0-20190712062909-fae7ac547cb7 // indirect
 	google.golang.org/api v0.7.0 // indirect
-	google.golang.org/appengine v1.6.1 // indirect
+	google.golang.org/appengine v1.6.2 // indirect
 	google.golang.org/genproto v0.0.0-20190627203621-eb59cef1c072 // indirect
 	google.golang.org/grpc v1.21.1 // indirect
 )

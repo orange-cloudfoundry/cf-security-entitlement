@@ -28,4 +28,5 @@ type CFConfig struct {
 	ClientID          string `cloud:"client_id"`
 	ClientSecret      string `cloud:"client_secret"`
 	SkipSSLValidation bool   `cloud:"skip_ssl_validation"`
+	UAAEndpoint       string `cloud:"uaa_endpoint"`
 }

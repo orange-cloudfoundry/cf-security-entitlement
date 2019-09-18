@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/json"
 	"fmt"
 	"github.com/cloudfoundry-community/gautocloud"
 	_ "github.com/cloudfoundry-community/gautocloud/connectors/databases/gorm"
@@ -199,6 +200,15 @@ func loadClient(transport *http.Transport, c model.ConfigServer) error {
 	httpClient := &http.Client{
 		Transport: transport,
 	}
+
+	if c.CloudFoundry.UAAEndpoint != "" {
+		roundTripper, err := loadTranslatedTransportUaa(httpClient, transport, c)
+		if err != nil {
+			return err
+		}
+		httpClient.Transport = roundTripper
+	}
+
 	configClient := &cfclient.Config{
 		ApiAddress:        c.CloudFoundry.Endpoint,
 		ClientID:          c.CloudFoundry.ClientID,
@@ -212,6 +222,32 @@ func loadClient(transport *http.Transport, c model.ConfigServer) error {
 	}
 
 	return nil
+}
+
+func loadTranslatedTransportUaa(httpClient *http.Client, transport *http.Transport, c model.ConfigServer) (http.RoundTripper, error) {
+	var roundTripper http.RoundTripper
+	roundTripper = transport
+	resp, err := httpClient.Get(c.CloudFoundry.Endpoint + "/v2/info")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	uaaEndpoint := struct {
+		AuthEndpoint  string `json:"authorization_endpoint"`
+		TokenEndpoint string `json:"token_endpoint"`
+	}{}
+	dec := json.NewDecoder(resp.Body)
+	err = dec.Decode(&uaaEndpoint)
+	if err != nil {
+		return nil, err
+	}
+	if uaaEndpoint.AuthEndpoint != "" {
+		roundTripper = NewTranslateTransport(roundTripper, uaaEndpoint.AuthEndpoint, c.CloudFoundry.UAAEndpoint)
+	}
+	if uaaEndpoint.TokenEndpoint != "" {
+		roundTripper = NewTranslateTransport(roundTripper, uaaEndpoint.TokenEndpoint, c.CloudFoundry.UAAEndpoint)
+	}
+	return roundTripper, nil
 }
 
 func loadLogConfig(c model.ConfigServer) {
