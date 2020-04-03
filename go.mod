@@ -1,12 +1,12 @@
 module github.com/orange-cloudfoundry/cf-security-entitlement
 
-go 1.12
+go 1.13
 
 replace github.com/ugorji/go => github.com/ugorji/go v0.0.0-20181204163529-d75b2dcb6bc8
 
 replace github.com/hashicorp/go-getter => github.com/hashicorp/go-getter v1.4.0
 
-replace git.apache.org/thrift.git => github.com/apache/thrift v0.12.0
+replace launchpad.net/gocheck => gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f
 
 require (
 	code.cloudfoundry.org/cli v6.44.1+incompatible
