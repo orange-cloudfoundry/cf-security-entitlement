@@ -22,6 +22,10 @@ func get(value reflect.Value, path string) reflect.Value {
 
 		length := value.Len()
 
+		if length == 0 {
+			return resultSlice
+		}
+
 		for i := 0; i < length; i++ {
 			item := value.Index(i)
 
@@ -72,4 +76,15 @@ func get(value reflect.Value, path string) reflect.Value {
 	}
 
 	return value
+}
+
+// Get retrieves the value of the pointer or default.
+func GetOrElse(v interface{}, def interface{}) interface{} {
+	val := reflect.ValueOf(v)
+	if v == nil {
+		return def
+	} else if val.Kind() != reflect.Ptr {
+		return v
+	}
+	return val.Elem().Interface()
 }

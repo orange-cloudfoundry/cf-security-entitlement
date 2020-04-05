@@ -93,7 +93,7 @@ func (m *JWTMiddleware) logf(format string, args ...interface{}) {
 	}
 }
 
-// Special implementation for Negroni, but could be used elsewhere.
+// HandlerWithNext is a special implementation for Negroni, but could be used elsewhere.
 func (m *JWTMiddleware) HandlerWithNext(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	err := m.CheckJWT(w, r)
 
@@ -127,7 +127,7 @@ func FromAuthHeader(r *http.Request) (string, error) {
 	}
 
 	// TODO: Make this a bit more robust, parsing-wise
-	authHeaderParts := strings.Split(authHeader, " ")
+	authHeaderParts := strings.Fields(authHeader)
 	if len(authHeaderParts) != 2 || strings.ToLower(authHeaderParts[0]) != "bearer" {
 		return "", errors.New("Authorization header format must be Bearer {token}")
 	}
