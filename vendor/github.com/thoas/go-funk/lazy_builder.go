@@ -27,6 +27,9 @@ func (b *lazyBuilder) Initial() Builder {
 func (b *lazyBuilder) Intersect(y interface{}) Builder {
 	return &lazyBuilder{func() interface{} { return Intersect(b.exec(), y) }}
 }
+func (b *lazyBuilder) Join(rarr interface{}, fnc JoinFnc) Builder {
+	return &lazyBuilder{func() interface{} { return Join(b.exec(), rarr, fnc) }}
+}
 func (b *lazyBuilder) Map(mapFunc interface{}) Builder {
 	return &lazyBuilder{func() interface{} { return Map(b.exec(), mapFunc) }}
 }
@@ -41,6 +44,9 @@ func (b *lazyBuilder) Tail() Builder {
 }
 func (b *lazyBuilder) Uniq() Builder {
 	return &lazyBuilder{func() interface{} { return Uniq(b.exec()) }}
+}
+func (b *lazyBuilder) Without(values ...interface{}) Builder {
+	return &lazyBuilder{func() interface{} { return Without(b.exec(), values...) }}
 }
 
 func (b *lazyBuilder) All() bool {

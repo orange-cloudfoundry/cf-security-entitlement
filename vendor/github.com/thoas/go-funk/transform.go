@@ -150,7 +150,7 @@ func mapMap(arrValue reflect.Value, funcValue reflect.Value) interface{} {
 	funcType := funcValue.Type()
 
 	if funcType.NumIn() != 2 || funcType.NumOut() == 0 || funcType.NumOut() > 2 {
-		panic("Map function with an map must have one parameter and must return one or two parameters")
+		panic("Map function with a map must have two parameters and must return one or two parameters")
 	}
 
 	// Only one returned parameter, should be a slice
@@ -313,6 +313,8 @@ func Uniq(in interface{}) interface{} {
 	if kind == reflect.Array || kind == reflect.Slice {
 		length := value.Len()
 
+		result := makeSlice(value, 0)
+
 		seen := make(map[interface{}]bool, length)
 		j := 0
 
@@ -325,11 +327,11 @@ func Uniq(in interface{}) interface{} {
 			}
 
 			seen[v] = true
-			value.Index(j).Set(val)
+			result = reflect.Append(result, val)
 			j++
 		}
 
-		return value.Slice(0, j).Interface()
+		return result.Interface()
 	}
 
 	panic(fmt.Sprintf("Type %s is not supported by Uniq", valueType.String()))

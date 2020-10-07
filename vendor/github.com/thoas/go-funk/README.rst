@@ -140,10 +140,10 @@ funk.Intersect
 
 Returns the intersection between two collections.
 
-```
-inter := funk.Intersect([]int{1, 2, 3, 4}, []int{2, 4, 6})  // []int{2, 4}
-inter := funk.Intersect([]string{"foo", "bar", "hello", "bar"}, []string{"foo", "bar"})  // []string{"foo", "bar"}
-```
+.. code-block:: go
+
+    funk.Intersect([]int{1, 2, 3, 4}, []int{2, 4, 6})  // []int{2, 4}
+    funk.Intersect([]string{"foo", "bar", "hello", "bar"}, []string{"foo", "bar"})  // []string{"foo", "bar"}
 
 see also, typesafe implementations: IntersectString
 
@@ -155,10 +155,10 @@ funk.Difference
 
 Returns the difference between two collections.
 
-```
-left, right := funk.Difference([]int{1, 2, 3, 4}, []int{2, 4, 6})  // []int{1, 3}, []int{6}
-left, right := funk.Difference([]string{"foo", "bar", "hello", "bar"}, []string{"foo", "bar"})  // []string{"hello"}, []string{}
-```
+.. code-block:: go
+
+    funk.Difference([]int{1, 2, 3, 4}, []int{2, 4, 6})  // []int{1, 3}, []int{6}
+    funk.Difference([]string{"foo", "bar", "hello", "bar"}, []string{"foo", "bar"})  // []string{"hello"}, []string{}
 
 see also, typesafe implementations: DifferenceString
 
@@ -630,6 +630,17 @@ Generates a sharded string with a fixed length and depth.
 
     funk.Shard("e89d66bdfdd4dd26b682cc77e23a86eb", 2, 2, true) // []string{"e8", "9d", "66", "bdfdd4dd26b682cc77e23a86eb"}
 
+funk.Subset
+.............
+
+Returns true if a collection is a subset of another 
+
+.. code-block:: go
+
+    funk.Subset([]int{1, 2, 4}, []int{1, 2, 3, 4, 5}) // true
+    funk.Subset([]string{"foo", "bar"},[]string{"foo", "bar", "hello", "bar", "hi"}) //true
+   
+    
 Performance
 -----------
 

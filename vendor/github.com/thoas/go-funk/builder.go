@@ -14,11 +14,13 @@ type Builder interface {
 	FlattenDeep() Builder
 	Initial() Builder
 	Intersect(y interface{}) Builder
+	Join(rarr interface{}, fnc JoinFnc) Builder
 	Map(mapFunc interface{}) Builder
 	Reverse() Builder
 	Shuffle() Builder
 	Tail() Builder
 	Uniq() Builder
+	Without(values ...interface{}) Builder
 
 	All() bool
 	Any() bool
