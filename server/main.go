@@ -5,6 +5,10 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/cloudfoundry-community/gautocloud"
 	_ "github.com/cloudfoundry-community/gautocloud/connectors/databases/gorm"
 	"github.com/cloudfoundry-community/gautocloud/connectors/generic"
@@ -19,9 +23,6 @@ import (
 	"github.com/orange-cloudfoundry/gobis-middlewares/jwt"
 	"github.com/orange-cloudfoundry/gobis-middlewares/trace"
 	log "github.com/sirupsen/logrus"
-	"net/http"
-	"strings"
-	"time"
 )
 
 func init() {

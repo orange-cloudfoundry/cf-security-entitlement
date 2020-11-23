@@ -135,6 +135,45 @@ curl "https://cfsecurity.[your-domain.com]/v2/security_entitlement -d '{
 200 OK
 ```
 
+#### GET /v2/security_groups/<security_group_guid>/<space_guid>/check
+
+Check if space has its org entitle with this security group guid
+
+**Url Parameters**:
+- `security_group_guid`: a security guid to check
+- `space_guid`: a space guid to check
+
+**Headers**:
+
+```
+Authorization: bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidWFhLWlkLTkiLCJlbWFpbCI6ImVtYWlsLTlAc29tZWRvbWFpbi5jb20iLCJzY29wZSI6WyJjbG91ZF9jb250cm9sbGVyLmFkbWluIl0sImF1ZCI6WyJjbG91ZF9jb250cm9sbGVyIl0sImV4cCI6MTQ2NjAwODg4MX0.r0oLFGpSuuUWDIpqwuZ6X_8xhkqhspKEOhDYQdRzu9Y
+Host: example.org
+Content-Type: application/json
+Cookie: 
+```
+
+**Curl**:
+
+```
+curl "https://cfsecurity.[your-domain.com]/v2/security_groups/23a073f5-00e7-425b-b046-de45ba9b5456/spaces/4ad3d6c7-80a9-4655-866f-aa0f71d95183/check \
+	-H "Authorization: bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidWFhLWlkLTkiLCJlbWFpbCI6ImVtYWlsLTlAc29tZWRvbWFpbi5jb20iLCJzY29wZSI6WyJjbG91ZF9jb250cm9sbGVyLmFkbWluIl0sImF1ZCI6WyJjbG91ZF9jb250cm9sbGVyIl0sImV4cCI6MTQ2NjAwODg4MX0.r0oLFGpSuuUWDIpqwuZ6X_8xhkqhspKEOhDYQdRzu9Y" \
+	-H "Host: example.org" \
+```
+
+**Response status**:
+```
+200 OK
+```
+
+**Response body**:
+
+```json
+{
+  "is_entitled": true,
+  "organization_guid": "7e0477b9-fff8-41b1-8fd8-969095ba62e5"
+}
+```
+
 ## Cli plugin
 
 ### Installation

@@ -3,16 +3,18 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"regexp"
+	"strings"
+
 	"github.com/cloudfoundry-community/go-cfclient"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/model"
 	"github.com/orange-cloudfoundry/gobis"
 	"github.com/thoas/go-funk"
-	"net/http"
-	"regexp"
-	"strings"
 )
 
 var bindReqRegex = regexp.MustCompile("^/v2/security_groups/[^/]*/spaces/[^/]*")
+var checkReqRegex = regexp.MustCompile("^/v2/security_groups/[^/]*/spaces/[^/]*/check")
 var findReqRegex = regexp.MustCompile("^/v2/security_groups(/[^/]*)?")
 
 type SecGroupConfig struct {
@@ -38,6 +40,10 @@ func (SecGroupMiddleware) Handler(proxyRoute gobis.ProxyRoute, params interface{
 			bindOrUnbindSecGroup(w, req, next)
 			return
 		}
+		if checkReqRegex.MatchString(path) && req.Method == http.MethodGet {
+			checkBind(w, req, next)
+			return
+		}
 		if findReqRegex.MatchString(path) && req.Method == http.MethodGet {
 			findSecGroup(w, req, next)
 			return
@@ -51,6 +57,41 @@ func (SecGroupMiddleware) Handler(proxyRoute gobis.ProxyRoute, params interface{
 
 func (SecGroupMiddleware) Schema() interface{} {
 	return SecGroupConfig{}
+}
+
+func checkBind(w http.ResponseWriter, req *http.Request, next http.Handler) {
+	path := strings.TrimSuffix(req.URL.Path, "/check")
+	_, err := getUserId(req)
+	if err != nil {
+		serverErrorCode(w, http.StatusBadRequest, err)
+		return
+	}
+	pathSplit := strings.Split(path, "/")
+	secGroupGuid := pathSplit[3]
+	spaceGuid := pathSplit[5]
+
+	space, err := client.GetSpaceByGuid(spaceGuid)
+	if err != nil {
+		serverError(w, err)
+		return
+	}
+	var entitlement model.EntitlementSecGroup
+	DB.Where(&model.EntitlementSecGroup{
+		OrganizationGUID:  space.OrganizationGuid,
+		SecurityGroupGUID: secGroupGuid,
+	}).First(&entitlement)
+
+	data := struct {
+		OrganizationGUID string `json:"organization_guid"`
+		IsEntitled       bool   `json:"is_entitled"`
+	}{
+		OrganizationGUID: space.OrganizationGuid,
+		IsEntitled:       entitlement.OrganizationGUID != "",
+	}
+	b, _ := json.MarshalIndent(data, "", "  ")
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(b)
 }
 
 func bindOrUnbindSecGroup(w http.ResponseWriter, req *http.Request, next http.Handler) {
