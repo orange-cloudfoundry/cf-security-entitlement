@@ -2,6 +2,7 @@ package cfsecurity
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform/helper/hashcode"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -17,6 +18,11 @@ func resourceEntitleAsg() *schema.Resource {
 		Update: resourceEntitleAsgUpdate,
 		Read:   resourceEntitleAsgRead,
 		Delete: resourceEntitleAsgDelete,
+		Importer: &schema.ResourceImporter{
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				return []*schema.ResourceData{d}, nil
+			},
+		},
 
 		Schema: map[string]*schema.Schema{
 			"entitle": &schema.Schema{

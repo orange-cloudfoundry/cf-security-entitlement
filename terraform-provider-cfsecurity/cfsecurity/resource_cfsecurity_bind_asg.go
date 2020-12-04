@@ -2,6 +2,7 @@ package cfsecurity
 
 import (
 	"fmt"
+
 	"github.com/cloudfoundry-community/go-cfclient"
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform/helper/hashcode"
@@ -17,6 +18,11 @@ func resourceBindAsg() *schema.Resource {
 		Read:   resourceBindAsgRead,
 		Update: resourceBindAsgUpdate,
 		Delete: resourceBindAsgDelete,
+		Importer: &schema.ResourceImporter{
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				return []*schema.ResourceData{d}, nil
+			},
+		},
 
 		Schema: map[string]*schema.Schema{
 			"bind": &schema.Schema{
