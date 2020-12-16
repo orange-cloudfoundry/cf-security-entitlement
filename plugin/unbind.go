@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages"
 )
 
@@ -33,7 +34,13 @@ func (c *UnbindCommand) Execute(_ []string) error {
 	if err != nil {
 		return err
 	}
-	spaces, err := getOrgSpaces(c.BindOptions.Org)
+
+	orgId, err := getOrgID(c.BindOptions.Org)
+	if err != nil {
+		return err
+	}
+
+	spaces, err := getOrgSpaces(orgId)
 	if err != nil {
 		return err
 	}

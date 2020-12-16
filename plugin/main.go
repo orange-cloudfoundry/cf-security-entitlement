@@ -1,11 +1,12 @@
 package main
 
 import (
+	"net/url"
+	"strings"
+
 	"code.cloudfoundry.org/cli/plugin"
 	"github.com/jessevdk/go-flags"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages"
-	"net/url"
-	"strings"
 )
 
 type Options struct {
@@ -41,7 +42,7 @@ func (p *SecurityPlugin) GetMetadata() plugin.PluginMetadata {
 		Version: plugin.VersionType{
 			Major: 1,
 			Minor: 0,
-			Build: 0,
+			Build: 1,
 		},
 		Commands: []plugin.Command{
 			{
