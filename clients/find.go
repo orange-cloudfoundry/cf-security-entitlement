@@ -136,45 +136,16 @@ func (c Client) GetSecGroupByGuid(guid string) (*cfclient.SecGroup, error) {
 func (c Client) GetSecGroupSpaces(guid string) ([]cfclient.Space, error) {
 	spaces := make([]cfclient.Space, 0)
 
-	endpoint := fmt.Sprintf("%s/v2/security_groups/%s/spaces",
-		c.endpoint,
-		guid,
-	)
-	for {
-		req, err := http.NewRequest(http.MethodGet, endpoint, nil)
-		if err != nil {
-			return spaces, err
-		}
-		// cfclient do check status code and set error if >= 400
-		resp, err := c.cfClient.Do(req)
-		if err != nil {
-			return spaces, err
-		}
-		defer resp.Body.Close()
-		resBody, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return nil, errors.Wrap(err, "Error reading sec group response body")
-		}
+	secgroup, err := c.GetSecGroupByGuid(guid)
+	if err != nil {
+		return spaces, err
+	}
 
-		var spaceResp cfclient.SpaceResponse
-		err = json.Unmarshal(resBody, &spaceResp)
-		if err != nil {
-			return nil, errors.Wrap(err, "Error unmarshaling space response")
-		}
-
-		for _, space := range spaceResp.Resources {
-			space.Entity.Guid = space.Meta.Guid
-			space.Entity.CreatedAt = space.Meta.CreatedAt
-			space.Entity.UpdatedAt = space.Meta.UpdatedAt
-			spaces = append(spaces, space.Entity)
-		}
-		if spaceResp.NextUrl == "" {
-			break
-		}
-		endpoint = fmt.Sprintf("%s%s",
-			c.endpoint,
-			spaceResp.NextUrl,
-		)
+	for _, space := range secgroup.SpacesData {
+		space.Entity.Guid = space.Meta.Guid
+		space.Entity.CreatedAt = space.Meta.CreatedAt
+		space.Entity.UpdatedAt = space.Meta.UpdatedAt
+		spaces = append(spaces, space.Entity)
 	}
 
 	return spaces, nil
