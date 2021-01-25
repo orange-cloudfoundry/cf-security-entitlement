@@ -3,6 +3,7 @@ package funcs
 import (
 	"errors"
 	"fmt"
+	"math/big"
 	"sort"
 
 	"github.com/zclconf/go-cty/cty"
@@ -53,6 +54,69 @@ var LengthFunc = function.New(&function.Spec{
 			// Should never happen, because of the checks in our Type func above
 			return cty.UnknownVal(cty.Number), errors.New("impossible value type for length(...)")
 		}
+	},
+})
+
+// AllTrueFunc constructs a function that returns true if all elements of the
+// list are true. If the list is empty, return true.
+var AllTrueFunc = function.New(&function.Spec{
+	Params: []function.Parameter{
+		{
+			Name: "list",
+			Type: cty.List(cty.Bool),
+		},
+	},
+	Type: function.StaticReturnType(cty.Bool),
+	Impl: func(args []cty.Value, retType cty.Type) (ret cty.Value, err error) {
+		result := cty.True
+		for it := args[0].ElementIterator(); it.Next(); {
+			_, v := it.Element()
+			if !v.IsKnown() {
+				return cty.UnknownVal(cty.Bool), nil
+			}
+			if v.IsNull() {
+				return cty.False, nil
+			}
+			result = result.And(v)
+			if result.False() {
+				return cty.False, nil
+			}
+		}
+		return result, nil
+	},
+})
+
+// AnyTrueFunc constructs a function that returns true if any element of the
+// list is true. If the list is empty, return false.
+var AnyTrueFunc = function.New(&function.Spec{
+	Params: []function.Parameter{
+		{
+			Name: "list",
+			Type: cty.List(cty.Bool),
+		},
+	},
+	Type: function.StaticReturnType(cty.Bool),
+	Impl: func(args []cty.Value, retType cty.Type) (ret cty.Value, err error) {
+		result := cty.False
+		var hasUnknown bool
+		for it := args[0].ElementIterator(); it.Next(); {
+			_, v := it.Element()
+			if !v.IsKnown() {
+				hasUnknown = true
+				continue
+			}
+			if v.IsNull() {
+				continue
+			}
+			result = result.Or(v)
+			if result.True() {
+				return cty.True, nil
+			}
+		}
+		if hasUnknown {
+			return cty.UnknownVal(cty.Bool), nil
+		}
+		return result, nil
 	},
 })
 
@@ -277,7 +341,7 @@ var LookupFunc = function.New(&function.Spec{
 		mapVar := args[0]
 		lookupKey := args[1].AsString()
 
-		if !mapVar.IsWhollyKnown() {
+		if !mapVar.IsKnown() {
 			return cty.UnknownVal(retType), nil
 		}
 
@@ -484,27 +548,45 @@ var SumFunc = function.New(&function.Spec{
 		arg := args[0].AsValueSlice()
 		ty := args[0].Type()
 
-		var i float64
-		var s float64
-
 		if !ty.IsListType() && !ty.IsSetType() && !ty.IsTupleType() {
 			return cty.NilVal, function.NewArgErrorf(0, fmt.Sprintf("argument must be list, set, or tuple. Received %s", ty.FriendlyName()))
 		}
 
-		if !args[0].IsKnown() {
+		if !args[0].IsWhollyKnown() {
 			return cty.UnknownVal(cty.Number), nil
 		}
 
-		for _, v := range arg {
-
-			if err := gocty.FromCtyValue(v, &i); err != nil {
-				return cty.UnknownVal(cty.Number), function.NewArgErrorf(0, "argument must be list, set, or tuple of number values")
-			} else {
-				s += i
+		// big.Float.Add can panic if the input values are opposing infinities,
+		// so we must catch that here in order to remain within
+		// the cty Function abstraction.
+		defer func() {
+			if r := recover(); r != nil {
+				if _, ok := r.(big.ErrNaN); ok {
+					ret = cty.NilVal
+					err = fmt.Errorf("can't compute sum of opposing infinities")
+				} else {
+					// not a panic we recognize
+					panic(r)
+				}
 			}
+		}()
+
+		s := arg[0]
+		if s.IsNull() {
+			return cty.NilVal, function.NewArgErrorf(0, "argument must be list, set, or tuple of number values")
+		}
+		for _, v := range arg[1:] {
+			if v.IsNull() {
+				return cty.NilVal, function.NewArgErrorf(0, "argument must be list, set, or tuple of number values")
+			}
+			v, err = convert.Convert(v, cty.Number)
+			if err != nil {
+				return cty.NilVal, function.NewArgErrorf(0, "argument must be list, set, or tuple of number values")
+			}
+			s = s.Add(v)
 		}
 
-		return cty.NumberFloatVal(s), nil
+		return s, nil
 	},
 })
 
@@ -580,6 +662,18 @@ func appendIfMissing(slice []cty.Value, element cty.Value) ([]cty.Value, error) 
 // Unicode characters in the given string.
 func Length(collection cty.Value) (cty.Value, error) {
 	return LengthFunc.Call([]cty.Value{collection})
+}
+
+// AllTrue returns true if all elements of the list are true. If the list is empty,
+// return true.
+func AllTrue(collection cty.Value) (cty.Value, error) {
+	return AllTrueFunc.Call([]cty.Value{collection})
+}
+
+// AnyTrue returns true if any element of the list is true. If the list is empty,
+// return false.
+func AnyTrue(collection cty.Value) (cty.Value, error) {
+	return AnyTrueFunc.Call([]cty.Value{collection})
 }
 
 // Coalesce takes any number of arguments and returns the first one that isn't empty.

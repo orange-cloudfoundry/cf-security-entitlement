@@ -4,11 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"log"
 	"net/http"
 	"strings"
-
-	"github.com/dgrijalva/jwt-go"
 )
 
 // A function called whenever an error is encountered
@@ -94,7 +93,7 @@ func (m *JWTMiddleware) logf(format string, args ...interface{}) {
 	}
 }
 
-// HandlerWithNext is a special implementation for Negroni, but could be used elsewhere.
+// Special implementation for Negroni, but could be used elsewhere.
 func (m *JWTMiddleware) HandlerWithNext(w http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
 	err := m.CheckJWT(w, r)
 
@@ -128,7 +127,7 @@ func FromAuthHeader(r *http.Request) (string, error) {
 	}
 
 	// TODO: Make this a bit more robust, parsing-wise
-	authHeaderParts := strings.Fields(authHeader)
+	authHeaderParts := strings.Split(authHeader, " ")
 	if len(authHeaderParts) != 2 || strings.ToLower(authHeaderParts[0]) != "bearer" {
 		return "", errors.New("Authorization header format must be Bearer {token}")
 	}
@@ -181,7 +180,7 @@ func (m *JWTMiddleware) CheckJWT(w http.ResponseWriter, r *http.Request) error {
 	// If an error occurs, call the error handler and return an error
 	if err != nil {
 		m.Options.ErrorHandler(w, r, err.Error())
-		return fmt.Errorf("Error extracting token: %w", err)
+		return fmt.Errorf("Error extracting token: %v", err)
 	}
 
 	// If the token is empty...
@@ -207,7 +206,7 @@ func (m *JWTMiddleware) CheckJWT(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		m.logf("Error parsing token: %v", err)
 		m.Options.ErrorHandler(w, r, err.Error())
-		return fmt.Errorf("Error parsing token: %w", err)
+		return fmt.Errorf("Error parsing token: %v", err)
 	}
 
 	if m.Options.SigningMethod != nil && m.Options.SigningMethod.Alg() != parsedToken.Header["alg"] {

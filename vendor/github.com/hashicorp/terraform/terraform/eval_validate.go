@@ -2,7 +2,6 @@ package terraform
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/terraform/addrs"
@@ -12,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform/provisioners"
 	"github.com/hashicorp/terraform/tfdiags"
 	"github.com/zclconf/go-cty/cty"
-	"github.com/zclconf/go-cty/cty/convert"
 	"github.com/zclconf/go-cty/cty/gocty"
 )
 
@@ -64,53 +62,9 @@ RETURN:
 	return nil, diags.NonFatalErr()
 }
 
-// EvalValidateProvider is an EvalNode implementation that validates
-// a provider configuration.
-type EvalValidateProvider struct {
-	Addr     addrs.AbsProviderConfig
-	Provider *providers.Interface
-	Config   *configs.Provider
-}
-
-func (n *EvalValidateProvider) Eval(ctx EvalContext) (interface{}, error) {
-	var diags tfdiags.Diagnostics
-	provider := *n.Provider
-
-	configBody := buildProviderConfig(ctx, n.Addr, n.Config)
-
-	resp := provider.GetSchema()
-	diags = diags.Append(resp.Diagnostics)
-	if diags.HasErrors() {
-		return nil, diags.NonFatalErr()
-	}
-
-	configSchema := resp.Provider.Block
-	if configSchema == nil {
-		// Should never happen in real code, but often comes up in tests where
-		// mock schemas are being used that tend to be incomplete.
-		log.Printf("[WARN] EvalValidateProvider: no config schema is available for %s, so using empty schema", n.Addr)
-		configSchema = &configschema.Block{}
-	}
-
-	configVal, configBody, evalDiags := ctx.EvaluateBlock(configBody, configSchema, nil, EvalDataForNoInstanceKey)
-	diags = diags.Append(evalDiags)
-	if evalDiags.HasErrors() {
-		return nil, diags.NonFatalErr()
-	}
-
-	req := providers.PrepareProviderConfigRequest{
-		Config: configVal,
-	}
-
-	validateResp := provider.PrepareProviderConfig(req)
-	diags = diags.Append(validateResp.Diagnostics)
-
-	return nil, diags.NonFatalErr()
-}
-
-// EvalValidateProvisioner is an EvalNode implementation that validates
-// the configuration of a provisioner belonging to a resource. The provisioner
-// config is expected to contain the merged connection configurations.
+// EvalValidateProvisioner validates the configuration of a provisioner
+// belonging to a resource. The provisioner config is expected to contain the
+// merged connection configurations.
 type EvalValidateProvisioner struct {
 	ResourceAddr       addrs.Resource
 	Provisioner        *provisioners.Interface
@@ -120,43 +74,38 @@ type EvalValidateProvisioner struct {
 	ResourceHasForEach bool
 }
 
-func (n *EvalValidateProvisioner) Eval(ctx EvalContext) (interface{}, error) {
+func (n *EvalValidateProvisioner) Validate(ctx EvalContext) error {
 	provisioner := *n.Provisioner
 	config := *n.Config
 	schema := *n.Schema
 
 	var diags tfdiags.Diagnostics
 
-	{
-		// Validate the provisioner's own config first
-
-		configVal, _, configDiags := n.evaluateBlock(ctx, config.Config, schema)
-		diags = diags.Append(configDiags)
-		if configDiags.HasErrors() {
-			return nil, diags.Err()
-		}
-
-		if configVal == cty.NilVal {
-			// Should never happen for a well-behaved EvaluateBlock implementation
-			return nil, fmt.Errorf("EvaluateBlock returned nil value")
-		}
-
-		req := provisioners.ValidateProvisionerConfigRequest{
-			Config: configVal,
-		}
-
-		resp := provisioner.ValidateProvisionerConfig(req)
-		diags = diags.Append(resp.Diagnostics)
+	// Validate the provisioner's own config first
+	configVal, _, configDiags := n.evaluateBlock(ctx, config.Config, schema)
+	diags = diags.Append(configDiags)
+	if configDiags.HasErrors() {
+		return diags.Err()
 	}
 
-	{
-		// Now validate the connection config, which contains the merged bodies
-		// of the resource and provisioner connection blocks.
-		connDiags := n.validateConnConfig(ctx, config.Connection, n.ResourceAddr)
-		diags = diags.Append(connDiags)
+	if configVal == cty.NilVal {
+		// Should never happen for a well-behaved EvaluateBlock implementation
+		return fmt.Errorf("EvaluateBlock returned nil value")
 	}
 
-	return nil, diags.NonFatalErr()
+	req := provisioners.ValidateProvisionerConfigRequest{
+		Config: configVal,
+	}
+
+	resp := provisioner.ValidateProvisionerConfig(req)
+	diags = diags.Append(resp.Diagnostics)
+
+	// Now validate the connection config, which contains the merged bodies
+	// of the resource and provisioner connection blocks.
+	connDiags := n.validateConnConfig(ctx, config.Connection, n.ResourceAddr)
+	diags = diags.Append(connDiags)
+
+	return diags.NonFatalErr()
 }
 
 func (n *EvalValidateProvisioner) validateConnConfig(ctx EvalContext, config *configs.Connection, self addrs.Referenceable) tfdiags.Diagnostics {
@@ -342,8 +291,7 @@ func ConnectionBlockSupersetSchema() *configschema.Block {
 	return connectionBlockSupersetSchema
 }
 
-// EvalValidateResource is an EvalNode implementation that validates
-// the configuration of a resource.
+// EvalValidateResource validates the configuration of a resource.
 type EvalValidateResource struct {
 	Addr           addrs.Resource
 	Provider       *providers.Interface
@@ -363,9 +311,9 @@ type EvalValidateResource struct {
 	ConfigVal *cty.Value
 }
 
-func (n *EvalValidateResource) Eval(ctx EvalContext) (interface{}, error) {
+func (n *EvalValidateResource) Validate(ctx EvalContext) error {
 	if n.ProviderSchema == nil || *n.ProviderSchema == nil {
-		return nil, fmt.Errorf("EvalValidateResource has nil schema for %s", n.Addr)
+		return fmt.Errorf("EvalValidateResource has nil schema for %s", n.Addr)
 	}
 
 	var diags tfdiags.Diagnostics
@@ -450,25 +398,33 @@ func (n *EvalValidateResource) Eval(ctx EvalContext) (interface{}, error) {
 				Detail:   fmt.Sprintf("The provider %s does not support resource type %q.", cfg.ProviderConfigAddr(), cfg.Type),
 				Subject:  &cfg.TypeRange,
 			})
-			return nil, diags.Err()
+			return diags.Err()
 		}
 
 		configVal, _, valDiags := ctx.EvaluateBlock(cfg.Config, schema, nil, keyData)
 		diags = diags.Append(valDiags)
 		if valDiags.HasErrors() {
-			return nil, diags.Err()
+			return diags.Err()
 		}
 
 		if cfg.Managed != nil { // can be nil only in tests with poorly-configured mocks
 			for _, traversal := range cfg.Managed.IgnoreChanges {
+				// validate the ignore_changes traversals apply.
 				moreDiags := schema.StaticValidateTraversal(traversal)
 				diags = diags.Append(moreDiags)
+
+				// TODO: we want to notify users that they can't use
+				// ignore_changes for computed attributes, but we don't have an
+				// easy way to correlate the config value, schema and
+				// traversal together.
 			}
 		}
 
+		// Use unmarked value for validate request
+		unmarkedConfigVal, _ := configVal.UnmarkDeep()
 		req := providers.ValidateResourceTypeConfigRequest{
 			TypeName: cfg.Type,
-			Config:   configVal,
+			Config:   unmarkedConfigVal,
 		}
 
 		resp := provider.ValidateResourceTypeConfig(req)
@@ -487,18 +443,20 @@ func (n *EvalValidateResource) Eval(ctx EvalContext) (interface{}, error) {
 				Detail:   fmt.Sprintf("The provider %s does not support data source %q.", cfg.ProviderConfigAddr(), cfg.Type),
 				Subject:  &cfg.TypeRange,
 			})
-			return nil, diags.Err()
+			return diags.Err()
 		}
 
 		configVal, _, valDiags := ctx.EvaluateBlock(cfg.Config, schema, nil, keyData)
 		diags = diags.Append(valDiags)
 		if valDiags.HasErrors() {
-			return nil, diags.Err()
+			return diags.Err()
 		}
 
+		// Use unmarked value for validate request
+		unmarkedConfigVal, _ := configVal.UnmarkDeep()
 		req := providers.ValidateDataSourceConfigRequest{
 			TypeName: cfg.Type,
-			Config:   configVal,
+			Config:   unmarkedConfigVal,
 		}
 
 		resp := provider.ValidateDataSourceConfig(req)
@@ -508,79 +466,26 @@ func (n *EvalValidateResource) Eval(ctx EvalContext) (interface{}, error) {
 	if n.IgnoreWarnings {
 		// If we _only_ have warnings then we'll return nil.
 		if diags.HasErrors() {
-			return nil, diags.NonFatalErr()
+			return diags.NonFatalErr()
 		}
-		return nil, nil
+		return nil
 	} else {
 		// We'll return an error if there are any diagnostics at all, even if
 		// some of them are warnings.
-		return nil, diags.NonFatalErr()
+		return diags.NonFatalErr()
 	}
 }
 
-func (n *EvalValidateResource) validateCount(ctx EvalContext, expr hcl.Expression) tfdiags.Diagnostics {
-	if expr == nil {
-		return nil
-	}
-
-	var diags tfdiags.Diagnostics
-
-	countVal, countDiags := ctx.EvaluateExpr(expr, cty.Number, nil)
-	diags = diags.Append(countDiags)
-	if diags.HasErrors() {
-		return diags
-	}
-
-	if countVal.IsNull() {
-		diags = diags.Append(&hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Invalid count argument",
-			Detail:   `The given "count" argument value is null. An integer is required.`,
-			Subject:  expr.Range().Ptr(),
-		})
-		return diags
-	}
-
-	var err error
-	countVal, err = convert.Convert(countVal, cty.Number)
-	if err != nil {
-		diags = diags.Append(&hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Invalid count argument",
-			Detail:   fmt.Sprintf(`The given "count" argument value is unsuitable: %s.`, err),
-			Subject:  expr.Range().Ptr(),
-		})
-		return diags
-	}
-
+func (n *EvalValidateResource) validateCount(ctx EvalContext, expr hcl.Expression) (diags tfdiags.Diagnostics) {
+	val, countDiags := evaluateCountExpressionValue(expr, ctx)
 	// If the value isn't known then that's the best we can do for now, but
-	// we'll check more thoroughly during the plan walk.
-	if !countVal.IsKnown() {
+	// we'll check more thoroughly during the plan walk
+	if !val.IsKnown() {
 		return diags
 	}
 
-	// If we _do_ know the value, then we can do a few more checks here.
-	var count int
-	err = gocty.FromCtyValue(countVal, &count)
-	if err != nil {
-		// Isn't a whole number, etc.
-		diags = diags.Append(&hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Invalid count argument",
-			Detail:   fmt.Sprintf(`The given "count" argument value is unsuitable: %s.`, err),
-			Subject:  expr.Range().Ptr(),
-		})
-		return diags
-	}
-
-	if count < 0 {
-		diags = diags.Append(&hcl.Diagnostic{
-			Severity: hcl.DiagError,
-			Summary:  "Invalid count argument",
-			Detail:   `The given "count" argument value is unsuitable: count cannot be negative.`,
-			Subject:  expr.Range().Ptr(),
-		})
-		return diags
+	if countDiags.HasErrors() {
+		diags = diags.Append(countDiags)
 	}
 
 	return diags

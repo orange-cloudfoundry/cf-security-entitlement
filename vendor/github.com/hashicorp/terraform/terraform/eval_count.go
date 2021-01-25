@@ -60,6 +60,10 @@ func evaluateCountExpressionValue(expr hcl.Expression, ctx EvalContext) (cty.Val
 		return nullCount, diags
 	}
 
+	// Unmark the count value, sensitive values are allowed in count but not for_each,
+	// as using it here will not disclose the sensitive value
+	countVal, _ = countVal.Unmark()
+
 	switch {
 	case countVal.IsNull():
 		diags = diags.Append(&hcl.Diagnostic{
@@ -117,8 +121,12 @@ func evaluateCountExpressionValue(expr hcl.Expression, ctx EvalContext) (cty.Val
 // or this function will block forever awaiting the lock.
 func fixResourceCountSetTransition(ctx EvalContext, addr addrs.ConfigResource, countEnabled bool) {
 	state := ctx.State()
-	changed := state.MaybeFixUpResourceInstanceAddressForCount(addr, countEnabled)
-	if changed {
+	if state.MaybeFixUpResourceInstanceAddressForCount(addr, countEnabled) {
+		log.Printf("[TRACE] renamed first %s instance in transient state due to count argument change", addr)
+	}
+
+	refreshState := ctx.RefreshState()
+	if refreshState != nil && refreshState.MaybeFixUpResourceInstanceAddressForCount(addr, countEnabled) {
 		log.Printf("[TRACE] renamed first %s instance in transient state due to count argument change", addr)
 	}
 }

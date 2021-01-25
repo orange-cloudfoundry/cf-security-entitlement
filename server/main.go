@@ -22,6 +22,8 @@ import (
 	"github.com/orange-cloudfoundry/gobis-middlewares/ceftrace"
 	"github.com/orange-cloudfoundry/gobis-middlewares/jwt"
 	"github.com/orange-cloudfoundry/gobis-middlewares/trace"
+	"github.com/prometheus/common/version"
+	"gopkg.in/alecthomas/kingpin.v2"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -32,12 +34,6 @@ func init() {
 	gautocloud.RegisterConnector(generic.NewConfigGenericConnector(model.ConfigServer{}))
 
 }
-
-var (
-	version = "dev"
-	commit  = "none"
-	date    = "unknown"
-)
 
 func main() {
 	panic(boot())
@@ -75,6 +71,12 @@ func retrieveGormDb(config model.ConfigServer) *gorm.DB {
 }
 
 func boot() error {
+	kingpin.Version(version.Print("cfsecurity-server"))
+	kingpin.HelpFlag.Short('h')
+	usage := strings.ReplaceAll(kingpin.DefaultUsageTemplate, "usage: ", "usage: CLOUD_FILE=config.yml ")
+	kingpin.UsageTemplate(usage)
+	kingpin.Parse()
+
 	var config model.ConfigServer
 	gautocloud.Inject(&config)
 
@@ -133,7 +135,7 @@ func boot() error {
 			Enabled:       true,
 			DeviceVendor:  "Orange",
 			DeviceProduct: "cf-security-entitlement",
-			DeviceVersion: version,
+			DeviceVersion: version.Version,
 		},
 	}
 	builder := gobis.Builder()

@@ -18,7 +18,6 @@ var cliConnection plugin.CliConnection
 var defaultEndpoint string
 
 func Parse(args []string) error {
-
 	_, err := parser.ParseArgs(args)
 	if err != nil {
 		if errFlag, ok := err.(*flags.Error); ok && errFlag.Type == flags.ErrCommandRequired {

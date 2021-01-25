@@ -1,7 +1,3 @@
-# cloud.google.com/go v0.68.0
-## explicit
-# cloud.google.com/go/storage v1.12.0
-## explicit
 # code.cloudfoundry.org/cli v7.1.0+incompatible
 ## explicit
 code.cloudfoundry.org/cli/plugin
@@ -12,35 +8,34 @@ code.cloudfoundry.org/gofileutils/fileutils
 github.com/ArthurHlt/logrus-cef-formatter
 # github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
 github.com/Knetic/govaluate
-# github.com/Masterminds/semver v1.5.0
-## explicit
+# github.com/Masterminds/semver v1.4.2
 github.com/Masterminds/semver
-# github.com/agext/levenshtein v1.2.3
-## explicit
+# github.com/agext/levenshtein v1.2.2
 github.com/agext/levenshtein
+# github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
+github.com/alecthomas/template
+github.com/alecthomas/template/parse
+# github.com/alecthomas/units v0.0.0-20190924025748-f65c72e2690d
+github.com/alecthomas/units
 # github.com/apparentlymart/go-cidr v1.1.0
 github.com/apparentlymart/go-cidr/cidr
 # github.com/apparentlymart/go-textseg/v12 v12.0.0
 github.com/apparentlymart/go-textseg/v12/textseg
-# github.com/apparentlymart/go-versions v1.0.0
+# github.com/apparentlymart/go-versions v1.0.1
 github.com/apparentlymart/go-versions/versions
 github.com/apparentlymart/go-versions/versions/constraints
-# github.com/auth0/go-jwt-middleware v0.0.0-20200810150920-a32d7af194d1
-## explicit
+# github.com/auth0/go-jwt-middleware v0.0.0-20170425171159-5493cabe49f7
 github.com/auth0/go-jwt-middleware
-# github.com/aws/aws-sdk-go v1.35.4
-## explicit
 # github.com/azer/snakecase v1.0.0
 github.com/azer/snakecase
-# github.com/bmatcuk/doublestar v1.3.2
-## explicit
+# github.com/beorn7/perks v1.0.1
+github.com/beorn7/perks/quantile
+# github.com/bmatcuk/doublestar v1.1.5
 github.com/bmatcuk/doublestar
-# github.com/casbin/casbin v1.9.1
-## explicit
+# github.com/casbin/casbin v1.8.1
 github.com/casbin/casbin
 github.com/casbin/casbin/config
 github.com/casbin/casbin/effect
-github.com/casbin/casbin/errors
 github.com/casbin/casbin/log
 github.com/casbin/casbin/model
 github.com/casbin/casbin/persist
@@ -48,6 +43,8 @@ github.com/casbin/casbin/persist/file-adapter
 github.com/casbin/casbin/rbac
 github.com/casbin/casbin/rbac/default-role-manager
 github.com/casbin/casbin/util
+# github.com/cespare/xxhash/v2 v2.1.1
+github.com/cespare/xxhash/v2
 # github.com/cloudfoundry-community/gautocloud v1.1.6
 ## explicit
 github.com/cloudfoundry-community/gautocloud
@@ -68,25 +65,19 @@ github.com/cloudfoundry-community/gautocloud/decoder
 github.com/cloudfoundry-community/gautocloud/interceptor
 github.com/cloudfoundry-community/gautocloud/loader
 github.com/cloudfoundry-community/gautocloud/loader/fake
-# github.com/cloudfoundry-community/go-cfclient v0.0.0-20200413172050-18981bf12b4b
+# github.com/cloudfoundry-community/go-cfclient v0.0.0-20201123235753-4f46d6348a05
 ## explicit
 github.com/cloudfoundry-community/go-cfclient
-# github.com/cloudfoundry-community/go-cfenv v1.18.0
-## explicit
+# github.com/cloudfoundry-community/go-cfenv v1.17.0
 github.com/cloudfoundry-community/go-cfenv
-# github.com/denisenkom/go-mssqldb v0.0.0-20200910202707-1e08a3fab204
-## explicit
+# github.com/denisenkom/go-mssqldb v0.0.0-20191124224453-732737034ffd
 github.com/denisenkom/go-mssqldb
 github.com/denisenkom/go-mssqldb/internal/cp
 github.com/denisenkom/go-mssqldb/internal/decimal
 github.com/denisenkom/go-mssqldb/internal/querytext
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 github.com/dgrijalva/jwt-go
-# github.com/fatih/color v1.9.0
-## explicit
-github.com/fatih/color
-# github.com/fsnotify/fsnotify v1.4.9
-## explicit
+# github.com/fsnotify/fsnotify v1.4.7
 github.com/fsnotify/fsnotify
 # github.com/go-sql-driver/mysql v1.5.0
 github.com/go-sql-driver/mysql
@@ -117,41 +108,31 @@ github.com/google/go-cmp/cmp/internal/diff
 github.com/google/go-cmp/cmp/internal/flags
 github.com/google/go-cmp/cmp/internal/function
 github.com/google/go-cmp/cmp/internal/value
-# github.com/google/uuid v1.1.2
-## explicit
+# github.com/google/uuid v1.1.1
 github.com/google/uuid
-# github.com/gorilla/mux v1.8.0
-## explicit
+# github.com/gorilla/mux v1.7.3
 github.com/gorilla/mux
-# github.com/gorilla/websocket v1.4.2
+# github.com/gorilla/websocket v1.4.0
 github.com/gorilla/websocket
-# github.com/gravitational/trace v1.1.11
-## explicit
+# github.com/gravitational/trace v0.0.0-20190409171327-f30095ced5ff
 github.com/gravitational/trace
-# github.com/hashicorp/errwrap v1.1.0
-## explicit
+# github.com/hashicorp/errwrap v1.0.0
 github.com/hashicorp/errwrap
 # github.com/hashicorp/go-cleanhttp v0.5.1
 github.com/hashicorp/go-cleanhttp
-# github.com/hashicorp/go-getter v1.5.0
-## explicit
-# github.com/hashicorp/go-hclog v0.14.1
-## explicit
+# github.com/hashicorp/go-hclog v0.9.2
 github.com/hashicorp/go-hclog
-# github.com/hashicorp/go-multierror v1.1.0
-## explicit
+# github.com/hashicorp/go-multierror v1.0.0
 github.com/hashicorp/go-multierror
 # github.com/hashicorp/go-plugin v1.3.0
 github.com/hashicorp/go-plugin
 github.com/hashicorp/go-plugin/internal/plugin
-# github.com/hashicorp/go-retryablehttp v0.6.7
-## explicit
+# github.com/hashicorp/go-retryablehttp v0.5.2
 github.com/hashicorp/go-retryablehttp
 # github.com/hashicorp/go-uuid v1.0.2
 ## explicit
 github.com/hashicorp/go-uuid
-# github.com/hashicorp/go-version v1.2.1
-## explicit
+# github.com/hashicorp/go-version v1.2.0
 github.com/hashicorp/go-version
 # github.com/hashicorp/hcl v1.0.0
 github.com/hashicorp/hcl
@@ -164,25 +145,18 @@ github.com/hashicorp/hcl/hcl/token
 github.com/hashicorp/hcl/json/parser
 github.com/hashicorp/hcl/json/scanner
 github.com/hashicorp/hcl/json/token
-# github.com/hashicorp/hcl/v2 v2.6.0
+# github.com/hashicorp/hcl/v2 v2.8.2
 github.com/hashicorp/hcl/v2
 github.com/hashicorp/hcl/v2/ext/customdecode
 github.com/hashicorp/hcl/v2/ext/dynblock
 github.com/hashicorp/hcl/v2/ext/tryfunc
-github.com/hashicorp/hcl/v2/ext/typeexpr
 github.com/hashicorp/hcl/v2/gohcl
 github.com/hashicorp/hcl/v2/hcldec
 github.com/hashicorp/hcl/v2/hclparse
 github.com/hashicorp/hcl/v2/hclsyntax
 github.com/hashicorp/hcl/v2/hclwrite
 github.com/hashicorp/hcl/v2/json
-# github.com/hashicorp/hil v0.0.0-20200423225030-a18a1cd20038
-## explicit
-github.com/hashicorp/hil
-github.com/hashicorp/hil/ast
-github.com/hashicorp/hil/parser
-github.com/hashicorp/hil/scanner
-# github.com/hashicorp/terraform v0.13.4
+# github.com/hashicorp/terraform v0.14.5
 ## explicit
 github.com/hashicorp/terraform/addrs
 github.com/hashicorp/terraform/configs
@@ -190,15 +164,18 @@ github.com/hashicorp/terraform/configs/configschema
 github.com/hashicorp/terraform/configs/hcl2shim
 github.com/hashicorp/terraform/dag
 github.com/hashicorp/terraform/experiments
-github.com/hashicorp/terraform/helper/didyoumean
 github.com/hashicorp/terraform/helper/hashcode
 github.com/hashicorp/terraform/helper/logging
 github.com/hashicorp/terraform/helper/plugin
 github.com/hashicorp/terraform/helper/schema
 github.com/hashicorp/terraform/httpclient
 github.com/hashicorp/terraform/instances
+github.com/hashicorp/terraform/internal/depsfile
+github.com/hashicorp/terraform/internal/didyoumean
 github.com/hashicorp/terraform/internal/getproviders
+github.com/hashicorp/terraform/internal/replacefile
 github.com/hashicorp/terraform/internal/tfplugin5
+github.com/hashicorp/terraform/internal/typeexpr
 github.com/hashicorp/terraform/lang
 github.com/hashicorp/terraform/lang/blocktoattr
 github.com/hashicorp/terraform/lang/funcs
@@ -215,12 +192,10 @@ github.com/hashicorp/terraform/terraform
 github.com/hashicorp/terraform/tfdiags
 github.com/hashicorp/terraform/version
 # github.com/hashicorp/terraform-svchost v0.0.0-20200729002733-f050f53b9734
-## explicit
 github.com/hashicorp/terraform-svchost
 github.com/hashicorp/terraform-svchost/auth
 github.com/hashicorp/terraform-svchost/disco
-# github.com/hashicorp/yamux v0.0.0-20200609203250-aecfd211c9ce
-## explicit
+# github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d
 github.com/hashicorp/yamux
 # github.com/jessevdk/go-flags v1.4.0
 ## explicit
@@ -234,11 +209,9 @@ github.com/jinzhu/gorm/dialects/postgres
 github.com/jinzhu/gorm/dialects/sqlite
 # github.com/jinzhu/inflection v1.0.0
 github.com/jinzhu/inflection
-# github.com/jonboulle/clockwork v0.2.2
-## explicit
+# github.com/jonboulle/clockwork v0.1.0
 github.com/jonboulle/clockwork
 # github.com/lib/pq v1.8.0
-## explicit
 github.com/lib/pq
 github.com/lib/pq/hstore
 github.com/lib/pq/oid
@@ -246,8 +219,7 @@ github.com/lib/pq/scram
 # github.com/logrusorgru/aurora v2.0.3+incompatible
 ## explicit
 github.com/logrusorgru/aurora
-# github.com/magiconair/properties v1.8.4
-## explicit
+# github.com/magiconair/properties v1.8.0
 github.com/magiconair/properties
 # github.com/mailgun/multibuf v0.0.0-20150714184110-565402cd71fb
 github.com/mailgun/multibuf
@@ -257,32 +229,28 @@ github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.12
 ## explicit
 github.com/mattn/go-isatty
-# github.com/mattn/go-runewidth v0.0.9
-## explicit
+# github.com/mattn/go-runewidth v0.0.7
 github.com/mattn/go-runewidth
-# github.com/mattn/go-sqlite3 v2.0.3+incompatible
-## explicit
+# github.com/mattn/go-sqlite3 v1.14.0
 github.com/mattn/go-sqlite3
+# github.com/matttproud/golang_protobuf_extensions v1.0.1
+github.com/matttproud/golang_protobuf_extensions/pbutil
 # github.com/mitchellh/copystructure v1.0.0
 github.com/mitchellh/copystructure
 # github.com/mitchellh/go-homedir v1.1.0
 github.com/mitchellh/go-homedir
-# github.com/mitchellh/go-testing-interface v1.14.1
-## explicit
+# github.com/mitchellh/go-testing-interface v1.0.0
 github.com/mitchellh/go-testing-interface
-# github.com/mitchellh/go-wordwrap v1.0.1
-## explicit
+# github.com/mitchellh/go-wordwrap v1.0.0
 github.com/mitchellh/go-wordwrap
-# github.com/mitchellh/mapstructure v1.3.3
-## explicit
+# github.com/mitchellh/mapstructure v1.1.2
 github.com/mitchellh/mapstructure
 # github.com/mitchellh/reflectwalk v1.0.1
 github.com/mitchellh/reflectwalk
 # github.com/o1egl/gormrus v0.0.0-20190416211302-fde1f6a23457
 ## explicit
 github.com/o1egl/gormrus
-# github.com/oklog/run v1.1.0
-## explicit
+# github.com/oklog/run v1.0.0
 github.com/oklog/run
 # github.com/olekukonko/tablewriter v0.0.4
 ## explicit
@@ -297,58 +265,60 @@ github.com/orange-cloudfoundry/gobis-middlewares/ceftrace
 github.com/orange-cloudfoundry/gobis-middlewares/jwt
 github.com/orange-cloudfoundry/gobis-middlewares/trace
 github.com/orange-cloudfoundry/gobis-middlewares/utils
-# github.com/pelletier/go-toml v1.8.1
-## explicit
+# github.com/pelletier/go-toml v1.2.0
 github.com/pelletier/go-toml
 # github.com/pkg/errors v0.9.1
 ## explicit
 github.com/pkg/errors
+# github.com/prometheus/client_golang v1.7.1
+github.com/prometheus/client_golang/prometheus
+github.com/prometheus/client_golang/prometheus/internal
+# github.com/prometheus/client_model v0.2.0
+github.com/prometheus/client_model/go
+# github.com/prometheus/common v0.15.0
+## explicit
+github.com/prometheus/common/expfmt
+github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
+github.com/prometheus/common/model
+github.com/prometheus/common/version
+# github.com/prometheus/procfs v0.1.3
+github.com/prometheus/procfs
+github.com/prometheus/procfs/internal/fs
+github.com/prometheus/procfs/internal/util
 # github.com/satori/go.uuid v1.2.0
 github.com/satori/go.uuid
 # github.com/sirupsen/logrus v1.7.0
 ## explicit
 github.com/sirupsen/logrus
-# github.com/spf13/afero v1.4.1
-## explicit
+# github.com/spf13/afero v1.2.2
 github.com/spf13/afero
 github.com/spf13/afero/mem
-# github.com/spf13/cast v1.3.1
-## explicit
+# github.com/spf13/cast v1.3.0
 github.com/spf13/cast
-# github.com/spf13/jwalterweatherman v1.1.0
-## explicit
+# github.com/spf13/jwalterweatherman v1.0.0
 github.com/spf13/jwalterweatherman
-# github.com/spf13/pflag v1.0.5
-## explicit
+# github.com/spf13/pflag v1.0.3
 github.com/spf13/pflag
-# github.com/spf13/viper v1.7.1
-## explicit
+# github.com/spf13/viper v1.3.1
 github.com/spf13/viper
-# github.com/stretchr/testify v1.6.1
-## explicit
-# github.com/subosito/gotenv v1.2.0
-github.com/subosito/gotenv
 # github.com/thoas/go-funk v0.7.0
 ## explicit
 github.com/thoas/go-funk
 # github.com/vmihailenco/msgpack/v4 v4.3.12
 github.com/vmihailenco/msgpack/v4
 github.com/vmihailenco/msgpack/v4/codes
-# github.com/vmihailenco/tagparser v0.1.2
-## explicit
+# github.com/vmihailenco/tagparser v0.1.1
 github.com/vmihailenco/tagparser
 github.com/vmihailenco/tagparser/internal
 github.com/vmihailenco/tagparser/internal/parser
-# github.com/vulcand/oxy v1.1.0
-## explicit
+# github.com/vulcand/oxy v0.0.0-20181130145254-c34b0c501e43
 github.com/vulcand/oxy/buffer
 github.com/vulcand/oxy/forward
 github.com/vulcand/oxy/trace
 github.com/vulcand/oxy/utils
 # github.com/vulcand/predicate v1.1.0
 github.com/vulcand/predicate
-# github.com/zclconf/go-cty v1.6.1
-## explicit
+# github.com/zclconf/go-cty v1.7.1
 github.com/zclconf/go-cty/cty
 github.com/zclconf/go-cty/cty/convert
 github.com/zclconf/go-cty/cty/function
@@ -359,10 +329,7 @@ github.com/zclconf/go-cty/cty/msgpack
 github.com/zclconf/go-cty/cty/set
 # github.com/zclconf/go-cty-yaml v1.0.2
 github.com/zclconf/go-cty-yaml
-# go.opencensus.io v0.22.5
-## explicit
-# golang.org/x/crypto v0.0.0-20201002170205-7f63de1d35b0
-## explicit
+# golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/cast5
@@ -384,8 +351,7 @@ golang.org/x/crypto/ssh/internal/bcrypt_pbkdf
 golang.org/x/crypto/ssh/terminal
 # golang.org/x/mod v0.3.0
 golang.org/x/mod/sumdb/dirhash
-# golang.org/x/net v0.0.0-20201006153459-a7d1128ccaa0
-## explicit
+# golang.org/x/net v0.0.0-20201021035429-f5854403a974
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp
 golang.org/x/net/http/httpguts
@@ -394,23 +360,32 @@ golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
-# golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43
+# golang.org/x/oauth2 v0.0.0-20201109201403-9fd604954f58
 golang.org/x/oauth2
 golang.org/x/oauth2/clientcredentials
 golang.org/x/oauth2/internal
-# golang.org/x/sys v0.0.0-20201007082116-8445cc04cbdf
-## explicit
+# golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f
 golang.org/x/sys/cpu
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
 # golang.org/x/text v0.3.3
+golang.org/x/text/encoding
+golang.org/x/text/encoding/charmap
+golang.org/x/text/encoding/ianaindex
+golang.org/x/text/encoding/internal
+golang.org/x/text/encoding/internal/identifier
+golang.org/x/text/encoding/japanese
+golang.org/x/text/encoding/korean
+golang.org/x/text/encoding/simplifiedchinese
+golang.org/x/text/encoding/traditionalchinese
+golang.org/x/text/encoding/unicode
+golang.org/x/text/internal/utf8internal
+golang.org/x/text/runes
 golang.org/x/text/secure/bidirule
 golang.org/x/text/transform
 golang.org/x/text/unicode/bidi
 golang.org/x/text/unicode/norm
-# golang.org/x/tools v0.0.0-20201007032633-0806396f153e
-## explicit
 # google.golang.org/appengine v1.6.6
 google.golang.org/appengine
 google.golang.org/appengine/datastore
@@ -425,10 +400,9 @@ google.golang.org/appengine/internal/modules
 google.golang.org/appengine/internal/remote_api
 google.golang.org/appengine/internal/urlfetch
 google.golang.org/appengine/urlfetch
-# google.golang.org/genproto v0.0.0-20201006033701-bcad7cf615f2
-## explicit
+# google.golang.org/genproto v0.0.0-20200904004341-0bd0a958aa1d
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.32.0
+# google.golang.org/grpc v1.31.1
 google.golang.org/grpc
 google.golang.org/grpc/attributes
 google.golang.org/grpc/backoff
@@ -440,6 +414,7 @@ google.golang.org/grpc/binarylog/grpc_binarylog_v1
 google.golang.org/grpc/codes
 google.golang.org/grpc/connectivity
 google.golang.org/grpc/credentials
+google.golang.org/grpc/credentials/internal
 google.golang.org/grpc/encoding
 google.golang.org/grpc/encoding/proto
 google.golang.org/grpc/grpclog
@@ -505,9 +480,8 @@ google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/emptypb
 google.golang.org/protobuf/types/known/timestamppb
-# gopkg.in/ini.v1 v1.62.0
+# gopkg.in/alecthomas/kingpin.v2 v2.2.6
 ## explicit
-gopkg.in/ini.v1
+gopkg.in/alecthomas/kingpin.v2
 # gopkg.in/yaml.v2 v2.3.0
-## explicit
 gopkg.in/yaml.v2

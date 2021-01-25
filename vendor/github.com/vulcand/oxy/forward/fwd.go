@@ -363,12 +363,7 @@ func (f *httpForwarder) serveWebSocket(w http.ResponseWriter, req *http.Request,
 				ctx.errHandler.ServeHTTP(w, req, errHijack)
 				return
 			}
-			defer func() {
-				conn.Close()
-				if f.websocketConnectionClosedHook != nil {
-					f.websocketConnectionClosedHook(req, conn)
-				}
-			}()
+			defer conn.Close()
 
 			errWrite := resp.Write(conn)
 			if errWrite != nil {
