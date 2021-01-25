@@ -51,6 +51,16 @@ archives:
       - static/*
       - templates/*
 
+  - id: plugin
+    format: binary
+    builds: [ plugin ]
+    name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}"
+
+  - id: provider
+    format: zip
+    builds: [ provider ]
+    name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}"
+
 checksum:
   name_template: checksums.txt
   algorithm: sha256
