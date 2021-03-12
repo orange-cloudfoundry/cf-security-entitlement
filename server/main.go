@@ -23,8 +23,8 @@ import (
 	"github.com/orange-cloudfoundry/gobis-middlewares/jwt"
 	"github.com/orange-cloudfoundry/gobis-middlewares/trace"
 	"github.com/prometheus/common/version"
-	"gopkg.in/alecthomas/kingpin.v2"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 func init() {
@@ -78,10 +78,12 @@ func boot() error {
 	kingpin.Parse()
 
 	var config model.ConfigServer
-	gautocloud.Inject(&config)
-
+	err := gautocloud.Inject(&config)
+	if err != nil {
+		return err
+	}
 	loadLogConfig(config)
-	err := loadClient(shallowDefaultTransport(config.TrustedCaCertificates, config.CloudFoundry.SkipSSLValidation), config)
+	err = loadClient(shallowDefaultTransport(config.TrustedCaCertificates, config.CloudFoundry.SkipSSLValidation), config)
 	if err != nil {
 		return err
 	}

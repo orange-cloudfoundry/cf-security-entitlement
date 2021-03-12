@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/cloudfoundry-community/go-cfclient"
-	"net/http"
 	"strings"
 )
 
@@ -20,17 +19,6 @@ type Client struct {
 
 func NewClient(endpoint string, cfClient *cfclient.Client) *Client {
 	return &Client{endpoint: endpoint, cfClient: cfClient}
-}
-
-func (c Client) setToken(req *http.Request) error {
-
-	token, err := c.cfClient.GetToken()
-	if err != nil {
-		return err
-	}
-	req.Header.Add("Authorization", token)
-
-	return nil
 }
 
 func (c Client) CurrentUserIsAdmin() (bool, error) {

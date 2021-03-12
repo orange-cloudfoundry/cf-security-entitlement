@@ -159,6 +159,7 @@ func bindOrUnbindSecGroup(w http.ResponseWriter, req *http.Request, next http.Ha
 			serverError(w, err)
 			return
 		}
+		defer resp.Body.Close()
 		if resp.StatusCode != 201 {
 			serverErrorCode(w, resp.StatusCode, fmt.Errorf(""))
 		}
