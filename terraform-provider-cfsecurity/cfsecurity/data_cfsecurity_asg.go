@@ -1,7 +1,7 @@
 package cfsecurity
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/clients"
 )
 

@@ -5,8 +5,8 @@ import (
 
 	"github.com/cloudfoundry-community/go-cfclient"
 	"github.com/hashicorp/go-uuid"
-	"github.com/hashicorp/terraform/helper/hashcode"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/clients"
 )
 

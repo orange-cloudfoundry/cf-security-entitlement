@@ -8,6 +8,7 @@ require (
 	github.com/cloudfoundry-community/go-cfclient v0.0.0-20201123235753-4f46d6348a05
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/terraform v0.14.5
+	github.com/hashicorp/terraform-plugin-sdk v1.15.0
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/jinzhu/gorm v1.9.16
 	github.com/logrusorgru/aurora v2.0.3+incompatible

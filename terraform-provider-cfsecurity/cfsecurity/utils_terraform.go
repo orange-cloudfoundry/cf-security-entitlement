@@ -7,10 +7,6 @@ import (
 	"reflect"
 )
 
-const (
-	importStateKey = "is_import_state"
-)
-
 // getListOfStructs
 func getListOfStructs(v interface{}) []map[string]interface{} {
 	if vvSet, ok := v.(*schema.Set); ok {
