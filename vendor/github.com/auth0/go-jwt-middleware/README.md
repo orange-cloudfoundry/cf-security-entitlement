@@ -1,5 +1,7 @@
 # GO JWT Middleware
 
+**NOTE:** We released this version using a fork of jwt-go in order to address a security vulnerability. Due to jwt-go not being actively maintained we will be looking to switch to a more actively maintained package in the near future.
+
 A middleware that will check that a [JWT](http://jwt.io/) is sent on the `Authorization` header and will then set the content of the JWT into the `user` variable of the request.
 
 This module lets you authenticate HTTP requests using JWT tokens in your Go Programming Language applications. JWTs are typically used to protect API endpoints, and are often issued using OpenID Connect.
@@ -28,15 +30,15 @@ import (
   "net/http"
 
   "github.com/auth0/go-jwt-middleware"
-  "github.com/dgrijalva/jwt-go"
-  "github.com/gorilla/context"
+  "github.com/form3tech-oss/jwt-go"
+  "context"
 )
 
 var myHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-  user := context.Get(r, "user")
+  user := r.Context().Value("user")
   fmt.Fprintf(w, "This is an authenticated request")
   fmt.Fprintf(w, "Claim content:\n")
-  for k, v := range user.(*jwt.Token).Claims {
+  for k, v := range user.(*jwt.Token).Claims.(jwt.MapClaims) {
     fmt.Fprintf(w, "%s :\t%#v\n", k, v)
   }
 })
@@ -69,8 +71,8 @@ import (
   "net/http"
 
   "github.com/auth0/go-jwt-middleware"
-  "github.com/codegangsta/negroni"
-  "github.com/dgrijalva/jwt-go"
+  "github.com/urfave/negroni"
+  "github.com/form3tech-oss/jwt-go"
   "github.com/gorilla/mux"
 )
 
@@ -78,7 +80,7 @@ var myHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
   user := r.Context().Value("user");
   fmt.Fprintf(w, "This is an authenticated request")
   fmt.Fprintf(w, "Claim content:\n")
-  for k, v := range user.(*jwt.Token).Claims {
+  for k, v := range user.(*jwt.Token).Claims.(jwt.MapClaims) {
     fmt.Fprintf(w, "%s :\t%#v\n", k, v)
   }
 })
@@ -204,4 +206,4 @@ If you have found a bug or if you have a feature request, please report them at 
 
 ## License
 
-This project is licensed under the MIT license. See the [LICENSE](LICENSE.txt) file for more info.
+This project is licensed under the MIT license. See the [LICENSE](LICENSE) file for more info.
