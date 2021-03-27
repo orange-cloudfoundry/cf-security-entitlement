@@ -49,7 +49,7 @@ require (
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/orange-cloudfoundry/gobis v1.4.2
-	github.com/orange-cloudfoundry/gobis-middlewares v1.3.1
+	github.com/orange-cloudfoundry/gobis-middlewares v1.3.2
 	github.com/pelletier/go-toml v1.8.1 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/posener/complete v1.2.3 // indirect
@@ -67,6 +67,8 @@ require (
 	github.com/vmihailenco/tagparser v0.1.2 // indirect
 	github.com/zclconf/go-cty v1.8.1 // indirect
 	golang.org/x/mod v0.4.2 // indirect
+	golang.org/x/net v0.0.0-20210326220855-61e056675ecf // indirect
+	golang.org/x/sys v0.0.0-20210326220804-49726bf1d181 // indirect
 	google.golang.org/api v0.43.0 // indirect
 	google.golang.org/genproto v0.0.0-20210325141258-5636347f2b14 // indirect
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
