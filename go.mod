@@ -12,7 +12,6 @@ require (
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/alecthomas/units v0.0.0-20210208195552-ff826a37aa15 // indirect
 	github.com/aws/aws-sdk-go v1.38.5 // indirect
-	github.com/bmatcuk/doublestar v1.3.4 // indirect
 	github.com/cloudfoundry-community/gautocloud v1.1.6
 	github.com/cloudfoundry-community/go-cfclient v0.0.0-20210323224952-08c3e61b3283
 	github.com/cloudfoundry-community/go-cfenv v1.18.0 // indirect
@@ -25,9 +24,8 @@ require (
 	github.com/hashicorp/go-hclog v0.15.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-plugin v1.4.0 // indirect
-	github.com/hashicorp/go-retryablehttp v0.6.8 // indirect
 	github.com/hashicorp/go-uuid v1.0.2
-	github.com/hashicorp/terraform v0.14.9
+	github.com/hashicorp/hcl/v2 v2.9.1 // indirect
 	github.com/hashicorp/terraform-plugin-sdk v1.16.1
 	github.com/hashicorp/yamux v0.0.0-20210316155119-a95892c5f864 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect

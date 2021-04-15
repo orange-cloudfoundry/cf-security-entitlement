@@ -2,7 +2,8 @@ package cfsecurity
 
 import (
 	"github.com/cloudfoundry-community/go-cfclient"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"hash/crc32"
 	"net/http"
 	"reflect"
 )
@@ -99,4 +100,16 @@ func isNotFoundErr(err error) bool {
 		return httpErr.StatusCode == http.StatusNotFound
 	}
 	return false
+}
+
+func StringHashCode(s string) int {
+	v := int(crc32.ChecksumIEEE([]byte(s)))
+	if v >= 0 {
+		return v
+	}
+	if -v >= 0 {
+		return -v
+	}
+	// v == MinInt
+	return 0
 }

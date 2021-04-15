@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/go-uuid"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/clients"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/model"
@@ -34,7 +33,7 @@ func resourceEntitleAsg() *schema.Resource {
 						elem["asg_id"],
 						elem["org_id"],
 					)
-					return hashcode.String(str)
+					return StringHashCode(str)
 				},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

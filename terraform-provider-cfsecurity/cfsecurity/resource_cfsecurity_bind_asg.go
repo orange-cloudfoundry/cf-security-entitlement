@@ -5,7 +5,6 @@ import (
 
 	"github.com/cloudfoundry-community/go-cfclient"
 	"github.com/hashicorp/go-uuid"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/clients"
 )
@@ -34,7 +33,7 @@ func resourceBindAsg() *schema.Resource {
 						elem["asg_id"],
 						elem["space_id"],
 					)
-					return hashcode.String(str)
+					return StringHashCode(str)
 				},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
