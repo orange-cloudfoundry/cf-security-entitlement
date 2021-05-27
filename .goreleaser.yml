@@ -27,11 +27,6 @@ builds:
     id: plugin
     binary: cfsecurity-plugin
     dir: ./plugin
-  -
-    <<: *template
-    id: provider
-    binary: terraform-provider-cfsecurity
-    dir: ./terraform-provider-cfsecurity
 
 archives:
   - id: archives
@@ -56,10 +51,6 @@ archives:
     builds: [ plugin ]
     name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}"
 
-  - id: provider
-    format: zip
-    builds: [ provider ]
-    name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}"
 
 checksum:
   name_template: checksums.txt
