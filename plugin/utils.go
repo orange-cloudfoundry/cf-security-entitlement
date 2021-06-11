@@ -47,7 +47,7 @@ func getOrgSpaces(orgId string) ([]plugin_models.GetOrg_Space, error) {
 	spaces := make([]plugin_models.GetOrg_Space, 0)
 	page := 1
 	for {
-		newSpaces, totalPages, err := getOrgSpacesByPage(orgId, 1)
+		newSpaces, totalPages, err := getOrgSpacesByPage(orgId, page)
 		if err != nil {
 			return spaces, err
 		}
