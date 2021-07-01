@@ -29,6 +29,7 @@ type Service struct {
 	Active               bool     `json:"active"`
 	Bindable             bool     `json:"bindable"`
 	ServiceBrokerGuid    string   `json:"service_broker_guid"`
+	ServiceBrokerName    string   `json:"service_broker_name"`
 	PlanUpdateable       bool     `json:"plan_updateable"`
 	Tags                 []string `json:"tags"`
 	UniqueID             string   `json:"unique_id"`
@@ -71,8 +72,8 @@ func (c *Client) GetServiceByGuid(guid string) (Service, error) {
 	if err != nil {
 		return Service{}, err
 	}
-	body, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return Service{}, err
 	}
@@ -97,6 +98,7 @@ func (c *Client) ListServicesByQuery(query url.Values) ([]Service, error) {
 		if err != nil {
 			return nil, errors.Wrap(err, "Error requesting services")
 		}
+		defer resp.Body.Close()
 		resBody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return nil, errors.Wrap(err, "Error reading services request:")
