@@ -40,9 +40,9 @@ type CreateV3AppRequest struct {
 }
 
 type UpdateV3AppRequest struct {
-	Name      string
-	Lifecycle *V3Lifecycle
-	Metadata  *V3Metadata
+	Name      string       `json:"name"`
+	Lifecycle *V3Lifecycle `json:"lifecycle"`
+	Metadata  *V3Metadata  `json:"metadata"`
 }
 
 func (c *Client) CreateV3App(r CreateV3AppRequest) (*V3App, error) {
@@ -208,7 +208,7 @@ func (c *Client) ListV3AppsByQuery(query url.Values) ([]V3App, error) {
 		apps = append(apps, data.Resources...)
 
 		requestURL = data.Pagination.Next.Href
-		if requestURL == "" {
+		if requestURL == "" || query.Get("page") != "" {
 			break
 		}
 		requestURL, err = extractPathFromURL(requestURL)
