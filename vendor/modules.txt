@@ -14,7 +14,7 @@ github.com/Masterminds/semver
 # github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 github.com/alecthomas/template
 github.com/alecthomas/template/parse
-# github.com/alecthomas/units v0.0.0-20210208195552-ff826a37aa15
+# github.com/alecthomas/units v0.0.0-20210927113745-59d0afb8317a
 ## explicit
 github.com/alecthomas/units
 # github.com/auth0/go-jwt-middleware v1.0.1
@@ -35,9 +35,10 @@ github.com/casbin/casbin/persist/file-adapter
 github.com/casbin/casbin/rbac
 github.com/casbin/casbin/rbac/default-role-manager
 github.com/casbin/casbin/util
-# github.com/cespare/xxhash/v2 v2.1.1
+# github.com/cespare/xxhash/v2 v2.1.2
+## explicit
 github.com/cespare/xxhash/v2
-# github.com/cloudfoundry-community/gautocloud v1.1.6
+# github.com/cloudfoundry-community/gautocloud v1.1.7
 ## explicit
 github.com/cloudfoundry-community/gautocloud
 github.com/cloudfoundry-community/gautocloud/cloudenv
@@ -57,26 +58,26 @@ github.com/cloudfoundry-community/gautocloud/decoder
 github.com/cloudfoundry-community/gautocloud/interceptor
 github.com/cloudfoundry-community/gautocloud/loader
 github.com/cloudfoundry-community/gautocloud/loader/fake
-# github.com/cloudfoundry-community/go-cfclient v0.0.0-20210621174645-7773f7e22665
+# github.com/cloudfoundry-community/go-cfclient v0.0.0-20210823134051-721f0e559306
 ## explicit
 github.com/cloudfoundry-community/go-cfclient
 # github.com/cloudfoundry-community/go-cfenv v1.18.0
-## explicit
 github.com/cloudfoundry-community/go-cfenv
-# github.com/denisenkom/go-mssqldb v0.10.0
+# github.com/denisenkom/go-mssqldb v0.11.0
 ## explicit
 github.com/denisenkom/go-mssqldb
 github.com/denisenkom/go-mssqldb/internal/cp
 github.com/denisenkom/go-mssqldb/internal/decimal
 github.com/denisenkom/go-mssqldb/internal/querytext
+github.com/denisenkom/go-mssqldb/msdsn
 # github.com/dgrijalva/jwt-go v3.2.0+incompatible
 github.com/dgrijalva/jwt-go
-# github.com/form3tech-oss/jwt-go v3.2.3+incompatible
+# github.com/form3tech-oss/jwt-go v3.2.5+incompatible
+## explicit
 github.com/form3tech-oss/jwt-go
-# github.com/fsnotify/fsnotify v1.4.9
+# github.com/fsnotify/fsnotify v1.5.1
 github.com/fsnotify/fsnotify
 # github.com/go-sql-driver/mysql v1.6.0
-## explicit
 github.com/go-sql-driver/mysql
 # github.com/gobwas/glob v0.2.3
 github.com/gobwas/glob
@@ -90,7 +91,6 @@ github.com/gobwas/glob/util/strings
 # github.com/golang-sql/civil v0.0.0-20190719163853-cb61b32ac6fe
 github.com/golang-sql/civil
 # github.com/golang/mock v1.6.0
-## explicit
 github.com/golang/mock/gomock
 # github.com/golang/protobuf v1.5.2
 github.com/golang/protobuf/proto
@@ -130,7 +130,7 @@ github.com/jinzhu/gorm/dialects/sqlite
 github.com/jinzhu/inflection
 # github.com/jonboulle/clockwork v0.2.2
 github.com/jonboulle/clockwork
-# github.com/lib/pq v1.10.2
+# github.com/lib/pq v1.10.3
 ## explicit
 github.com/lib/pq
 github.com/lib/pq/hstore
@@ -143,21 +143,21 @@ github.com/logrusorgru/aurora
 github.com/magiconair/properties
 # github.com/mailgun/multibuf v0.0.0-20150714184110-565402cd71fb
 github.com/mailgun/multibuf
-# github.com/mattn/go-colorable v0.1.8
+# github.com/mattn/go-colorable v0.1.11
 ## explicit
 github.com/mattn/go-colorable
-# github.com/mattn/go-isatty v0.0.13
+# github.com/mattn/go-isatty v0.0.14
 ## explicit
 github.com/mattn/go-isatty
 # github.com/mattn/go-runewidth v0.0.13
 ## explicit
 github.com/mattn/go-runewidth
-# github.com/mattn/go-sqlite3 v1.14.7
+# github.com/mattn/go-sqlite3 v1.14.8
 ## explicit
 github.com/mattn/go-sqlite3
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 github.com/matttproud/golang_protobuf_extensions/pbutil
-# github.com/mitchellh/mapstructure v1.4.1
+# github.com/mitchellh/mapstructure v1.4.2
 github.com/mitchellh/mapstructure
 # github.com/o1egl/gormrus v0.0.0-20190416211302-fde1f6a23457
 ## explicit
@@ -175,7 +175,7 @@ github.com/orange-cloudfoundry/gobis-middlewares/ceftrace
 github.com/orange-cloudfoundry/gobis-middlewares/jwt
 github.com/orange-cloudfoundry/gobis-middlewares/trace
 github.com/orange-cloudfoundry/gobis-middlewares/utils
-# github.com/pelletier/go-toml v1.9.3
+# github.com/pelletier/go-toml v1.9.4
 github.com/pelletier/go-toml
 # github.com/pkg/errors v0.9.1
 ## explicit
@@ -185,13 +185,13 @@ github.com/prometheus/client_golang/prometheus
 github.com/prometheus/client_golang/prometheus/internal
 # github.com/prometheus/client_model v0.2.0
 github.com/prometheus/client_model/go
-# github.com/prometheus/common v0.29.0
+# github.com/prometheus/common v0.31.1
 ## explicit
 github.com/prometheus/common/expfmt
 github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
 github.com/prometheus/common/model
 github.com/prometheus/common/version
-# github.com/prometheus/procfs v0.7.0
+# github.com/prometheus/procfs v0.7.3
 ## explicit
 github.com/prometheus/procfs
 github.com/prometheus/procfs/internal/fs
@@ -206,18 +206,23 @@ github.com/sirupsen/logrus
 # github.com/spf13/afero v1.6.0
 github.com/spf13/afero
 github.com/spf13/afero/mem
-# github.com/spf13/cast v1.3.1
+# github.com/spf13/cast v1.4.1
 github.com/spf13/cast
 # github.com/spf13/jwalterweatherman v1.1.0
 github.com/spf13/jwalterweatherman
 # github.com/spf13/pflag v1.0.5
 github.com/spf13/pflag
-# github.com/spf13/viper v1.8.1
+# github.com/spf13/viper v1.9.0
 ## explicit
 github.com/spf13/viper
+github.com/spf13/viper/internal/encoding
+github.com/spf13/viper/internal/encoding/hcl
+github.com/spf13/viper/internal/encoding/json
+github.com/spf13/viper/internal/encoding/toml
+github.com/spf13/viper/internal/encoding/yaml
 # github.com/subosito/gotenv v1.2.0
 github.com/subosito/gotenv
-# github.com/thoas/go-funk v0.9.0
+# github.com/thoas/go-funk v0.9.1
 ## explicit
 github.com/thoas/go-funk
 # github.com/vulcand/oxy v1.3.0
@@ -227,24 +232,29 @@ github.com/vulcand/oxy/trace
 github.com/vulcand/oxy/utils
 # github.com/vulcand/predicate v1.1.0
 github.com/vulcand/predicate
-# golang.org/x/crypto v0.0.0-20210616213533-5ff15b29337e
+# golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
+## explicit
 golang.org/x/crypto/md4
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/net v0.0.0-20210614182718-04defd469f4e
+# golang.org/x/net v0.0.0-20210929193557-e81a3d93ecf6
+## explicit
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp
-# golang.org/x/oauth2 v0.0.0-20210628180205-a41e5a781914
+# golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f
 golang.org/x/oauth2
 golang.org/x/oauth2/clientcredentials
 golang.org/x/oauth2/internal
-# golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c
+# golang.org/x/sys v0.0.0-20210930212924-f542c8878de8
+## explicit
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/plan9
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b
+# golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
+## explicit
 golang.org/x/term
-# golang.org/x/text v0.3.6
+# golang.org/x/text v0.3.7
+## explicit
 golang.org/x/text/transform
 golang.org/x/text/unicode/norm
 # google.golang.org/appengine v1.6.7
@@ -289,7 +299,7 @@ google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/alecthomas/kingpin.v2 v2.2.6
 ## explicit
 gopkg.in/alecthomas/kingpin.v2
-# gopkg.in/ini.v1 v1.62.0
+# gopkg.in/ini.v1 v1.63.2
 gopkg.in/ini.v1
 # gopkg.in/yaml.v2 v2.4.0
 gopkg.in/yaml.v2
