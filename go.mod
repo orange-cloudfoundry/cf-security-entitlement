@@ -24,8 +24,8 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.8 // indirect
 	github.com/o1egl/gormrus v0.0.0-20190416211302-fde1f6a23457
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/orange-cloudfoundry/gobis v1.4.3
-	github.com/orange-cloudfoundry/gobis-middlewares v1.3.3
+	github.com/orange-cloudfoundry/gobis v1.5.1
+	github.com/orange-cloudfoundry/gobis-middlewares v1.3.4
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/common v0.31.1
 	github.com/prometheus/procfs v0.7.3 // indirect
@@ -73,11 +73,11 @@ require (
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/vulcand/oxy v1.3.0 // indirect
 	github.com/vulcand/predicate v1.1.0 // indirect
-	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
-	golang.org/x/net v0.0.0-20210614182718-04defd469f4e // indirect
+	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
+	golang.org/x/net v0.0.0-20211015210444-4f30a5c0130f // indirect
 	golang.org/x/oauth2 v0.0.0-20211005180243-6b3c2da341f1 // indirect
-	golang.org/x/sys v0.0.0-20210927094055-39ccf1dd6fa6 // indirect
-	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b // indirect
+	golang.org/x/sys v0.0.0-20211015200801-69063c4bb744 // indirect
+	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.6 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
