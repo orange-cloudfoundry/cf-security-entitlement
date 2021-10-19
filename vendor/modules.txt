@@ -191,8 +191,8 @@ github.com/o1egl/gormrus
 # github.com/olekukonko/tablewriter v0.0.5
 ## explicit; go 1.12
 github.com/olekukonko/tablewriter
-# github.com/orange-cloudfoundry/gobis v1.4.3
-## explicit; go 1.16
+# github.com/orange-cloudfoundry/gobis v1.5.1
+## explicit; go 1.17
 github.com/orange-cloudfoundry/gobis
 # github.com/orange-cloudfoundry/gobis-middlewares v1.3.3
 ## explicit; go 1.16
