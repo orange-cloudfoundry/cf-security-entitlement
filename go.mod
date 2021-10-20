@@ -8,7 +8,7 @@ require (
 	code.cloudfoundry.org/cli v7.1.0+incompatible
 	github.com/Masterminds/semver v1.5.0 // indirect
 	github.com/alecthomas/units v0.0.0-20210927113745-59d0afb8317a // indirect
-	github.com/cloudfoundry-community/gautocloud v1.1.7
+	github.com/cloudfoundry-community/gautocloud v1.1.8
 	github.com/cloudfoundry-community/go-cfclient v0.0.0-20210823134051-721f0e559306
 	github.com/cloudfoundry-community/go-cfenv v1.18.0 // indirect
 	github.com/denisenkom/go-mssqldb v0.11.0 // indirect
@@ -78,7 +78,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20211005180243-6b3c2da341f1 // indirect
 	golang.org/x/sys v0.0.0-20211015200801-69063c4bb744 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
-	golang.org/x/text v0.3.6 // indirect
+	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/ini.v1 v1.63.2 // indirect
