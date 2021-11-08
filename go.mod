@@ -24,7 +24,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.8 // indirect
 	github.com/o1egl/gormrus v0.0.0-20190416211302-fde1f6a23457
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/orange-cloudfoundry/gobis v1.5.1
+	github.com/orange-cloudfoundry/gobis v1.6.0
 	github.com/orange-cloudfoundry/gobis-middlewares v1.3.4
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/common v0.32.1
