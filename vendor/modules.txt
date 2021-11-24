@@ -167,7 +167,7 @@ github.com/magiconair/properties
 # github.com/mailgun/multibuf v0.0.0-20150714184110-565402cd71fb
 ## explicit
 github.com/mailgun/multibuf
-# github.com/mattn/go-colorable v0.1.11
+# github.com/mattn/go-colorable v0.1.12
 ## explicit; go 1.13
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.14
