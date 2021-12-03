@@ -410,11 +410,10 @@ github.com/onsi/gomega v1.14.0/go.mod h1:cIuvLEne0aoVhAgh/O6ac0Op8WWw9H6eYCriF+t
 github.com/onsi/gomega v1.17.0 h1:9Luw4uT5HTjHTN8+aNcSThgH1vdXnmdJ8xIfZ4wyTRE=
 github.com/onsi/gomega v1.17.0/go.mod h1:HnhC7FXeEQY45zxNK3PPoIUhzk/80Xly9PcubAlGdZY=
 github.com/orange-cloudfoundry/go-auth-pubtkt v1.0.3/go.mod h1:Hx1cPjYq6feLBcQ7LiYB0eu/femb52Bn+MyZe1mnqh4=
-github.com/orange-cloudfoundry/gobis v1.6.0/go.mod h1:xq4P5VpZRd48Va2X7Ppn4R/Dy0l297xIJXlmgjDBTg8=
 github.com/orange-cloudfoundry/gobis v1.6.1 h1:2mLj0e8VlDMMouw9EOPUCq5VGru6zepHGlAVfMTgks8=
 github.com/orange-cloudfoundry/gobis v1.6.1/go.mod h1:rHReSmQEwo5wndsEBmwZfNItGhIuD1g15ol1WRC1kGs=
-github.com/orange-cloudfoundry/gobis-middlewares v1.5.0 h1:iDwoebkNnaU3IcxAGz0Dgub/UGr/fXOZiD1V9IqOH5U=
-github.com/orange-cloudfoundry/gobis-middlewares v1.5.0/go.mod h1:U7xQ1lfDIcT8DWvlQPb1kUwPpPYiLEjk6OHP++eB+UM=
+github.com/orange-cloudfoundry/gobis-middlewares v1.5.1 h1:OVr1u6vWG9jpaI4mgRJXrYFJmshIh/XnzbwXnrgQafM=
+github.com/orange-cloudfoundry/gobis-middlewares v1.5.1/go.mod h1:JYSbjUB4u6l2oumALqKla+dINBTWBuEoAYMypg84dGE=
 github.com/oxtoacart/bpool v0.0.0-20150712133111-4e1c5567d7c2 h1:CXwSGu/LYmbjEab5aMCs5usQRVBGThelUKBNnoSOuso=
 github.com/oxtoacart/bpool v0.0.0-20150712133111-4e1c5567d7c2/go.mod h1:L3UMQOThbttwfYRNFOWLLVXMhk5Lkio4GGOtw5UrxS0=
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
