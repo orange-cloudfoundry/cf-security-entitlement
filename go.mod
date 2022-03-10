@@ -24,14 +24,14 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.8 // indirect
 	github.com/o1egl/gormrus v0.0.0-20190416211302-fde1f6a23457
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/orange-cloudfoundry/gobis v1.7.1
+	github.com/orange-cloudfoundry/gobis v1.7.2
 	github.com/orange-cloudfoundry/gobis-middlewares v1.7.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/common v0.32.1
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.9.0 // indirect
-	github.com/thoas/go-funk v0.9.1
+	github.com/thoas/go-funk v0.9.2
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )
 
