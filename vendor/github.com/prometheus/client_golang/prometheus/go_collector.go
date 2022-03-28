@@ -197,7 +197,6 @@ func goRuntimeMemStats() memStatsMetrics {
 			),
 			eval:    func(ms *runtime.MemStats) float64 { return float64(ms.NextGC) },
 			valType: GaugeValue,
-		},
 	}
 }
 

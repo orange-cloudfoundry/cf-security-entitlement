@@ -3,12 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/olekukonko/tablewriter"
-	"github.com/orange-cloudfoundry/cf-security-entitlement/clients"
-	"github.com/orange-cloudfoundry/cf-security-entitlement/model"
-	"github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages"
 	"os"
 	"strings"
+
+	"github.com/olekukonko/tablewriter"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/client"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/model"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages"
 )
 
 type EntitleSecGroup struct {
@@ -21,7 +22,7 @@ type ListEntitlementCommand struct {
 	InJson bool   `long:"json" description:"see in json"`
 }
 
-func entitlementsExtract(client *clients.Client, entitlements []model.EntitlementSecGroup) ([]EntitleSecGroup, error) {
+func entitlementsExtract(cfclient *client.Client, entitlements []model.EntitlementSecGroup) ([]EntitleSecGroup, error) {
 	currentSecGroup := ""
 	entitleSecGroups := make([]EntitleSecGroup, 0)
 	orgs := make([]string, 0)
@@ -33,12 +34,12 @@ func entitlementsExtract(client *clients.Client, entitlements []model.Entitlemen
 			entitleSecGroups = append(entitleSecGroups, entitleSecGroup)
 		}
 		if currentSecGroup != entitlement.SecurityGroupGUID {
-			secGroup, err := client.GetSecGroupByGuid(entitlement.SecurityGroupGUID)
+			secGroup, err := cfclient.GetSecGroupByGuid(entitlement.SecurityGroupGUID)
 			if err != nil {
 				return entitleSecGroups, err
 			}
 			entitleSecGroup = EntitleSecGroup{
-				Name: secGroup.Name,
+				Name: secGroup.Resources[0].Name,
 			}
 			currentSecGroup = entitlement.SecurityGroupGUID
 			orgs = make([]string, 0)
@@ -62,7 +63,7 @@ func entitlementsExtract(client *clients.Client, entitlements []model.Entitlemen
 var listEntitlementCommand ListEntitlementCommand
 
 func (c *ListEntitlementCommand) Execute(_ []string) error {
-	client := genClient(c.Api)
+	cfclient := genClient(c.Api)
 	username, err := cliConnection.Username()
 	if err != nil {
 		return err
@@ -70,11 +71,11 @@ func (c *ListEntitlementCommand) Execute(_ []string) error {
 	if !c.InJson {
 		messages.Printf("Getting entitlements security groups as %s...\n", messages.C.Cyan(username))
 	}
-	cEntitlements, err := client.ListSecGroupEntitlements()
+	cEntitlements, err := cfclient.ListSecGroupEntitlements()
 	if err != nil {
 		return err
 	}
-	entitlements, err := entitlementsExtract(client, cEntitlements)
+	entitlements, err := entitlementsExtract(cfclient, cEntitlements)
 	if err != nil {
 		return err
 	}

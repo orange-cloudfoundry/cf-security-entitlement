@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"strings"
 
-	"code.cloudfoundry.org/cli/plugin/models"
-	"github.com/cloudfoundry-community/go-cfclient"
-	"github.com/orange-cloudfoundry/cf-security-entitlement/clients"
+	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
+	ccWrapper "code.cloudfoundry.org/cli/api/cloudcontroller/wrapper"
+	"code.cloudfoundry.org/cli/api/uaa"
+	plugin_models "code.cloudfoundry.org/cli/plugin/models"
+	"code.cloudfoundry.org/cli/util/configv3"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/client"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages"
 )
 
@@ -23,7 +26,7 @@ func getOrgID(orgName string) (string, error) {
 func getOrgName(orgId string) (string, error) {
 	result, err := cliConnection.CliCommandWithoutTerminalOutput(
 		"curl",
-		"/v2/organizations/"+orgId,
+		"/v3/organizations/"+orgId,
 	)
 	if err != nil {
 		return "", err
@@ -44,22 +47,15 @@ func getOrgName(orgId string) (string, error) {
 }
 
 func getOrgSpaces(orgId string) ([]plugin_models.GetOrg_Space, error) {
-	spaces := make([]plugin_models.GetOrg_Space, 0)
-	page := 1
-	for {
-		newSpaces, totalPages, err := getOrgSpacesByPage(orgId, page)
-		if err != nil {
-			return spaces, err
-		}
-		spaces = append(spaces, newSpaces...)
-		if totalPages == page {
-			break
-		}
-		page++
+	orgName, err := getOrgName(orgId)
+	org, err := cliConnection.GetOrg(orgName)
+	if err != nil {
+		return org.Spaces, err
 	}
-	return spaces, nil
+	return org.Spaces, nil
 }
 
+// a supprimer
 func getOrgSpacesByPage(orgId string, pageNumber int) ([]plugin_models.GetOrg_Space, int, error) {
 	result, err := cliConnection.CliCommandWithoutTerminalOutput(
 		"curl",
@@ -97,7 +93,7 @@ func joinResult(result []string) string {
 	return strings.Join(result, "\n")
 }
 
-func genClient(endpoint string) *clients.Client {
+func genClient(endpoint string) *client.Client {
 	if endpoint == "" {
 		endpoint = defaultEndpoint
 	}
@@ -110,17 +106,50 @@ func genClient(endpoint string) *clients.Client {
 	if err != nil {
 		messages.Fatal(err.Error())
 	}
-	accessToken = strings.TrimPrefix(accessToken, "bearer ")
+	//accessToken = strings.TrimPrefix(accessToken, "bearer ")
 	sslDisable, _ := cliConnection.IsSSLDisabled()
-	cfClient, err := cfclient.NewClient(&cfclient.Config{
-		ApiAddress:        apiUrl,
-		SkipSslValidation: sslDisable,
-		Token:             accessToken,
+	// session, err := clients.NewSession(clients.Config{
+	// 	Endpoint:          apiUrl,
+	// 	SkipSslValidation: sslDisable,
+	// 	Token:             accessToken,
+	// })
+
+	config := &configv3.Config{
+		ConfigFile: configv3.JSONConfig{
+			ConfigVersion:     3,
+			Target:            apiUrl,
+			AccessToken:       accessToken,
+			SkipSSLValidation: sslDisable,
+		},
+	}
+
+	uaaClient := uaa.NewClient(config)
+	authWrapperV3 := ccWrapper.NewUAAAuthentication(uaaClient, config)
+	ccWrappersV3 := []ccv3.ConnectionWrapper{
+		authWrapperV3,
+		ccWrapper.NewRetryRequest(config.RequestRetryCount()),
+	}
+
+	ccClientV3 := ccv3.NewClient(ccv3.Config{
+		AppName:            config.BinaryName(),
+		AppVersion:         config.BinaryVersion(),
+		JobPollingTimeout:  config.OverallPollingTimeout(),
+		JobPollingInterval: config.PollingInterval(),
+		Wrappers:           ccWrappersV3,
 	})
+
+	ccClientV3.TargetCF(ccv3.TargetSettings{
+		URL:               config.Target(),
+		SkipSSLValidation: config.SkipSSLValidation(),
+		DialTimeout:       config.DialTimeout(),
+	})
+
+	//info, _, err := ccClientV3.GetInfo()
+
 	if err != nil {
-		messages.Fatal(err.Error())
+		messages.Error(err.Error())
 		return nil
 	}
 
-	return clients.NewClient(endpoint, cfClient)
+	return client.NewClient(endpoint, ccClientV3, accessToken)
 }

@@ -37,7 +37,7 @@ func (c *EnableCommand) Execute(_ []string) error {
 		return err
 	}
 
-	err = client.EntitleSecurityGroup(secGroup.Guid, orgId)
+	err = client.EntitleSecurityGroup(secGroup.Resources[0].GUID, orgId)
 	if err != nil {
 		return err
 	}

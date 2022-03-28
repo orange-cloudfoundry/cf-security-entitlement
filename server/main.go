@@ -5,23 +5,29 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
 
+	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
+	ccWrapper "code.cloudfoundry.org/cli/api/cloudcontroller/wrapper"
+	"code.cloudfoundry.org/cli/api/uaa"
+	"code.cloudfoundry.org/cli/util/configv3"
 	"github.com/cloudfoundry-community/gautocloud"
 	_ "github.com/cloudfoundry-community/gautocloud/connectors/databases/gorm"
 	"github.com/cloudfoundry-community/gautocloud/connectors/generic"
-	"github.com/cloudfoundry-community/go-cfclient"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/o1egl/gormrus"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/client"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/model"
 	"github.com/orange-cloudfoundry/gobis"
 	"github.com/orange-cloudfoundry/gobis-middlewares/casbin"
 	"github.com/orange-cloudfoundry/gobis-middlewares/ceftrace"
 	"github.com/orange-cloudfoundry/gobis-middlewares/jwt"
 	"github.com/orange-cloudfoundry/gobis-middlewares/trace"
+	"github.com/pkg/errors"
 	"github.com/prometheus/common/version"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/alecthomas/kingpin.v2"
@@ -39,7 +45,7 @@ func main() {
 	panic(boot())
 }
 
-var client *cfclient.Client
+var cfclient *client.Client
 var DB *gorm.DB
 
 func retrieveGormDb(config model.ConfigServer) *gorm.DB {
@@ -95,8 +101,7 @@ func boot() error {
 		DB.LogMode(true)
 	}
 	DB.AutoMigrate(&model.EntitlementSecGroup{})
-
-	info, err := client.GetInfo()
+	info, err := GetInfo(config.CloudFoundry.Endpoint)
 	if err != nil {
 		return err
 	}
@@ -104,7 +109,7 @@ func boot() error {
 	jwtConfig := jwt.JwtConfig{
 		Jwt: &jwt.JwtOptions{
 			Enabled: true,
-			Issuer:  info.TokenEndpoint + "/oauth/token",
+			Issuer:  info.Links.UAA.HREF + "/oauth/token",
 			Alg:     config.JWT.Alg,
 			Secret:  config.JWT.Secret,
 		},
@@ -151,7 +156,7 @@ func boot() error {
 		AddRouteHandler("/v2/security_entitlement", http.HandlerFunc(handleListSecGroup)).
 		WithMethods("GET").
 		WithMiddlewareParams(jwtConfig, casbinConfig, traceConfig, cefConfig).
-		AddRoute("/v2/security_groups/**", config.CloudFoundry.Endpoint+"/v2/security_groups").
+		AddRoute("/v3/security_groups/**", config.CloudFoundry.Endpoint+"/v3/security_groups").
 		WithMethods("PUT", "DELETE", "GET").
 		WithMiddlewareParams(jwtConfig, bindingConfig, traceConfig, cefConfig)
 
@@ -202,26 +207,50 @@ func checkDbConnection(db *gorm.DB) {
 
 func loadClient(transport *http.Transport, c model.ConfigServer) error {
 	var err error
-	httpClient := &http.Client{
-		Transport: transport,
+	// httpClient := &http.Client{
+	// 	Transport: transport,
+	// }
+
+	// if c.CloudFoundry.UAAEndpoint != "" {
+	// 	roundTripper, err := loadTranslatedTransportUaa(httpClient, transport, c)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	httpClient.Transport = roundTripper
+	// }
+
+	config := &configv3.Config{
+		ConfigFile: configv3.JSONConfig{
+			ConfigVersion:        3,
+			UAAEndpoint:          c.CloudFoundry.UAAEndpoint,
+			UAAOAuthClient:       c.CloudFoundry.ClientID,
+			UAAOAuthClientSecret: c.CloudFoundry.ClientSecret,
+			SkipSSLValidation:    c.CloudFoundry.SkipSSLValidation,
+		},
 	}
 
-	if c.CloudFoundry.UAAEndpoint != "" {
-		roundTripper, err := loadTranslatedTransportUaa(httpClient, transport, c)
-		if err != nil {
-			return err
-		}
-		httpClient.Transport = roundTripper
+	uaaClient := uaa.NewClient(config)
+	authWrapperV3 := ccWrapper.NewUAAAuthentication(uaaClient, config)
+	ccWrappersV3 := []ccv3.ConnectionWrapper{
+		authWrapperV3,
+		ccWrapper.NewRetryRequest(config.RequestRetryCount()),
 	}
 
-	configClient := &cfclient.Config{
-		ApiAddress:        c.CloudFoundry.Endpoint,
-		ClientID:          c.CloudFoundry.ClientID,
-		ClientSecret:      c.CloudFoundry.ClientSecret,
-		SkipSslValidation: c.CloudFoundry.SkipSSLValidation,
-		HttpClient:        httpClient,
-	}
-	client, err = cfclient.NewClient(configClient)
+	ccClientV3 := ccv3.NewClient(ccv3.Config{
+		AppName:            config.BinaryName(),
+		AppVersion:         config.BinaryVersion(),
+		JobPollingTimeout:  config.OverallPollingTimeout(),
+		JobPollingInterval: config.PollingInterval(),
+		Wrappers:           ccWrappersV3,
+	})
+
+	ccClientV3.TargetCF(ccv3.TargetSettings{
+		URL:               c.CloudFoundry.Endpoint,
+		SkipSSLValidation: config.SkipSSLValidation(),
+		DialTimeout:       config.DialTimeout(),
+	})
+
+	cfclient = client.NewClient(c.CloudFoundry.Endpoint, ccClientV3, "")
 	if err != nil {
 		return err
 	}
@@ -232,25 +261,22 @@ func loadClient(transport *http.Transport, c model.ConfigServer) error {
 func loadTranslatedTransportUaa(httpClient *http.Client, transport *http.Transport, c model.ConfigServer) (http.RoundTripper, error) {
 	var roundTripper http.RoundTripper
 	roundTripper = transport
-	resp, err := httpClient.Get(c.CloudFoundry.Endpoint + "/v2/info")
+	resp, err := httpClient.Get(c.CloudFoundry.Endpoint)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	uaaEndpoint := struct {
-		AuthEndpoint  string `json:"authorization_endpoint"`
-		TokenEndpoint string `json:"token_endpoint"`
-	}{}
+	info := ccv3.Info{}
 	dec := json.NewDecoder(resp.Body)
-	err = dec.Decode(&uaaEndpoint)
+	err = dec.Decode(&info)
 	if err != nil {
 		return nil, err
 	}
-	if uaaEndpoint.AuthEndpoint != "" {
-		roundTripper = NewTranslateTransport(roundTripper, uaaEndpoint.AuthEndpoint, c.CloudFoundry.UAAEndpoint)
+	if info.Links.Login.HREF != "" {
+		roundTripper = NewTranslateTransport(roundTripper, info.Links.Login.HREF, c.CloudFoundry.UAAEndpoint)
 	}
-	if uaaEndpoint.TokenEndpoint != "" {
-		roundTripper = NewTranslateTransport(roundTripper, uaaEndpoint.TokenEndpoint, c.CloudFoundry.UAAEndpoint)
+	if info.Links.UAA.HREF != "" {
+		roundTripper = NewTranslateTransport(roundTripper, info.Links.UAA.HREF, c.CloudFoundry.UAAEndpoint)
 	}
 	return roundTripper, nil
 }
@@ -310,4 +336,32 @@ func shallowDefaultTransport(certs []string, skipVerify bool) *http.Transport {
 			InsecureSkipVerify: skipVerify,
 		},
 	}
+}
+
+func GetInfo(Endpoint string) (ccv3.Info, error) {
+
+	client := &http.Client{}
+	info := ccv3.Info{}
+	req, err := http.NewRequest(http.MethodGet, Endpoint, nil)
+	if err != nil {
+		return info, err
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return info, err
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return info, err
+	}
+
+	if err = json.Unmarshal(body, &info); err != nil {
+		return info, errors.Wrap(err, "Error unmarshaling Info")
+	}
+	json.Unmarshal(body, &info)
+
+	return info, nil
 }

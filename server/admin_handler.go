@@ -3,8 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/orange-cloudfoundry/cf-security-entitlement/model"
 	"net/http"
+
+	"github.com/orange-cloudfoundry/cf-security-entitlement/model"
 )
 
 func handleEntitleSecGroup(w http.ResponseWriter, req *http.Request) {
@@ -42,16 +43,13 @@ func handleRevokeSecGroup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	secGroup, err := client.GetSecGroup(entitlement.SecurityGroupGUID)
+	secGroup, err := cfclient.GetSecGroupByGuid(entitlement.SecurityGroupGUID)
 	if err != nil {
 		panic(err)
 	}
-	spaces, err := secGroup.ListSpaceResources()
-	if err != nil {
-		panic(err)
-	}
-	for _, space := range spaces {
-		if space.Entity.OrganizationGuid == entitlement.OrganizationGUID {
+
+	for _, space := range secGroup.Resources[0].Relationships.Running_spaces.Data {
+		if space.OrgGuid == entitlement.OrganizationGUID {
 			serverErrorCode(w, http.StatusBadRequest, fmt.Errorf("There is still bindings in this organization, please remove all bindings before revoke"))
 			return
 		}

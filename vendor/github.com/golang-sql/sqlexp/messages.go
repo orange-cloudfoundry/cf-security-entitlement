@@ -2,7 +2,6 @@ package sqlexp
 
 import (
 	"context"
-	"fmt"
 )
 
 // RawMessage is returned from RowsMessage.
@@ -72,7 +71,7 @@ type (
 	MsgLastInsertID struct{ Value interface{} }
 
 	// MsgNotice is raised from the SQL text and is only informational.
-	MsgNotice struct{ Message fmt.Stringer }
+	MsgNotice struct{ Message string }
 
 	// MsgError returns SQL errors from the database system (not transport
 	// or other system level errors).

@@ -489,6 +489,15 @@ func (f *File) writeToBuffer(indent string) (*bytes.Buffer, error) {
 				}
 			}
 
+			for _, val := range shadows {
+				exitLoop, err := writeKeyValue(val)
+				if err != nil {
+					return nil, err
+				} else if exitLoop {
+					continue KeyList
+				}
+			}
+
 			for _, val := range key.nestedValues {
 				if _, err := buf.WriteString(indent + "  " + val + LineBreak); err != nil {
 					return nil, err
