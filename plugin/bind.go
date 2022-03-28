@@ -54,7 +54,7 @@ func (c *BindCommand) Execute(_ []string) error {
 		if c.BindOptions.Space != "" && c.BindOptions.Space != space.Name {
 			continue
 		}
-		err := client.BindSecurityGroup(secGroup.Guid, space.Guid)
+		err := client.BindSecurityGroup(secGroup.Resources[0].GUID, space.Guid)
 		if err != nil {
 			return err
 		}

@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/olekukonko/tablewriter"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages"
-	"os"
 )
 
 type ListCommand struct {
@@ -34,18 +35,19 @@ func (c *ListCommand) Execute(_ []string) error {
 	for iSec, secGroup := range secGroups {
 		subData := make([]string, 0)
 		subData = append(subData, fmt.Sprintf("#%d", iSec))
-		subData = append(subData, secGroup.Name)
-		if len(secGroup.SpacesData) == 0 {
+		subData = append(subData, secGroup.Resources[0].Name)
+		if len(secGroup.Resources[0].Relationships.Running_spaces.Data) == 0 || len(secGroup.Resources[0].Relationships.Staging_spaces.Data) == 0 {
 			subData = append(subData, "", "", "")
 			data = append(data, subData)
 			continue
 		}
-		for iSpace, space := range secGroup.SpacesData {
+		// à revoir
+		for iSpace, space := range secGroup.Resources[0].Relationships.Running_spaces.Data {
 			if iSpace > 0 {
 				subData = make([]string, 0)
 				subData = append(subData, "", "")
 			}
-			subData = append(subData, space.Entity.OrgData.Entity.Name, space.Entity.Name)
+			subData = append(subData, space.OrgName, space.SpaceName)
 			data = append(data, append(subData, "running"))
 			if iSpace == 0 {
 				subData[0] = ""

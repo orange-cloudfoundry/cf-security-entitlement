@@ -4,9 +4,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/cloudfoundry-community/go-cfclient"
 	"net/http"
 	"strings"
+
+	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
 )
 
 func serverError(w http.ResponseWriter, err error) {
@@ -15,21 +16,19 @@ func serverError(w http.ResponseWriter, err error) {
 
 func serverErrorCode(w http.ResponseWriter, code int, err error) {
 	w.Header().Add("Content-Type", "application/json")
-	if httpErr, ok := err.(cfclient.CloudFoundryError); ok {
-		w.WriteHeader(httpErr.Code)
-		b, _ := json.Marshal(cfclient.CloudFoundryError{
-			Code:        httpErr.Code,
-			ErrorCode:   httpErr.ErrorCode,
-			Description: httpErr.Description,
+	if httpErr, ok := err.(ccerror.V3UnexpectedResponseError); ok {
+		w.WriteHeader(httpErr.ResponseCode)
+		b, _ := json.Marshal(ccerror.V3UnexpectedResponseError{
+			ResponseCode: httpErr.ResponseCode,
+			RequestIDs:   httpErr.RequestIDs,
 		})
 		w.Write(b)
 		return
 	}
 	w.WriteHeader(code)
-	b, _ := json.Marshal(cfclient.CloudFoundryError{
-		Code:        code,
-		ErrorCode:   http.StatusText(code),
-		Description: err.Error(),
+	b, _ := json.Marshal(ccerror.V3UnexpectedResponseError{
+		ResponseCode: code,
+		//RequestIDs:   err.Error(),
 	})
 	w.Write(b)
 }
@@ -44,7 +43,7 @@ func isAdmin(groups []string) bool {
 }
 
 func isNotFoundErr(err error) bool {
-	if httpErr, ok := err.(cfclient.CloudFoundryHTTPError); ok {
+	if httpErr, ok := err.(ccerror.RawHTTPStatusError); ok {
 		return httpErr.StatusCode == http.StatusNotFound
 	}
 	return false
