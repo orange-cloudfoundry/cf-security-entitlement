@@ -6,9 +6,12 @@ import (
 	"strings"
 
 	plugin_models "code.cloudfoundry.org/cli/plugin/models"
-	clients "github.com/cloudfoundry-community/go-cf-clients-helper/v2"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/client"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages"
+	"code.cloudfoundry.org/cli/util/configv3"
+	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
+	"code.cloudfoundry.org/cli/api/uaa"
+	ccWrapper "code.cloudfoundry.org/cli/api/cloudcontroller/wrapper"
 )
 
 func getOrgID(orgName string) (string, error) {
@@ -103,17 +106,44 @@ func genClient(endpoint string) *client.Client {
 	if err != nil {
 		messages.Fatal(err.Error())
 	}
-	accessToken = strings.TrimPrefix(accessToken, "bearer ")
+
 	sslDisable, _ := cliConnection.IsSSLDisabled()
-	session, err := clients.NewSession(clients.Config{
-		Endpoint:          apiUrl,
-		SkipSslValidation: sslDisable,
-		Token:             accessToken,
+
+	config := &configv3.Config{
+		ConfigFile: configv3.JSONConfig{
+			ConfigVersion:        3,
+			Target:               apiUrl,
+			AccessToken:          accessToken,
+			SkipSSLValidation:    sslDisable,
+		},
+	}
+
+	uaaClient := uaa.NewClient(config)
+	authWrapperV3 := ccWrapper.NewUAAAuthentication(uaaClient, config)
+	ccWrappersV3 := []ccv3.ConnectionWrapper{
+		authWrapperV3,
+		ccWrapper.NewRetryRequest(config.RequestRetryCount()),
+	}
+
+	ccClientV3 := ccv3.NewClient(ccv3.Config{
+		AppName:            config.BinaryName(),
+		AppVersion:         config.BinaryVersion(),
+		JobPollingTimeout:  config.OverallPollingTimeout(),
+		JobPollingInterval: config.PollingInterval(),
+		Wrappers:           ccWrappersV3,
 	})
+
+	ccClientV3.TargetCF(ccv3.TargetSettings{
+		URL:               config.Target(),
+		SkipSSLValidation: config.SkipSSLValidation(),
+		DialTimeout:       config.DialTimeout(),
+	})
+
+	info, _, err := ccClientV3.GetInfo()
 	if err != nil {
-		messages.Fatal(err.Error())
+		messages.Error(err.Error())
 		return nil
 	}
 
-	return client.NewClient(endpoint, session)
+	return client.NewClient(endpoint, ccClientV3)
 }
