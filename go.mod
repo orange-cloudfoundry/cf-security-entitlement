@@ -1,27 +1,27 @@
 module github.com/orange-cloudfoundry/cf-security-entitlement
 
-go 1.17
+go 1.18
 
 replace github.com/codahale/hdrhistogram => github.com/HdrHistogram/hdrhistogram-go v0.0.0-20210305173142-35c7773a578a
 
 require (
 	code.cloudfoundry.org/cli v7.1.0+incompatible
 	github.com/Masterminds/semver v1.5.0 // indirect
-	github.com/alecthomas/units v0.0.0-20210927113745-59d0afb8317a // indirect
+	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 // indirect
 	github.com/cloudfoundry-community/gautocloud v1.1.8
-	github.com/cloudfoundry-community/go-cfclient v0.0.0-20210823134051-721f0e559306
+	github.com/cloudfoundry-community/go-cfclient v0.0.0-20220405200807-800807a1b060
 	github.com/cloudfoundry-community/go-cfenv v1.18.0 // indirect
-	github.com/denisenkom/go-mssqldb v0.11.0 // indirect
+	github.com/denisenkom/go-mssqldb v0.12.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/jessevdk/go-flags v1.5.0
 	github.com/jinzhu/gorm v1.9.16
-	github.com/lib/pq v1.10.3 // indirect
+	github.com/lib/pq v1.10.5 // indirect
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/mattn/go-colorable v0.1.12
 	github.com/mattn/go-isatty v0.0.14
 	github.com/mattn/go-runewidth v0.0.13 // indirect
-	github.com/mattn/go-sqlite3 v1.14.8 // indirect
+	github.com/mattn/go-sqlite3 v1.14.12 // indirect
 	github.com/o1egl/gormrus v0.0.0-20190416211302-fde1f6a23457
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/orange-cloudfoundry/gobis v1.9.0
@@ -30,7 +30,7 @@ require (
 	github.com/prometheus/common v0.33.0
 	github.com/prometheus/procfs v0.7.3 // indirect
 	github.com/sirupsen/logrus v1.8.1
-	github.com/spf13/viper v1.9.0 // indirect
+	github.com/spf13/viper v1.10.1 // indirect
 	github.com/thoas/go-funk v0.9.2
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )
@@ -49,7 +49,8 @@ require (
 	github.com/form3tech-oss/jwt-go v3.2.5+incompatible // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
-	github.com/golang-sql/civil v0.0.0-20190719163853-cb61b32ac6fe // indirect
+	github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 // indirect
+	github.com/golang-sql/sqlexp v0.0.0-20170517235910-f1bb20e5a188 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
@@ -57,7 +58,7 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jonboulle/clockwork v0.2.3 // indirect
-	github.com/magiconair/properties v1.8.5 // indirect
+	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mailgun/multibuf v0.0.0-20150714184110-565402cd71fb // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
@@ -66,7 +67,7 @@ require (
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/satori/go.uuid v1.2.0 // indirect
-	github.com/spf13/afero v1.6.0 // indirect
+	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/cast v1.4.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
@@ -81,6 +82,6 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
-	gopkg.in/ini.v1 v1.63.2 // indirect
+	gopkg.in/ini.v1 v1.66.4 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
