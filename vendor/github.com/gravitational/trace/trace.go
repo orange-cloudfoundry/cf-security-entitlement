@@ -138,9 +138,28 @@ func GetFields(err error) map[string]interface{} {
 	if err == nil {
 		return map[string]interface{}{}
 	}
+
+	// for proxyError combine top-level and nested fields.
+	if proxy, ok := err.(proxyError); ok {
+		fields := map[string]interface{}{}
+
+		// nested
+		for field, value := range GetFields(proxy.Err) {
+			fields[field] = value
+		}
+
+		// top-level
+		for field, value := range proxy.GetFields() {
+			fields[field] = value
+		}
+
+		return fields
+	}
+
 	if wrap, ok := err.(Error); ok {
 		return wrap.GetFields()
 	}
+
 	return map[string]interface{}{}
 }
 
@@ -184,13 +203,13 @@ type Traces = internal.Traces
 type Trace = internal.Trace
 
 // MarshalJSON marshals this error as JSON-encoded payload
-func (r *TraceErr) MarshalJSON() ([]byte, error) {
-	if r == nil {
+func (e *TraceErr) MarshalJSON() ([]byte, error) {
+	if e == nil {
 		return nil, nil
 	}
 	type marshalableError TraceErr
-	err := marshalableError(*r)
-	err.Err = &RawTrace{Message: r.Err.Error()}
+	err := marshalableError(*e)
+	err.Err = &RawTrace{Message: e.Err.Error()}
 	return json.Marshal(err)
 }
 
@@ -200,7 +219,7 @@ type TraceErr struct {
 	// Err is the underlying error that TraceErr wraps
 	Err error `json:"error"`
 	// Traces is a slice of stack trace entries for the error
-	Traces `json:"traces,omitempty"`
+	Traces `json:"-"`
 	// Message is an optional message that can be wrapped with the original error.
 	//
 	// This field is obsolete, replaced by messages list below.
@@ -355,7 +374,7 @@ type Error interface {
 	DebugReporter
 	UserMessager
 
-	// AddMessage adds formatted user-facing message
+	// AddUserMessage adds formatted user-facing message
 	// to the error, depends on the implementation,
 	// usually works as fmt.Sprintf(formatArg, rest...)
 	// but implementations can choose another way, e.g. treat

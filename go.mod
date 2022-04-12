@@ -24,8 +24,8 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.8 // indirect
 	github.com/o1egl/gormrus v0.0.0-20190416211302-fde1f6a23457
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/orange-cloudfoundry/gobis v1.8.0
-	github.com/orange-cloudfoundry/gobis-middlewares v1.9.0
+	github.com/orange-cloudfoundry/gobis v1.9.0
+	github.com/orange-cloudfoundry/gobis-middlewares v1.10.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/common v0.33.0
 	github.com/prometheus/procfs v0.7.3 // indirect
@@ -52,11 +52,11 @@ require (
 	github.com/golang-sql/civil v0.0.0-20190719163853-cb61b32ac6fe // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
-	github.com/gravitational/trace v1.1.15 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/gravitational/trace v1.1.18 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
-	github.com/jonboulle/clockwork v0.2.2 // indirect
+	github.com/jonboulle/clockwork v0.2.3 // indirect
 	github.com/magiconair/properties v1.8.5 // indirect
 	github.com/mailgun/multibuf v0.0.0-20150714184110-565402cd71fb // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
@@ -72,15 +72,15 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/vulcand/oxy v1.3.0 // indirect
-	github.com/vulcand/predicate v1.1.0 // indirect
-	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
-	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
-	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b // indirect
-	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
-	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
+	github.com/vulcand/predicate v1.2.0 // indirect
+	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4 // indirect
+	golang.org/x/net v0.0.0-20220412020605-290c469a71a5 // indirect
+	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5 // indirect
+	golang.org/x/sys v0.0.0-20220412071739-889880a91fd5 // indirect
+	golang.org/x/term v0.0.0-20220411215600-e5f449aeb171 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
+	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/ini.v1 v1.63.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
