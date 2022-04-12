@@ -114,11 +114,11 @@ github.com/golang/protobuf/ptypes/timestamp
 # github.com/gorilla/mux v1.8.0
 ## explicit; go 1.12
 github.com/gorilla/mux
-# github.com/gorilla/websocket v1.4.2
+# github.com/gorilla/websocket v1.5.0
 ## explicit; go 1.12
 github.com/gorilla/websocket
-# github.com/gravitational/trace v1.1.15
-## explicit
+# github.com/gravitational/trace v1.1.18
+## explicit; go 1.15
 github.com/gravitational/trace
 github.com/gravitational/trace/internal
 # github.com/hashicorp/hcl v1.0.0
@@ -146,7 +146,7 @@ github.com/jinzhu/gorm/dialects/sqlite
 # github.com/jinzhu/inflection v1.0.0
 ## explicit
 github.com/jinzhu/inflection
-# github.com/jonboulle/clockwork v0.2.2
+# github.com/jonboulle/clockwork v0.2.3
 ## explicit; go 1.13
 github.com/jonboulle/clockwork
 # github.com/lib/pq v1.10.3
@@ -188,8 +188,8 @@ github.com/o1egl/gormrus
 # github.com/olekukonko/tablewriter v0.0.5
 ## explicit; go 1.12
 github.com/olekukonko/tablewriter
-# github.com/orange-cloudfoundry/gobis v1.8.0
-## explicit; go 1.17
+# github.com/orange-cloudfoundry/gobis v1.9.0
+## explicit; go 1.18
 github.com/orange-cloudfoundry/gobis
 # github.com/orange-cloudfoundry/gobis-middlewares v1.9.0
 ## explicit; go 1.17
@@ -264,14 +264,14 @@ github.com/vulcand/oxy/buffer
 github.com/vulcand/oxy/forward
 github.com/vulcand/oxy/trace
 github.com/vulcand/oxy/utils
-# github.com/vulcand/predicate v1.1.0
-## explicit
+# github.com/vulcand/predicate v1.2.0
+## explicit; go 1.16
 github.com/vulcand/predicate
-# golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
+# golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4
 ## explicit; go 1.17
 golang.org/x/crypto/md4
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/net v0.0.0-20220225172249-27dd8689420f
+# golang.org/x/net v0.0.0-20220412020605-290c469a71a5
 ## explicit; go 1.17
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp
@@ -280,13 +280,13 @@ golang.org/x/net/context/ctxhttp
 golang.org/x/oauth2
 golang.org/x/oauth2/clientcredentials
 golang.org/x/oauth2/internal
-# golang.org/x/sys v0.0.0-20220114195835-da31bd327af9
+# golang.org/x/sys v0.0.0-20220412071739-889880a91fd5
 ## explicit; go 1.17
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/plan9
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
+# golang.org/x/term v0.0.0-20220411215600-e5f449aeb171
 ## explicit; go 1.17
 golang.org/x/term
 # golang.org/x/text v0.3.7
