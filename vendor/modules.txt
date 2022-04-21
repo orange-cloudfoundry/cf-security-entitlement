@@ -182,7 +182,7 @@ github.com/mattn/go-sqlite3
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 ## explicit
 github.com/matttproud/golang_protobuf_extensions/pbutil
-# github.com/mitchellh/mapstructure v1.4.3
+# github.com/mitchellh/mapstructure v1.5.0
 ## explicit; go 1.14
 github.com/mitchellh/mapstructure
 # github.com/o1egl/gormrus v0.0.0-20190416211302-fde1f6a23457
@@ -191,7 +191,7 @@ github.com/o1egl/gormrus
 # github.com/olekukonko/tablewriter v0.0.5
 ## explicit; go 1.12
 github.com/olekukonko/tablewriter
-# github.com/orange-cloudfoundry/gobis v1.9.0
+# github.com/orange-cloudfoundry/gobis v1.10.0
 ## explicit; go 1.18
 github.com/orange-cloudfoundry/gobis
 # github.com/orange-cloudfoundry/gobis-middlewares v1.10.0

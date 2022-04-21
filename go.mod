@@ -24,7 +24,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.12 // indirect
 	github.com/o1egl/gormrus v0.0.0-20190416211302-fde1f6a23457
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/orange-cloudfoundry/gobis v1.9.0
+	github.com/orange-cloudfoundry/gobis v1.10.0
 	github.com/orange-cloudfoundry/gobis-middlewares v1.10.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/common v0.33.0
@@ -61,7 +61,7 @@ require (
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mailgun/multibuf v0.0.0-20150714184110-565402cd71fb // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.1 // indirect
-	github.com/mitchellh/mapstructure v1.4.3 // indirect
+	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.0-beta.8 // indirect
 	github.com/prometheus/client_golang v1.12.1 // indirect
