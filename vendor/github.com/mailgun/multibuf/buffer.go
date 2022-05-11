@@ -1,4 +1,4 @@
-// package multibuf implements buffer optimized for streaming large chunks of data,
+// Package multibuf implements buffer optimized for streaming large chunks of data,
 // multiple reads and  optional partial buffering to disk.
 package multibuf
 
@@ -27,13 +27,13 @@ type MultiReader interface {
 type WriterOnce interface {
 	// Write implements io.Writer
 	Write(p []byte) (int, error)
-	// Reader transfers all data written to this writer to MultiReader. If there was no data written it retuns an error
+	// Reader transfers all data written to this writer to MultiReader. If there was no data written it returns an error
 	Reader() (MultiReader, error)
 	// WriterOnce owns the data before Reader has been called, so Close will close all the underlying files if Reader has not been called.
 	Close() error
 }
 
-// MaxBytes, ignored if set to value >=, if request exceeds the specified limit, the reader will return error,
+// MaxBytes ignored if set to value >=, if request exceeds the specified limit, the reader will return error,
 // by default buffer is not limited, negative values mean no limit
 func MaxBytes(m int64) optionSetter {
 	return func(o *options) error {
@@ -46,7 +46,7 @@ func MaxBytes(m int64) optionSetter {
 func MemBytes(m int64) optionSetter {
 	return func(o *options) error {
 		if m < 0 {
-			return fmt.Errorf("MemBytes should be >= 0")
+			return fmt.Errorf("memBytes should be >= 0")
 		}
 		o.memBytes = m
 		return nil
@@ -68,13 +68,13 @@ func NewWriterOnce(setters ...optionSetter) (WriterOnce, error) {
 		memBytes: DefaultMemBytes,
 		maxBytes: DefaultMaxBytes,
 	}
-	if o.memBytes == 0 {
-		o.memBytes = DefaultMemBytes
-	}
 	for _, s := range setters {
 		if err := s(&o); err != nil {
 			return nil, err
 		}
+	}
+	if o.memBytes == 0 {
+		o.memBytes = DefaultMemBytes
 	}
 	return &writerOnce{o: o}, nil
 }
@@ -157,9 +157,10 @@ type MaxSizeReachedError struct {
 }
 
 func (e *MaxSizeReachedError) Error() string {
-	return fmt.Sprintf("Maximum size %d was reached", e)
+	return fmt.Sprintf("Maximum size %d was reached", e.MaxSize)
 }
 
+// Default sizes
 const (
 	DefaultMemBytes = 1048576
 	DefaultMaxBytes = -1
@@ -298,7 +299,6 @@ const (
 
 type writerOnce struct {
 	o         options
-	err       error
 	state     int
 	mem       *bytes.Buffer
 	file      *os.File
@@ -357,7 +357,7 @@ func (w *writerOnce) write(p []byte) (int, error) {
 		}
 		// we can't write to memory any more, switch to file
 		if err := w.initFile(); err != nil {
-			return int(writeToMem), err
+			return writeToMem, err
 		}
 		w.state = writerFile
 		wrote, err := w.file.Write(p[writeToMem:])
@@ -406,7 +406,7 @@ func (w *writerOnce) Reader() (MultiReader, error) {
 		w.mem = nil
 		return newBuf(w.total, w.cleanupFn, br, fr), nil
 	}
-	return nil, fmt.Errorf("unsupported state: %d\n", w.state)
+	return nil, fmt.Errorf("unsupported state: %d", w.state)
 }
 
 const tempFilePrefix = "temp-multibuf-"
