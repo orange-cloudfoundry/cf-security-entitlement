@@ -1,8 +1,10 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
@@ -32,18 +34,16 @@ func getOrgName(orgId string) (string, error) {
 		return "", err
 	}
 	var org struct {
-		Entity struct {
-			Name string `json:"name"`
-		} `json:"entity"`
+		Name string `json:"name"`
 	}
 	err = json.Unmarshal([]byte(joinResult(result)), &org)
 	if err != nil {
 		return "", err
 	}
-	if org.Entity.Name == "" {
+	if org.Name == "" {
 		return "", fmt.Errorf("Org %s not found", orgId)
 	}
-	return org.Entity.Name, nil
+	return org.Name, nil
 }
 
 func getOrgSpaces(orgId string) ([]plugin_models.GetOrg_Space, error) {
@@ -53,40 +53,6 @@ func getOrgSpaces(orgId string) ([]plugin_models.GetOrg_Space, error) {
 		return org.Spaces, err
 	}
 	return org.Spaces, nil
-}
-
-// a supprimer
-func getOrgSpacesByPage(orgId string, pageNumber int) ([]plugin_models.GetOrg_Space, int, error) {
-	result, err := cliConnection.CliCommandWithoutTerminalOutput(
-		"curl",
-		fmt.Sprintf("/v2/organizations/%s/spaces?order-direction=asc&page=%d&results-per-page=50", orgId, pageNumber),
-	)
-	if err != nil {
-		return []plugin_models.GetOrg_Space{}, 0, err
-	}
-	var resource struct {
-		TotalPages int `json:"total_pages"`
-		Resources  []struct {
-			Metadata struct {
-				Guid string `json:"guid"`
-			} `json:"metadata"`
-			Entity struct {
-				Name string `json:"name"`
-			} `json:"entity"`
-		} `json:"resources"`
-	}
-	err = json.Unmarshal([]byte(joinResult(result)), &resource)
-	if err != nil {
-		return []plugin_models.GetOrg_Space{}, 0, err
-	}
-	spaces := make([]plugin_models.GetOrg_Space, len(resource.Resources))
-	for i, elem := range resource.Resources {
-		spaces[i] = plugin_models.GetOrg_Space{
-			Guid: elem.Metadata.Guid,
-			Name: elem.Entity.Name,
-		}
-	}
-	return spaces, resource.TotalPages, nil
 }
 
 func joinResult(result []string) string {
@@ -106,13 +72,8 @@ func genClient(endpoint string) *client.Client {
 	if err != nil {
 		messages.Fatal(err.Error())
 	}
-	//accessToken = strings.TrimPrefix(accessToken, "bearer ")
+
 	sslDisable, _ := cliConnection.IsSSLDisabled()
-	// session, err := clients.NewSession(clients.Config{
-	// 	Endpoint:          apiUrl,
-	// 	SkipSslValidation: sslDisable,
-	// 	Token:             accessToken,
-	// })
 
 	config := &configv3.Config{
 		ConfigFile: configv3.JSONConfig{
@@ -151,5 +112,9 @@ func genClient(endpoint string) *client.Client {
 		return nil
 	}
 
-	return client.NewClient(endpoint, ccClientV3, accessToken)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: sslDisable},
+	}
+
+	return client.NewClient(endpoint, ccClientV3, accessToken, apiUrl, *tr)
 }

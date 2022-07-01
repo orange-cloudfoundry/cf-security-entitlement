@@ -31,7 +31,7 @@ func (c *RevokeCommand) Execute(_ []string) error {
 	if err != nil {
 		return err
 	}
-	err = client.RevokeSecurityGroup(secGroup.Resources[0].Name, orgId)
+	err = client.RevokeSecurityGroup(secGroup.GUID, orgId)
 	if err != nil {
 		return err
 	}

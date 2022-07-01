@@ -35,14 +35,14 @@ func (c *GetCommand) Execute(_ []string) error {
 	}
 	messages.Println(
 		messages.C.Cyan("Name\t"),
-		secGroup.Resources[0].Name,
+		secGroup.Name,
 	)
 	messages.Println(messages.C.Cyan("Rules"))
-	b, _ := json.MarshalIndent(secGroup.Resources[0].Rules, "\t", "\t")
+	b, _ := json.MarshalIndent(secGroup.Rules, "\t", "\t")
 	messages.Println("\t" + string(b) + "\n")
 
 	data := make([][]string, 0)
-	for i, space := range secGroup.Resources[0].Relationships.Running_spaces.Data {
+	for i, space := range secGroup.Relationships.Running_spaces.Data {
 		data = append(data, []string{
 			messages.C.Sprintf(messages.C.Cyan("#%d"), i),
 			space.OrgName,
@@ -50,7 +50,7 @@ func (c *GetCommand) Execute(_ []string) error {
 		})
 	}
 
-	for i, space := range secGroup.Resources[0].Relationships.Staging_spaces.Data {
+	for i, space := range secGroup.Relationships.Staging_spaces.Data {
 		data = append(data, []string{
 			messages.C.Sprintf(messages.C.Cyan("#%d"), i),
 			space.OrgName,

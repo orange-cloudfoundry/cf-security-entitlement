@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
@@ -33,6 +35,13 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
+type OauthToken struct {
+	AccessToken string `json:"access_token,omitempty"`
+	TokenType   string `json:"token_type,omitempty"`
+	Exprires    int    `json:"expires_in,omitempty"`
+	Jti         string `json:"jti,omitempty"`
+}
+
 func init() {
 	if gautocloud.IsInACloudEnv() && gautocloud.CurrentCloudEnv().Name() != "localcloud" {
 		log.SetFormatter(&log.JSONFormatter{})
@@ -45,6 +54,7 @@ func main() {
 	panic(boot())
 }
 
+var expiresAt time.Time
 var cfclient *client.Client
 var DB *gorm.DB
 
@@ -101,7 +111,7 @@ func boot() error {
 		DB.LogMode(true)
 	}
 	DB.AutoMigrate(&model.EntitlementSecGroup{})
-	info, err := GetInfo(config.CloudFoundry.Endpoint)
+	info, err := GetInfo(config.CloudFoundry.Endpoint, config.CloudFoundry.SkipSSLValidation, config.TrustedCaCertificates)
 	if err != nil {
 		return err
 	}
@@ -157,7 +167,7 @@ func boot() error {
 		WithMethods("GET").
 		WithMiddlewareParams(jwtConfig, casbinConfig, traceConfig, cefConfig).
 		AddRoute("/v3/security_groups/**", config.CloudFoundry.Endpoint+"/v3/security_groups").
-		WithMethods("PUT", "DELETE", "GET").
+		WithMethods("POST", "DELETE", "GET").
 		WithMiddlewareParams(jwtConfig, bindingConfig, traceConfig, cefConfig)
 
 	routes := builder.Build()
@@ -207,28 +217,27 @@ func checkDbConnection(db *gorm.DB) {
 
 func loadClient(transport *http.Transport, c model.ConfigServer) error {
 	var err error
-	// httpClient := &http.Client{
-	// 	Transport: transport,
-	// }
+	httpClient := &http.Client{
+		Transport: transport,
+	}
 
-	// if c.CloudFoundry.UAAEndpoint != "" {
-	// 	roundTripper, err := loadTranslatedTransportUaa(httpClient, transport, c)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	httpClient.Transport = roundTripper
-	// }
-
+	if c.CloudFoundry.UAAEndpoint != "" {
+		roundTripper, err := loadTranslatedTransportUaa(httpClient, transport, c)
+		if err != nil {
+			return err
+		}
+		httpClient.Transport = roundTripper
+	}
 	config := &configv3.Config{
 		ConfigFile: configv3.JSONConfig{
 			ConfigVersion:        3,
-			UAAEndpoint:          c.CloudFoundry.UAAEndpoint,
+			UAAEndpoint:          c.CloudFoundry.Endpoint,
 			UAAOAuthClient:       c.CloudFoundry.ClientID,
 			UAAOAuthClientSecret: c.CloudFoundry.ClientSecret,
 			SkipSSLValidation:    c.CloudFoundry.SkipSSLValidation,
+			Target:               c.CloudFoundry.Endpoint,
 		},
 	}
-
 	uaaClient := uaa.NewClient(config)
 	authWrapperV3 := ccWrapper.NewUAAAuthentication(uaaClient, config)
 	ccWrappersV3 := []ccv3.ConnectionWrapper{
@@ -245,12 +254,31 @@ func loadClient(transport *http.Transport, c model.ConfigServer) error {
 	})
 
 	ccClientV3.TargetCF(ccv3.TargetSettings{
-		URL:               c.CloudFoundry.Endpoint,
+		URL:               config.Target(),
 		SkipSSLValidation: config.SkipSSLValidation(),
 		DialTimeout:       config.DialTimeout(),
 	})
 
-	cfclient = client.NewClient(c.CloudFoundry.Endpoint, ccClientV3, "")
+	info, err := GetInfo(c.CloudFoundry.Endpoint, c.CloudFoundry.SkipSSLValidation, c.TrustedCaCertificates)
+	if err != nil {
+		return err
+	}
+
+	err = uaaClient.SetupResources(info.Links.UAA.HREF, info.Links.Login.HREF)
+	if err != nil {
+		return fmt.Errorf("Error setup resource uaa: %s", err)
+	}
+	tr := shallowDefaultTransport(c.TrustedCaCertificates, c.CloudFoundry.SkipSSLValidation)
+
+	accessToken, _, err := AuthenticateWithExpire(c.CloudFoundry.UAAEndpoint, config.UAAOAuthClient(), config.UAAOAuthClientSecret(), tr)
+	if err != nil {
+		return fmt.Errorf("Error when authenticate on cf: %s", err)
+	}
+	if accessToken == "" {
+		return fmt.Errorf("A pair of username/password or a pair of client_id/client_secret muste be set.")
+	}
+
+	cfclient = client.NewClient(c.CloudFoundry.Endpoint, ccClientV3, accessToken, info.Links.Self.HREF, *tr)
 	if err != nil {
 		return err
 	}
@@ -261,22 +289,15 @@ func loadClient(transport *http.Transport, c model.ConfigServer) error {
 func loadTranslatedTransportUaa(httpClient *http.Client, transport *http.Transport, c model.ConfigServer) (http.RoundTripper, error) {
 	var roundTripper http.RoundTripper
 	roundTripper = transport
-	resp, err := httpClient.Get(c.CloudFoundry.Endpoint)
+	resp, err := GetInfo(c.CloudFoundry.Endpoint, c.CloudFoundry.SkipSSLValidation, c.TrustedCaCertificates)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
-	info := ccv3.Info{}
-	dec := json.NewDecoder(resp.Body)
-	err = dec.Decode(&info)
-	if err != nil {
-		return nil, err
+	if resp.Links.Login.HREF != "" {
+		roundTripper = NewTranslateTransport(roundTripper, resp.Links.Login.HREF, c.CloudFoundry.UAAEndpoint)
 	}
-	if info.Links.Login.HREF != "" {
-		roundTripper = NewTranslateTransport(roundTripper, info.Links.Login.HREF, c.CloudFoundry.UAAEndpoint)
-	}
-	if info.Links.UAA.HREF != "" {
-		roundTripper = NewTranslateTransport(roundTripper, info.Links.UAA.HREF, c.CloudFoundry.UAAEndpoint)
+	if resp.Links.UAA.HREF != "" {
+		roundTripper = NewTranslateTransport(roundTripper, resp.Links.UAA.HREF, c.CloudFoundry.UAAEndpoint)
 	}
 	return roundTripper, nil
 }
@@ -338,10 +359,11 @@ func shallowDefaultTransport(certs []string, skipVerify bool) *http.Transport {
 	}
 }
 
-func GetInfo(Endpoint string) (ccv3.Info, error) {
+func GetInfo(Endpoint string, SkipVerify bool, certs []string) (model.Info, error) {
+	tr := shallowDefaultTransport(certs, SkipVerify)
 
-	client := &http.Client{}
-	info := ccv3.Info{}
+	client := &http.Client{Transport: tr}
+	info := model.Info{}
 	req, err := http.NewRequest(http.MethodGet, Endpoint, nil)
 	if err != nil {
 		return info, err
@@ -364,4 +386,36 @@ func GetInfo(Endpoint string) (ccv3.Info, error) {
 	json.Unmarshal(body, &info)
 
 	return info, nil
+}
+
+func AuthenticateWithExpire(endpoint string, clientId string, clientSecret string, tr *http.Transport) (string, time.Time, error) {
+	body := fmt.Sprint("grant_type=client_credentials")
+	var jsonData = []byte(body)
+	accessTokens := OauthToken{}
+	client := &http.Client{Transport: tr}
+	Request, err := http.NewRequest(http.MethodPost, endpoint+"/oauth/token", bytes.NewBuffer(jsonData))
+	Request.SetBasicAuth(clientId, clientSecret)
+	Request.Header.Add("Content-type", "application/x-www-form-urlencoded")
+	Request.Header.Add("Accept", "application/json")
+
+	resp, err := client.Do(Request)
+	if err != nil {
+		return "", time.Now(), err
+	}
+	defer resp.Body.Close()
+	buf, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", time.Now(), err
+	}
+	if err = json.Unmarshal(buf, &accessTokens); err != nil {
+		return "", time.Now(), errors.Wrap(err, "Error unmarshaling Auth")
+	}
+
+	accessToken := fmt.Sprintf("bearer %s", accessTokens.AccessToken)
+
+	expiresIn := time.Duration(accessTokens.Exprires) * time.Second
+	expiresAt = time.Now().Add(expiresIn)
+
+	return accessToken, expiresAt, err
+
 }

@@ -40,7 +40,6 @@ func (c *BindCommand) Execute(_ []string) error {
 	if err != nil {
 		return err
 	}
-
 	orgId, err := getOrgID(c.BindOptions.Org)
 	if err != nil {
 		return err
@@ -54,7 +53,7 @@ func (c *BindCommand) Execute(_ []string) error {
 		if c.BindOptions.Space != "" && c.BindOptions.Space != space.Name {
 			continue
 		}
-		err := client.BindSecurityGroup(secGroup.Resources[0].GUID, space.Guid)
+		err := client.BindSecurityGroup(secGroup.GUID, space.Guid, client.GetEndpoint())
 		if err != nil {
 			return err
 		}

@@ -27,22 +27,21 @@ func (c *ListCommand) Execute(_ []string) error {
 	}
 	messages.Println(messages.C.Green("OK\n"))
 
-	if len(secGroups) == 0 {
-		fmt.Println("Empty.")
+	if len(secGroups.Resources) == 0 {
 		return nil
 	}
 	data := make([][]string, 0)
-	for iSec, secGroup := range secGroups {
+	for iSec, secGroup := range secGroups.Resources {
 		subData := make([]string, 0)
 		subData = append(subData, fmt.Sprintf("#%d", iSec))
-		subData = append(subData, secGroup.Resources[0].Name)
-		if len(secGroup.Resources[0].Relationships.Running_spaces.Data) == 0 || len(secGroup.Resources[0].Relationships.Staging_spaces.Data) == 0 {
+		subData = append(subData, secGroup.Name)
+		if len(secGroup.Relationships.Running_spaces.Data) == 0 || len(secGroup.Relationships.Staging_spaces.Data) == 0 {
 			subData = append(subData, "", "", "")
 			data = append(data, subData)
 			continue
 		}
 		// à revoir
-		for iSpace, space := range secGroup.Resources[0].Relationships.Running_spaces.Data {
+		for iSpace, space := range secGroup.Relationships.Running_spaces.Data {
 			if iSpace > 0 {
 				subData = make([]string, 0)
 				subData = append(subData, "", "")

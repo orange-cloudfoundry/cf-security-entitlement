@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
@@ -17,16 +18,16 @@ type Client struct {
 	endpoint    string
 	ccv3Client  *ccv3.Client
 	accessToken string
+	apiUrl      string
+	transport   http.Transport
 }
 
-func NewClient(endpoint string, ccv3Client *ccv3.Client, accessToken string) *Client {
-	return &Client{endpoint: endpoint, ccv3Client: ccv3Client, accessToken: accessToken}
+func NewClient(endpoint string, ccv3Client *ccv3.Client, accessToken string, apiUrl string, transport http.Transport) *Client {
+	return &Client{endpoint: endpoint, ccv3Client: ccv3Client, accessToken: accessToken, apiUrl: apiUrl, transport: transport}
 }
 
 func (c Client) CurrentUserIsAdmin() (bool, error) {
 
-	//token := c.session.ConfigStore().AccessToken()
-	//token := c.ccv3Client.Login() // error ici
 	token := c.accessToken
 
 	tokenSplit := strings.Split(token, ".")

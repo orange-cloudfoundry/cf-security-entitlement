@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"code.cloudfoundry.org/cli/api/cloudcontroller/ccerror"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/client"
 )
 
 func serverError(w http.ResponseWriter, err error) {
@@ -16,19 +16,24 @@ func serverError(w http.ResponseWriter, err error) {
 
 func serverErrorCode(w http.ResponseWriter, code int, err error) {
 	w.Header().Add("Content-Type", "application/json")
-	if httpErr, ok := err.(ccerror.V3UnexpectedResponseError); ok {
-		w.WriteHeader(httpErr.ResponseCode)
-		b, _ := json.Marshal(ccerror.V3UnexpectedResponseError{
-			ResponseCode: httpErr.ResponseCode,
-			RequestIDs:   httpErr.RequestIDs,
+
+	if httpErr, ok := err.(client.CloudFoundryErrorV3); ok {
+		w.WriteHeader(int(httpErr.Code))
+
+		b, _ := json.Marshal(client.CloudFoundryErrorV3{
+			Code:   httpErr.Code,
+			Title:  httpErr.Title,
+			Detail: httpErr.Detail,
 		})
 		w.Write(b)
 		return
 	}
 	w.WriteHeader(code)
-	b, _ := json.Marshal(ccerror.V3UnexpectedResponseError{
-		ResponseCode: code,
-		//RequestIDs:   err.Error(),
+
+	b, _ := json.Marshal(client.CloudFoundryErrorV3{
+		Code:   code,
+		Title:  http.StatusText(code),
+		Detail: err.Error(),
 	})
 	w.Write(b)
 }
@@ -43,7 +48,7 @@ func isAdmin(groups []string) bool {
 }
 
 func isNotFoundErr(err error) bool {
-	if httpErr, ok := err.(ccerror.RawHTTPStatusError); ok {
+	if httpErr, ok := err.(client.CloudFoundryHTTPError); ok {
 		return httpErr.StatusCode == http.StatusNotFound
 	}
 	return false

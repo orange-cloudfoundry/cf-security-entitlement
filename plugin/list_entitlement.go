@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"strings"
 
@@ -39,7 +38,7 @@ func entitlementsExtract(cfclient *client.Client, entitlements []model.Entitleme
 				return entitleSecGroups, err
 			}
 			entitleSecGroup = EntitleSecGroup{
-				Name: secGroup.Resources[0].Name,
+				Name: secGroup.Name,
 			}
 			currentSecGroup = entitlement.SecurityGroupGUID
 			orgs = make([]string, 0)
@@ -89,7 +88,6 @@ func (c *ListEntitlementCommand) Execute(_ []string) error {
 		return nil
 	}
 	if len(entitlements) == 0 {
-		fmt.Println("Empty.")
 		return nil
 	}
 	data := make([][]string, 0)
