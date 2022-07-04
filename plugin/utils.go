@@ -17,12 +17,24 @@ import (
 )
 
 func getOrgID(orgName string) (string, error) {
-	org, err := cliConnection.GetOrg(orgName)
+	result, err := cliConnection.CliCommandWithoutTerminalOutput(
+		"curl",
+		"/v3/organizations?names="+orgName,
+	)
 	if err != nil {
 		return "", err
 	}
-
-	return org.Guid, nil
+	var Orgs struct {
+		Resources []client.Organization `json:"resources"`
+	}
+	err = json.Unmarshal([]byte(joinResult(result)), &Orgs)
+	if err != nil {
+		return "", err
+	}
+	if Orgs.Resources[0].GUID == "" {
+		return "", fmt.Errorf("Org %s not found", orgName)
+	}
+	return Orgs.Resources[0].GUID, nil
 }
 
 func getOrgName(orgId string) (string, error) {
@@ -47,12 +59,27 @@ func getOrgName(orgId string) (string, error) {
 }
 
 func getOrgSpaces(orgId string) ([]plugin_models.GetOrg_Space, error) {
-	orgName, err := getOrgName(orgId)
-	org, err := cliConnection.GetOrg(orgName)
+	var spaceResult plugin_models.GetOrg_Space
+	var spaceModel []plugin_models.GetOrg_Space
+	result, err := cliConnection.CliCommandWithoutTerminalOutput(
+		"curl",
+		"/v3/spaces",
+	)
 	if err != nil {
-		return org.Spaces, err
+		return spaceModel, err
 	}
-	return org.Spaces, nil
+	var spaces client.Spaces
+	err = json.Unmarshal([]byte(joinResult(result)), &spaces)
+
+	for _, space := range spaces.Resources {
+		if space.Relationships["organization"].GUID == orgId {
+			spaceResult.Guid = space.GUID
+			spaceResult.Name = space.Name
+			spaceModel = append(spaceModel, spaceResult)
+		}
+
+	}
+	return spaceModel, nil
 }
 
 func joinResult(result []string) string {
