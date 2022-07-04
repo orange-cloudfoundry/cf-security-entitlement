@@ -18,7 +18,7 @@ import (
 )
 
 var bindReqRegex = regexp.MustCompile("^/v3/security_groups/[^/]*/relationships/(running|staging)_spaces")
-var checkReqRegex = regexp.MustCompile("^/v3/security_groups/[^/]*/relationships/(running|staging)_spaces/([^/]*)?/check") // /check ??
+var checkReqRegex = regexp.MustCompile("^/v3/security_groups/[^/]*/relationships/spaces/([^/]*)/check")
 var findReqRegex = regexp.MustCompile("^/v3/security_groups(/[^/]*)?")
 
 type SecGroupConfig struct {

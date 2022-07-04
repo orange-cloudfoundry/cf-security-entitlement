@@ -135,7 +135,7 @@ curl "https://cfsecurity.[your-domain.com]/v2/security_entitlement -d '{
 200 OK
 ```
 
-#### GET /v2/security_groups/<security_group_guid>/<space_guid>/check
+#### GET /v3/security_groups/<security_group_guid>/relationships/spaces/<space_guid>/check
 
 Check if space has its org entitle with this security group guid
 
@@ -155,7 +155,7 @@ Cookie:
 **Curl**:
 
 ```
-curl "https://cfsecurity.[your-domain.com]/v2/security_groups/23a073f5-00e7-425b-b046-de45ba9b5456/spaces/4ad3d6c7-80a9-4655-866f-aa0f71d95183/check \
+curl "https://cfsecurity.[your-domain.com]/v3/security_groups/23a073f5-00e7-425b-b046-de45ba9b5456/relationships/spaces/4ad3d6c7-80a9-4655-866f-aa0f71d95183/check \
 	-H "Authorization: bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidWFhLWlkLTkiLCJlbWFpbCI6ImVtYWlsLTlAc29tZWRvbWFpbi5jb20iLCJzY29wZSI6WyJjbG91ZF9jb250cm9sbGVyLmFkbWluIl0sImF1ZCI6WyJjbG91ZF9jb250cm9sbGVyIl0sImV4cCI6MTQ2NjAwODg4MX0.r0oLFGpSuuUWDIpqwuZ6X_8xhkqhspKEOhDYQdRzu9Y" \
 	-H "Host: example.org" \
 ```
