@@ -1793,11 +1793,6 @@ func mergeMaps(
 
 		svType := reflect.TypeOf(sv)
 		tvType := reflect.TypeOf(tv)
-				"st", svType,
-				"tt", tvType,
-				"sv", sv,
-				"tv", tv,
-			)
 
 		v.logger.Trace(
 			"processing",
