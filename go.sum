@@ -313,8 +313,8 @@ github.com/onsi/gomega v1.5.0/go.mod h1:ex+gbHU/CVuBBDIJjb2X0qEXbFg53c61hWP/1Cpa
 github.com/onsi/gomega v1.19.0 h1:4ieX6qQjPP/BfC3mpsAtIGGlxTWPeA3Inl/7DtXw1tw=
 github.com/orange-cloudfoundry/gobis v1.11.2 h1:lBeXCPJfDwUL4jPUnK+BaNSsz0lC3gO4S9nMNI29WhM=
 github.com/orange-cloudfoundry/gobis v1.11.2/go.mod h1:XxEXB+PyI2nR87nS2QoVCLmV6jMCDXjsdWikBZvwJXs=
-github.com/orange-cloudfoundry/gobis-middlewares v1.12.3 h1:G1Fk+nYH+rnjzltWLXr503Ok8GD1Bf8ZuDNzQYEz6NA=
-github.com/orange-cloudfoundry/gobis-middlewares v1.12.3/go.mod h1:Xuv5eGvOlnLCLNCSUbEodlk+YAbPvu8iZPLhXevVqxE=
+github.com/orange-cloudfoundry/gobis-middlewares v1.13.0 h1:OXuPtGqbpQl/bBDyyvuQqTg5098fj51t8Ny7ZGw5kTQ=
+github.com/orange-cloudfoundry/gobis-middlewares v1.13.0/go.mod h1:VUtL4OIoZZBERO4nmzJUxxCv7D7CL3IVpVnVTsDxgYc=
 github.com/oxtoacart/bpool v0.0.0-20150712133111-4e1c5567d7c2 h1:CXwSGu/LYmbjEab5aMCs5usQRVBGThelUKBNnoSOuso=
 github.com/oxtoacart/bpool v0.0.0-20150712133111-4e1c5567d7c2/go.mod h1:L3UMQOThbttwfYRNFOWLLVXMhk5Lkio4GGOtw5UrxS0=
 github.com/pelletier/go-toml v1.9.5 h1:4yBQzkHv+7BHq2PQUZF3Mx0IYxG7LsP222s7Agd3ve8=
