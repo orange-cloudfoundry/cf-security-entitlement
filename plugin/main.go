@@ -40,8 +40,8 @@ func (p *SecurityPlugin) GetMetadata() plugin.PluginMetadata {
 		Name: "cf-security-entitlement",
 		Version: plugin.VersionType{
 			Major: 1,
-			Minor: 0,
-			Build: 1,
+			Minor: 1,
+			Build: 0,
 		},
 		Commands: []plugin.Command{
 			{

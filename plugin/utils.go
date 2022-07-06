@@ -1,103 +1,92 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 
-	"code.cloudfoundry.org/cli/plugin/models"
-	"github.com/cloudfoundry-community/go-cfclient"
-	"github.com/orange-cloudfoundry/cf-security-entitlement/clients"
+	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
+	ccWrapper "code.cloudfoundry.org/cli/api/cloudcontroller/wrapper"
+	"code.cloudfoundry.org/cli/api/uaa"
+	plugin_models "code.cloudfoundry.org/cli/plugin/models"
+	"code.cloudfoundry.org/cli/util/configv3"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/client"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages"
 )
 
 func getOrgID(orgName string) (string, error) {
-	org, err := cliConnection.GetOrg(orgName)
+	result, err := cliConnection.CliCommandWithoutTerminalOutput(
+		"curl",
+		"/v3/organizations?names="+orgName,
+	)
 	if err != nil {
 		return "", err
 	}
-
-	return org.Guid, nil
+	var Orgs struct {
+		Resources []client.Organization `json:"resources"`
+	}
+	err = json.Unmarshal([]byte(joinResult(result)), &Orgs)
+	if err != nil {
+		return "", err
+	}
+	if Orgs.Resources[0].GUID == "" {
+		return "", fmt.Errorf("Org %s not found", orgName)
+	}
+	return Orgs.Resources[0].GUID, nil
 }
 
 func getOrgName(orgId string) (string, error) {
 	result, err := cliConnection.CliCommandWithoutTerminalOutput(
 		"curl",
-		"/v2/organizations/"+orgId,
+		"/v3/organizations/"+orgId,
 	)
 	if err != nil {
 		return "", err
 	}
 	var org struct {
-		Entity struct {
-			Name string `json:"name"`
-		} `json:"entity"`
+		Name string `json:"name"`
 	}
 	err = json.Unmarshal([]byte(joinResult(result)), &org)
 	if err != nil {
 		return "", err
 	}
-	if org.Entity.Name == "" {
+	if org.Name == "" {
 		return "", fmt.Errorf("Org %s not found", orgId)
 	}
-	return org.Entity.Name, nil
+	return org.Name, nil
 }
 
 func getOrgSpaces(orgId string) ([]plugin_models.GetOrg_Space, error) {
-	spaces := make([]plugin_models.GetOrg_Space, 0)
-	page := 1
-	for {
-		newSpaces, totalPages, err := getOrgSpacesByPage(orgId, page)
-		if err != nil {
-			return spaces, err
-		}
-		spaces = append(spaces, newSpaces...)
-		if totalPages == page {
-			break
-		}
-		page++
-	}
-	return spaces, nil
-}
-
-func getOrgSpacesByPage(orgId string, pageNumber int) ([]plugin_models.GetOrg_Space, int, error) {
+	var spaceResult plugin_models.GetOrg_Space
+	var spaceModel []plugin_models.GetOrg_Space
 	result, err := cliConnection.CliCommandWithoutTerminalOutput(
 		"curl",
-		fmt.Sprintf("/v2/organizations/%s/spaces?order-direction=asc&page=%d&results-per-page=50", orgId, pageNumber),
+		"/v3/spaces",
 	)
 	if err != nil {
-		return []plugin_models.GetOrg_Space{}, 0, err
+		return spaceModel, err
 	}
-	var resource struct {
-		TotalPages int `json:"total_pages"`
-		Resources  []struct {
-			Metadata struct {
-				Guid string `json:"guid"`
-			} `json:"metadata"`
-			Entity struct {
-				Name string `json:"name"`
-			} `json:"entity"`
-		} `json:"resources"`
-	}
-	err = json.Unmarshal([]byte(joinResult(result)), &resource)
-	if err != nil {
-		return []plugin_models.GetOrg_Space{}, 0, err
-	}
-	spaces := make([]plugin_models.GetOrg_Space, len(resource.Resources))
-	for i, elem := range resource.Resources {
-		spaces[i] = plugin_models.GetOrg_Space{
-			Guid: elem.Metadata.Guid,
-			Name: elem.Entity.Name,
+	var spaces client.Spaces
+	err = json.Unmarshal([]byte(joinResult(result)), &spaces)
+
+	for _, space := range spaces.Resources {
+		if space.Relationships["organization"].GUID == orgId {
+			spaceResult.Guid = space.GUID
+			spaceResult.Name = space.Name
+			spaceModel = append(spaceModel, spaceResult)
 		}
+
 	}
-	return spaces, resource.TotalPages, nil
+	return spaceModel, nil
 }
 
 func joinResult(result []string) string {
 	return strings.Join(result, "\n")
 }
 
-func genClient(endpoint string) *clients.Client {
+func genClient(endpoint string) *client.Client {
 	if endpoint == "" {
 		endpoint = defaultEndpoint
 	}
@@ -110,17 +99,49 @@ func genClient(endpoint string) *clients.Client {
 	if err != nil {
 		messages.Fatal(err.Error())
 	}
-	accessToken = strings.TrimPrefix(accessToken, "bearer ")
+
 	sslDisable, _ := cliConnection.IsSSLDisabled()
-	cfClient, err := cfclient.NewClient(&cfclient.Config{
-		ApiAddress:        apiUrl,
-		SkipSslValidation: sslDisable,
-		Token:             accessToken,
+
+	config := &configv3.Config{
+		ConfigFile: configv3.JSONConfig{
+			ConfigVersion:     3,
+			Target:            apiUrl,
+			AccessToken:       accessToken,
+			SkipSSLValidation: sslDisable,
+		},
+	}
+
+	uaaClient := uaa.NewClient(config)
+	authWrapperV3 := ccWrapper.NewUAAAuthentication(uaaClient, config)
+	ccWrappersV3 := []ccv3.ConnectionWrapper{
+		authWrapperV3,
+		ccWrapper.NewRetryRequest(config.RequestRetryCount()),
+	}
+
+	ccClientV3 := ccv3.NewClient(ccv3.Config{
+		AppName:            config.BinaryName(),
+		AppVersion:         config.BinaryVersion(),
+		JobPollingTimeout:  config.OverallPollingTimeout(),
+		JobPollingInterval: config.PollingInterval(),
+		Wrappers:           ccWrappersV3,
 	})
+
+	ccClientV3.TargetCF(ccv3.TargetSettings{
+		URL:               config.Target(),
+		SkipSSLValidation: config.SkipSSLValidation(),
+		DialTimeout:       config.DialTimeout(),
+	})
+
+	//info, _, err := ccClientV3.GetInfo()
+
 	if err != nil {
-		messages.Fatal(err.Error())
+		messages.Error(err.Error())
 		return nil
 	}
 
-	return clients.NewClient(endpoint, cfClient)
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: sslDisable},
+	}
+
+	return client.NewClient(endpoint, ccClientV3, accessToken, apiUrl, *tr)
 }

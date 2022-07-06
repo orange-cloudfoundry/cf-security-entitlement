@@ -2,9 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"os"
+
 	"github.com/olekukonko/tablewriter"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages"
-	"os"
 )
 
 type GetOptions struct {
@@ -41,13 +42,22 @@ func (c *GetCommand) Execute(_ []string) error {
 	messages.Println("\t" + string(b) + "\n")
 
 	data := make([][]string, 0)
-	for i, space := range secGroup.SpacesData {
+	for i, space := range secGroup.Relationships.Running_spaces.Data {
 		data = append(data, []string{
 			messages.C.Sprintf(messages.C.Cyan("#%d"), i),
-			space.Entity.OrgData.Entity.Name,
-			space.Entity.Name,
+			space.OrgName,
+			space.SpaceName,
 		})
 	}
+
+	for i, space := range secGroup.Relationships.Staging_spaces.Data {
+		data = append(data, []string{
+			messages.C.Sprintf(messages.C.Cyan("#%d"), i),
+			space.OrgName,
+			space.SpaceName,
+		})
+	}
+
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"#", "organization", "space"})
 	table.AppendBulk(data)

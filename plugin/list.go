@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/olekukonko/tablewriter"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages"
-	"os"
 )
 
 type ListCommand struct {
@@ -26,26 +27,26 @@ func (c *ListCommand) Execute(_ []string) error {
 	}
 	messages.Println(messages.C.Green("OK\n"))
 
-	if len(secGroups) == 0 {
-		fmt.Println("Empty.")
+	if len(secGroups.Resources) == 0 {
 		return nil
 	}
 	data := make([][]string, 0)
-	for iSec, secGroup := range secGroups {
+	for iSec, secGroup := range secGroups.Resources {
 		subData := make([]string, 0)
 		subData = append(subData, fmt.Sprintf("#%d", iSec))
 		subData = append(subData, secGroup.Name)
-		if len(secGroup.SpacesData) == 0 {
+		if len(secGroup.Relationships.Running_spaces.Data) == 0 || len(secGroup.Relationships.Staging_spaces.Data) == 0 {
 			subData = append(subData, "", "", "")
 			data = append(data, subData)
 			continue
 		}
-		for iSpace, space := range secGroup.SpacesData {
+		// à revoir
+		for iSpace, space := range secGroup.Relationships.Running_spaces.Data {
 			if iSpace > 0 {
 				subData = make([]string, 0)
 				subData = append(subData, "", "")
 			}
-			subData = append(subData, space.Entity.OrgData.Entity.Name, space.Entity.Name)
+			subData = append(subData, space.OrgName, space.SpaceName)
 			data = append(data, append(subData, "running"))
 			if iSpace == 0 {
 				subData[0] = ""

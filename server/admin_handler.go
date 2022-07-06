@@ -3,8 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/orange-cloudfoundry/cf-security-entitlement/model"
+	"io/ioutil"
 	"net/http"
+
+	"github.com/orange-cloudfoundry/cf-security-entitlement/client"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/model"
 )
 
 func handleEntitleSecGroup(w http.ResponseWriter, req *http.Request) {
@@ -32,6 +35,7 @@ func handleEntitleSecGroup(w http.ResponseWriter, req *http.Request) {
 func handleRevokeSecGroup(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	var entitlement model.EntitlementSecGroup
+	var secGroup client.SecurityGroup
 	err := json.NewDecoder(req.Body).Decode(&entitlement)
 	if err != nil {
 		panic(err)
@@ -42,16 +46,47 @@ func handleRevokeSecGroup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	secGroup, err := client.GetSecGroup(entitlement.SecurityGroupGUID)
+	apiUrl := cfclient.GetApiUrl()
+
+	accessToken := req.Header.Get("Authorization")
+	tr := cfclient.GetTransport()
+	client := &http.Client{Transport: &tr}
+
+	Request, err := http.NewRequest(http.MethodGet, apiUrl+"/v3/security_groups/"+entitlement.SecurityGroupGUID, nil)
+	Request.Header.Add("Authorization", accessToken)
+
+	resp, err := client.Do(Request)
 	if err != nil {
 		panic(err)
 	}
-	spaces, err := secGroup.ListSpaceResources()
+
+	defer resp.Body.Close()
+
+	buf, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err = json.Unmarshal(buf, &secGroup); err != nil {
+		serverErrorCode(w, http.StatusBadRequest, fmt.Errorf("Error unmarshaling Security Group"))
+		return
+	}
+
+	secGroupWithOrg, err := cfclient.ListSpaceResources(secGroup)
 	if err != nil {
 		panic(err)
 	}
-	for _, space := range spaces {
-		if space.Entity.OrganizationGuid == entitlement.OrganizationGUID {
+
+	for _, space := range secGroupWithOrg.Relationships.Running_spaces.Data {
+		if space.OrgGUID == entitlement.OrganizationGUID {
+			serverErrorCode(w, http.StatusBadRequest, fmt.Errorf("There is still bindings in this organization, please remove all bindings before revoke"))
+			return
+		}
+	}
+
+	for _, space := range secGroupWithOrg.Relationships.Staging_spaces.Data {
+		if space.OrgGUID == entitlement.OrganizationGUID {
 			serverErrorCode(w, http.StatusBadRequest, fmt.Errorf("There is still bindings in this organization, please remove all bindings before revoke"))
 			return
 		}

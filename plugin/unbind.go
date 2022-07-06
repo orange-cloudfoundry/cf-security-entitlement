@@ -49,7 +49,7 @@ func (c *UnbindCommand) Execute(_ []string) error {
 		if c.BindOptions.Space != "" && c.BindOptions.Space != space.Name {
 			continue
 		}
-		err := client.UnbindSecurityGroup(secGroup.Guid, space.Guid)
+		err := client.UnBindSecurityGroup(secGroup.GUID, space.Guid, client.GetEndpoint())
 		if err != nil {
 			return err
 		}

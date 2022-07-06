@@ -1,31 +1,46 @@
 package main
 
 import (
+	"bytes"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
 
+	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
+	ccWrapper "code.cloudfoundry.org/cli/api/cloudcontroller/wrapper"
+	"code.cloudfoundry.org/cli/api/uaa"
+	"code.cloudfoundry.org/cli/util/configv3"
 	"github.com/cloudfoundry-community/gautocloud"
 	_ "github.com/cloudfoundry-community/gautocloud/connectors/databases/gorm"
 	"github.com/cloudfoundry-community/gautocloud/connectors/generic"
-	"github.com/cloudfoundry-community/go-cfclient"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/o1egl/gormrus"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/client"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/model"
 	"github.com/orange-cloudfoundry/gobis"
 	"github.com/orange-cloudfoundry/gobis-middlewares/casbin"
 	"github.com/orange-cloudfoundry/gobis-middlewares/ceftrace"
 	"github.com/orange-cloudfoundry/gobis-middlewares/jwt"
 	"github.com/orange-cloudfoundry/gobis-middlewares/trace"
+	"github.com/pkg/errors"
 	"github.com/prometheus/common/version"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
+
+type OauthToken struct {
+	AccessToken string `json:"access_token,omitempty"`
+	TokenType   string `json:"token_type,omitempty"`
+	Exprires    int    `json:"expires_in,omitempty"`
+	Jti         string `json:"jti,omitempty"`
+}
 
 func init() {
 	if gautocloud.IsInACloudEnv() && gautocloud.CurrentCloudEnv().Name() != "localcloud" {
@@ -39,7 +54,8 @@ func main() {
 	panic(boot())
 }
 
-var client *cfclient.Client
+var expiresAt time.Time
+var cfclient *client.Client
 var DB *gorm.DB
 
 func retrieveGormDb(config model.ConfigServer) *gorm.DB {
@@ -95,8 +111,7 @@ func boot() error {
 		DB.LogMode(true)
 	}
 	DB.AutoMigrate(&model.EntitlementSecGroup{})
-
-	info, err := client.GetInfo()
+	info, err := GetInfo(config.CloudFoundry.Endpoint, config.CloudFoundry.SkipSSLValidation, config.TrustedCaCertificates)
 	if err != nil {
 		return err
 	}
@@ -104,7 +119,7 @@ func boot() error {
 	jwtConfig := jwt.JwtConfig{
 		Jwt: &jwt.JwtOptions{
 			Enabled: true,
-			Issuer:  info.TokenEndpoint + "/oauth/token",
+			Issuer:  info.Links.UAA.HREF + "/oauth/token",
 			Alg:     config.JWT.Alg,
 			Secret:  config.JWT.Secret,
 		},
@@ -151,8 +166,8 @@ func boot() error {
 		AddRouteHandler("/v2/security_entitlement", http.HandlerFunc(handleListSecGroup)).
 		WithMethods("GET").
 		WithMiddlewareParams(jwtConfig, casbinConfig, traceConfig, cefConfig).
-		AddRoute("/v2/security_groups/**", config.CloudFoundry.Endpoint+"/v2/security_groups").
-		WithMethods("PUT", "DELETE", "GET").
+		AddRoute("/v3/security_groups/**", config.CloudFoundry.Endpoint+"/v3/security_groups").
+		WithMethods("POST", "DELETE", "GET").
 		WithMiddlewareParams(jwtConfig, bindingConfig, traceConfig, cefConfig)
 
 	routes := builder.Build()
@@ -213,15 +228,57 @@ func loadClient(transport *http.Transport, c model.ConfigServer) error {
 		}
 		httpClient.Transport = roundTripper
 	}
-
-	configClient := &cfclient.Config{
-		ApiAddress:        c.CloudFoundry.Endpoint,
-		ClientID:          c.CloudFoundry.ClientID,
-		ClientSecret:      c.CloudFoundry.ClientSecret,
-		SkipSslValidation: c.CloudFoundry.SkipSSLValidation,
-		HttpClient:        httpClient,
+	config := &configv3.Config{
+		ConfigFile: configv3.JSONConfig{
+			ConfigVersion:        3,
+			UAAEndpoint:          c.CloudFoundry.Endpoint,
+			UAAOAuthClient:       c.CloudFoundry.ClientID,
+			UAAOAuthClientSecret: c.CloudFoundry.ClientSecret,
+			SkipSSLValidation:    c.CloudFoundry.SkipSSLValidation,
+			Target:               c.CloudFoundry.Endpoint,
+		},
 	}
-	client, err = cfclient.NewClient(configClient)
+	uaaClient := uaa.NewClient(config)
+	authWrapperV3 := ccWrapper.NewUAAAuthentication(uaaClient, config)
+	ccWrappersV3 := []ccv3.ConnectionWrapper{
+		authWrapperV3,
+		ccWrapper.NewRetryRequest(config.RequestRetryCount()),
+	}
+
+	ccClientV3 := ccv3.NewClient(ccv3.Config{
+		AppName:            config.BinaryName(),
+		AppVersion:         config.BinaryVersion(),
+		JobPollingTimeout:  config.OverallPollingTimeout(),
+		JobPollingInterval: config.PollingInterval(),
+		Wrappers:           ccWrappersV3,
+	})
+
+	ccClientV3.TargetCF(ccv3.TargetSettings{
+		URL:               config.Target(),
+		SkipSSLValidation: config.SkipSSLValidation(),
+		DialTimeout:       config.DialTimeout(),
+	})
+
+	info, err := GetInfo(c.CloudFoundry.Endpoint, c.CloudFoundry.SkipSSLValidation, c.TrustedCaCertificates)
+	if err != nil {
+		return err
+	}
+
+	err = uaaClient.SetupResources(info.Links.UAA.HREF, info.Links.Login.HREF)
+	if err != nil {
+		return fmt.Errorf("Error setup resource uaa: %s", err)
+	}
+	tr := shallowDefaultTransport(c.TrustedCaCertificates, c.CloudFoundry.SkipSSLValidation)
+
+	accessToken, _, err := AuthenticateWithExpire(c.CloudFoundry.UAAEndpoint, config.UAAOAuthClient(), config.UAAOAuthClientSecret(), tr)
+	if err != nil {
+		return fmt.Errorf("Error when authenticate on cf: %s", err)
+	}
+	if accessToken == "" {
+		return fmt.Errorf("A pair of username/password or a pair of client_id/client_secret muste be set.")
+	}
+
+	cfclient = client.NewClient(c.CloudFoundry.Endpoint, ccClientV3, accessToken, info.Links.Self.HREF, *tr)
 	if err != nil {
 		return err
 	}
@@ -232,25 +289,15 @@ func loadClient(transport *http.Transport, c model.ConfigServer) error {
 func loadTranslatedTransportUaa(httpClient *http.Client, transport *http.Transport, c model.ConfigServer) (http.RoundTripper, error) {
 	var roundTripper http.RoundTripper
 	roundTripper = transport
-	resp, err := httpClient.Get(c.CloudFoundry.Endpoint + "/v2/info")
+	resp, err := GetInfo(c.CloudFoundry.Endpoint, c.CloudFoundry.SkipSSLValidation, c.TrustedCaCertificates)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
-	uaaEndpoint := struct {
-		AuthEndpoint  string `json:"authorization_endpoint"`
-		TokenEndpoint string `json:"token_endpoint"`
-	}{}
-	dec := json.NewDecoder(resp.Body)
-	err = dec.Decode(&uaaEndpoint)
-	if err != nil {
-		return nil, err
+	if resp.Links.Login.HREF != "" {
+		roundTripper = NewTranslateTransport(roundTripper, resp.Links.Login.HREF, c.CloudFoundry.UAAEndpoint)
 	}
-	if uaaEndpoint.AuthEndpoint != "" {
-		roundTripper = NewTranslateTransport(roundTripper, uaaEndpoint.AuthEndpoint, c.CloudFoundry.UAAEndpoint)
-	}
-	if uaaEndpoint.TokenEndpoint != "" {
-		roundTripper = NewTranslateTransport(roundTripper, uaaEndpoint.TokenEndpoint, c.CloudFoundry.UAAEndpoint)
+	if resp.Links.UAA.HREF != "" {
+		roundTripper = NewTranslateTransport(roundTripper, resp.Links.UAA.HREF, c.CloudFoundry.UAAEndpoint)
 	}
 	return roundTripper, nil
 }
@@ -310,4 +357,65 @@ func shallowDefaultTransport(certs []string, skipVerify bool) *http.Transport {
 			InsecureSkipVerify: skipVerify,
 		},
 	}
+}
+
+func GetInfo(Endpoint string, SkipVerify bool, certs []string) (model.Info, error) {
+	tr := shallowDefaultTransport(certs, SkipVerify)
+
+	client := &http.Client{Transport: tr}
+	info := model.Info{}
+	req, err := http.NewRequest(http.MethodGet, Endpoint, nil)
+	if err != nil {
+		return info, err
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return info, err
+	}
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return info, err
+	}
+
+	if err = json.Unmarshal(body, &info); err != nil {
+		return info, errors.Wrap(err, "Error unmarshaling Info")
+	}
+	json.Unmarshal(body, &info)
+
+	return info, nil
+}
+
+func AuthenticateWithExpire(endpoint string, clientId string, clientSecret string, tr *http.Transport) (string, time.Time, error) {
+	body := fmt.Sprint("grant_type=client_credentials")
+	var jsonData = []byte(body)
+	accessTokens := OauthToken{}
+	client := &http.Client{Transport: tr}
+	Request, err := http.NewRequest(http.MethodPost, endpoint+"/oauth/token", bytes.NewBuffer(jsonData))
+	Request.SetBasicAuth(clientId, clientSecret)
+	Request.Header.Add("Content-type", "application/x-www-form-urlencoded")
+	Request.Header.Add("Accept", "application/json")
+
+	resp, err := client.Do(Request)
+	if err != nil {
+		return "", time.Now(), err
+	}
+	defer resp.Body.Close()
+	buf, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", time.Now(), err
+	}
+	if err = json.Unmarshal(buf, &accessTokens); err != nil {
+		return "", time.Now(), errors.Wrap(err, "Error unmarshaling Auth")
+	}
+
+	accessToken := fmt.Sprintf("bearer %s", accessTokens.AccessToken)
+
+	expiresIn := time.Duration(accessTokens.Exprires) * time.Second
+	expiresAt = time.Now().Add(expiresIn)
+
+	return accessToken, expiresAt, err
+
 }
