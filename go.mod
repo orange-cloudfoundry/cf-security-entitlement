@@ -22,11 +22,11 @@ require (
 	github.com/o1egl/gormrus v0.0.0-20190416211302-fde1f6a23457
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/orange-cloudfoundry/gobis v1.11.2
-	github.com/orange-cloudfoundry/gobis-middlewares v1.14.0
+	github.com/orange-cloudfoundry/gobis-middlewares v1.15.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/common v0.37.0
 	github.com/prometheus/procfs v0.7.3 // indirect
-	github.com/sirupsen/logrus v1.8.1
+	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.12.0 // indirect
 	github.com/thoas/go-funk v0.9.2
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
@@ -91,7 +91,7 @@ require (
 	github.com/vulcand/predicate v1.2.0 // indirect
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
 	golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e // indirect
-	golang.org/x/sys v0.0.0-20220627191245-f75cf1eec38b // indirect
+	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8 // indirect
 	golang.org/x/term v0.0.0-20220526004731-065cf7ba2467 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
