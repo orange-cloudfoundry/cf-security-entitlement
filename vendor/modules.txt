@@ -255,7 +255,7 @@ github.com/olekukonko/tablewriter
 # github.com/orange-cloudfoundry/gobis v1.11.2
 ## explicit; go 1.18
 github.com/orange-cloudfoundry/gobis
-# github.com/orange-cloudfoundry/gobis-middlewares v1.14.0
+# github.com/orange-cloudfoundry/gobis-middlewares v1.15.0
 ## explicit; go 1.18
 github.com/orange-cloudfoundry/gobis-middlewares/casbin
 github.com/orange-cloudfoundry/gobis-middlewares/ceftrace
@@ -302,7 +302,7 @@ github.com/rivo/uniseg
 # github.com/satori/go.uuid v1.2.0
 ## explicit
 github.com/satori/go.uuid
-# github.com/sirupsen/logrus v1.8.1
+# github.com/sirupsen/logrus v1.9.0
 ## explicit; go 1.13
 github.com/sirupsen/logrus
 # github.com/spf13/afero v1.8.2
@@ -352,7 +352,7 @@ golang.org/x/crypto/ssh/terminal
 # golang.org/x/net v0.0.0-20220624214902-1bab6f366d9e
 ## explicit; go 1.17
 golang.org/x/net/context
-# golang.org/x/sys v0.0.0-20220627191245-f75cf1eec38b
+# golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8
 ## explicit; go 1.17
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/plan9
