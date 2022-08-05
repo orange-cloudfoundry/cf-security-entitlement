@@ -275,6 +275,23 @@ func (c Client) GetSpaceByGuid(guid string) (Space, error) {
 
 }
 
+func (c Client) GetSecGroupSpaces(guid string) (Spaces, error) {
+	var spaces Spaces
+	var space Space
+
+	secgroup, err := c.GetSecGroupByGuid(guid)
+	if err != nil {
+		return spaces, err
+	}
+
+	for _, spaceData := range secgroup.Relationships.Running_spaces.Data {
+		space.GUID = spaceData.GUID
+		spaces.Resources = append(spaces.Resources, space)
+	}
+
+	return spaces, nil
+}
+
 func (c Client) ListUserManagedOrgs(userGuid string) (UserRoles, error) {
 	userRoles := UserRoles{}
 	client := &http.Client{Transport: &c.transport}
