@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -63,7 +62,7 @@ func (e CloudFoundryHTTPError) Error() string {
 	return fmt.Sprintf("cfclient: HTTP error (%d): %s", e.StatusCode, e.Status)
 }
 
-func (c Client) handleError(resp *http.Response) (*http.Response, error) {
+func (c *Client) handleError(resp *http.Response) (*http.Response, error) {
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return resp, CloudFoundryHTTPError{
@@ -74,19 +73,6 @@ func (c Client) handleError(resp *http.Response) (*http.Response, error) {
 	}
 
 	defer resp.Body.Close()
-
-	// Unmarshal V2 error response
-	if strings.HasPrefix(resp.Request.URL.Path, "/v2/") {
-		var cfErr CloudFoundryError
-		if err := json.Unmarshal(body, &cfErr); err != nil {
-			return resp, CloudFoundryHTTPError{
-				StatusCode: resp.StatusCode,
-				Status:     resp.Status,
-				Body:       string(body),
-			}
-		}
-		return nil, cfErr
-	}
 
 	var cfErrorsV3 CloudFoundryErrorsV3
 	var cfErrorV3 CloudFoundryErrorV3

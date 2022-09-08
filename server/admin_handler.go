@@ -53,6 +53,10 @@ func handleRevokeSecGroup(w http.ResponseWriter, req *http.Request) {
 	client := &http.Client{Transport: &tr}
 
 	Request, err := http.NewRequest(http.MethodGet, apiUrl+"/v3/security_groups/"+entitlement.SecurityGroupGUID, nil)
+	if err != nil {
+		panic(err)
+	}
+
 	Request.Header.Add("Authorization", accessToken)
 
 	resp, err := client.Do(Request)
@@ -80,14 +84,14 @@ func handleRevokeSecGroup(w http.ResponseWriter, req *http.Request) {
 
 	for _, space := range secGroupWithOrg.Relationships.Running_spaces.Data {
 		if space.OrgGUID == entitlement.OrganizationGUID {
-			serverErrorCode(w, http.StatusBadRequest, fmt.Errorf("There is still bindings in this organization, please remove all bindings before revoke"))
+			serverErrorCode(w, http.StatusUnprocessableEntity, fmt.Errorf("There is still bindings in this organization, please remove all bindings before revoke"))
 			return
 		}
 	}
 
 	for _, space := range secGroupWithOrg.Relationships.Staging_spaces.Data {
 		if space.OrgGUID == entitlement.OrganizationGUID {
-			serverErrorCode(w, http.StatusBadRequest, fmt.Errorf("There is still bindings in this organization, please remove all bindings before revoke"))
+			serverErrorCode(w, http.StatusUnprocessableEntity, fmt.Errorf("There is still bindings in this organization, please remove all bindings before revoke"))
 			return
 		}
 	}

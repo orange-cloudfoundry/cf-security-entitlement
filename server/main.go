@@ -278,7 +278,7 @@ func loadClient(transport *http.Transport, c model.ConfigServer) error {
 		return fmt.Errorf("A pair of username/password or a pair of client_id/client_secret muste be set.")
 	}
 
-	cfclient = client.NewClient(c.CloudFoundry.Endpoint, ccClientV3, accessToken, info.Links.Self.HREF, *tr)
+	cfclient = client.NewClient(c.CloudFoundry.Endpoint, ccClientV3, accessToken, info.Links.Self.HREF, tr)
 	if err != nil {
 		return err
 	}
@@ -394,6 +394,9 @@ func AuthenticateWithExpire(endpoint string, clientId string, clientSecret strin
 	accessTokens := OauthToken{}
 	client := &http.Client{Transport: tr}
 	Request, err := http.NewRequest(http.MethodPost, endpoint+"/oauth/token", bytes.NewBuffer(jsonData))
+	if err != nil {
+		return "", time.Now(), err
+	}
 	Request.SetBasicAuth(clientId, clientSecret)
 	Request.Header.Add("Content-type", "application/x-www-form-urlencoded")
 	Request.Header.Add("Accept", "application/json")
@@ -414,7 +417,10 @@ func AuthenticateWithExpire(endpoint string, clientId string, clientSecret strin
 	accessToken := fmt.Sprintf("bearer %s", accessTokens.AccessToken)
 
 	expiresIn := time.Duration(accessTokens.Exprires) * time.Second
-	expiresAt = time.Now().Add(expiresIn)
+	expires := time.Now().Add(expiresIn)
+
+	// Taking 10 minute off the timer to have a margin of error
+	expiresAt = expires.Add(time.Duration(-10) * time.Minute)
 
 	return accessToken, expiresAt, err
 

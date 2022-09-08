@@ -22,11 +22,11 @@ type Client struct {
 	transport   http.Transport
 }
 
-func NewClient(endpoint string, ccv3Client *ccv3.Client, accessToken string, apiUrl string, transport http.Transport) *Client {
-	return &Client{endpoint: endpoint, ccv3Client: ccv3Client, accessToken: accessToken, apiUrl: apiUrl, transport: transport}
+func NewClient(endpoint string, ccv3Client *ccv3.Client, accessToken string, apiUrl string, transport *http.Transport) *Client {
+	return &Client{endpoint: endpoint, ccv3Client: ccv3Client, accessToken: accessToken, apiUrl: apiUrl, transport: *transport}
 }
 
-func (c Client) CurrentUserIsAdmin() (bool, error) {
+func (c *Client) CurrentUserIsAdmin() (bool, error) {
 
 	token := c.accessToken
 
