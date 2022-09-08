@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c Client) EntitleSecurityGroup(secGroupGUID, orgGUID string) error {
+func (c *Client) EntitleSecurityGroup(secGroupGUID, orgGUID string) error {
 	b, _ := json.Marshal(model.EntitlementSecGroup{
 		OrganizationGUID:  orgGUID,
 		SecurityGroupGUID: secGroupGUID,
@@ -42,7 +42,7 @@ func (c Client) EntitleSecurityGroup(secGroupGUID, orgGUID string) error {
 	return nil
 }
 
-func (c Client) RevokeSecurityGroup(secGroupGUID, orgGUID string) error {
+func (c *Client) RevokeSecurityGroup(secGroupGUID, orgGUID string) error {
 	b, _ := json.Marshal(model.EntitlementSecGroup{
 		OrganizationGUID:  orgGUID,
 		SecurityGroupGUID: secGroupGUID,
@@ -74,7 +74,7 @@ func (c Client) RevokeSecurityGroup(secGroupGUID, orgGUID string) error {
 	return nil
 }
 
-func (c Client) ListSecGroupEntitlements() ([]model.EntitlementSecGroup, error) {
+func (c *Client) ListSecGroupEntitlements() ([]model.EntitlementSecGroup, error) {
 
 	entitlements := make([]model.EntitlementSecGroup, 0)
 
@@ -106,7 +106,7 @@ func (c Client) ListSecGroupEntitlements() ([]model.EntitlementSecGroup, error) 
 	return entitlements, nil
 }
 
-func (c Client) OrgGUIDFromSpaceGUID(spaceGuid string) (string, error) {
+func (c *Client) OrgGUIDFromSpaceGUID(spaceGuid string) (string, error) {
 
 	client := &http.Client{}
 
@@ -127,6 +127,9 @@ func (c Client) OrgGUIDFromSpaceGUID(spaceGuid string) (string, error) {
 	}
 	var space Space
 	buf, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return spaceGuid, err
+	}
 	if err = json.Unmarshal(buf, &space); err != nil {
 		return spaceGuid, errors.Wrap(err, "Error unmarshaling Space")
 	}

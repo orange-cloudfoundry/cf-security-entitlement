@@ -121,13 +121,15 @@ var orderByTimestampDesc = ccv3.Query{
 	Values: []string{"-created_at"},
 }
 
-func (c Client) ListSecGroups(query ...ccv3.Query) (SecurityGroups, error) {
+func (c *Client) ListSecGroups(query ...ccv3.Query) (SecurityGroups, error) {
 	SecGroup := SecurityGroups{}
 
 	client := &http.Client{Transport: &c.transport}
 
 	Request, err := http.NewRequest(http.MethodGet, c.endpoint+"/v3/security_groups", nil)
-
+	if err != nil {
+		return SecGroup, err
+	}
 	Request.Header.Add("Authorization", c.accessToken)
 
 	resp, err := client.Do(Request)
@@ -141,6 +143,9 @@ func (c Client) ListSecGroups(query ...ccv3.Query) (SecurityGroups, error) {
 		return SecGroup, errors.Wrap(err, "http error")
 	}
 	buf, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return SecGroup, err
+	}
 	if err = json.Unmarshal(buf, &SecGroup); err != nil {
 		return SecGroup, errors.Wrap(err, "Error unmarshaling security group")
 	}
@@ -148,14 +153,16 @@ func (c Client) ListSecGroups(query ...ccv3.Query) (SecurityGroups, error) {
 
 }
 
-func (c Client) GetSecGroupByName(name string) (SecurityGroup, error) {
+func (c *Client) GetSecGroupByName(name string) (SecurityGroup, error) {
 	var SecGroup SecurityGroups
 	var errorSecGroup SecurityGroup
 
 	client := &http.Client{Transport: &c.transport}
 
 	Request, err := http.NewRequest(http.MethodGet, c.endpoint+"/v3/security_groups?names="+name, nil)
-
+	if err != nil {
+		return errorSecGroup, err
+	}
 	Request.Header.Add("Authorization", c.accessToken)
 
 	resp, err := client.Do(Request)
@@ -169,6 +176,10 @@ func (c Client) GetSecGroupByName(name string) (SecurityGroup, error) {
 		return errorSecGroup, err
 	}
 	buf, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return errorSecGroup, err
+	}
+
 	if err = json.Unmarshal(buf, &SecGroup); err != nil {
 		return errorSecGroup, errors.Wrap(err, "Error unmarshaling security group")
 	}
@@ -185,13 +196,15 @@ func (c Client) GetSecGroupByName(name string) (SecurityGroup, error) {
 	return SecGroupRelation, nil
 }
 
-func (c Client) GetSecGroupByGuid(guid string) (SecurityGroup, error) {
+func (c *Client) GetSecGroupByGuid(guid string) (SecurityGroup, error) {
 	var SecGroup SecurityGroup
 
 	client := &http.Client{Transport: &c.transport}
 
 	Request, err := http.NewRequest(http.MethodGet, c.apiUrl+"/v3/security_groups/"+guid, nil)
-
+	if err != nil {
+		return SecGroup, err
+	}
 	Request.Header.Add("Authorization", c.accessToken)
 
 	resp, err := client.Do(Request)
@@ -217,14 +230,16 @@ func (c Client) GetSecGroupByGuid(guid string) (SecurityGroup, error) {
 	return SecGroupRelation, nil
 }
 
-func (c Client) GetOrgByGuid(guid string) (Organization, error) {
+func (c *Client) GetOrgByGuid(guid string) (Organization, error) {
 
 	org := Organization{}
 
 	client := &http.Client{Transport: &c.transport}
 
 	Request, err := http.NewRequest(http.MethodGet, c.apiUrl+"/v3/organizations/"+guid, nil)
-
+	if err != nil {
+		return org, err
+	}
 	Request.Header.Add("Authorization", c.accessToken)
 
 	resp, err := client.Do(Request)
@@ -248,13 +263,15 @@ func (c Client) GetOrgByGuid(guid string) (Organization, error) {
 	return org, nil
 }
 
-func (c Client) GetSpaceByGuid(guid string) (Space, error) {
+func (c *Client) GetSpaceByGuid(guid string) (Space, error) {
 	var space Space
 
 	client := &http.Client{Transport: &c.transport}
 
 	Request, err := http.NewRequest(http.MethodGet, c.apiUrl+"/v3/spaces/"+guid, nil)
-
+	if err != nil {
+		return space, err
+	}
 	Request.Header.Add("Authorization", c.accessToken)
 
 	resp, err := client.Do(Request)
@@ -275,7 +292,7 @@ func (c Client) GetSpaceByGuid(guid string) (Space, error) {
 
 }
 
-func (c Client) GetSecGroupSpaces(guid string) (Spaces, error) {
+func (c *Client) GetSecGroupSpaces(guid string) (Spaces, error) {
 	var spaces Spaces
 	var space Space
 
@@ -292,12 +309,14 @@ func (c Client) GetSecGroupSpaces(guid string) (Spaces, error) {
 	return spaces, nil
 }
 
-func (c Client) ListUserManagedOrgs(userGuid string) (UserRoles, error) {
+func (c *Client) ListUserManagedOrgs(userGuid string) (UserRoles, error) {
 	userRoles := UserRoles{}
 	client := &http.Client{Transport: &c.transport}
 
 	Request, err := http.NewRequest(http.MethodGet, c.apiUrl+"/v3/roles?user_guids="+userGuid, nil)
-
+	if err != nil {
+		return userRoles, err
+	}
 	Request.Header.Add("Authorization", c.accessToken)
 
 	resp, err := client.Do(Request)
@@ -307,6 +326,9 @@ func (c Client) ListUserManagedOrgs(userGuid string) (UserRoles, error) {
 
 	defer resp.Body.Close()
 	buf, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return userRoles, err
+	}
 
 	if resp.StatusCode != http.StatusOK {
 		return userRoles, fmt.Errorf("http error")
@@ -317,12 +339,14 @@ func (c Client) ListUserManagedOrgs(userGuid string) (UserRoles, error) {
 	return userRoles, nil
 }
 
-func (c Client) ListOrgManagers(orgGuid string) (User, error) {
+func (c *Client) ListOrgManagers(orgGuid string) (User, error) {
 	user := User{}
 	client := &http.Client{Transport: &c.transport}
 
 	Request, err := http.NewRequest(http.MethodGet, c.apiUrl+"/v3/roles?organization_guids="+orgGuid, nil)
-
+	if err != nil {
+		return user, err
+	}
 	Request.Header.Add("Authorization", c.accessToken)
 
 	resp, err := client.Do(Request)
@@ -337,18 +361,25 @@ func (c Client) ListOrgManagers(orgGuid string) (User, error) {
 	}
 
 	buf, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return user, err
+	}
+
 	if err = json.Unmarshal(buf, &user); err != nil {
 		return user, errors.Wrap(err, "Error unmarshaling User")
 	}
 	return user, nil
 }
 
-func (c Client) GetInfo() (model.Info, error) {
+func (c *Client) GetInfo() (model.Info, error) {
 	info := model.Info{}
 
 	client := &http.Client{Transport: &c.transport}
 
 	Request, err := http.NewRequest(http.MethodGet, c.apiUrl, nil)
+	if err != nil {
+		return info, err
+	}
 
 	resp, err := client.Do(Request)
 	if err != nil {
@@ -361,6 +392,10 @@ func (c Client) GetInfo() (model.Info, error) {
 		return info, fmt.Errorf("http error")
 	}
 	buf, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return info, err
+	}
+
 	if err = json.Unmarshal(buf, &info); err != nil {
 		return info, errors.Wrap(err, "Error unmarshaling User")
 	}
@@ -375,23 +410,26 @@ func (c *Client) SetAccessToken(accessToken string) {
 	c.accessToken = accessToken
 }
 
-func (c Client) GetApiUrl() string {
+func (c *Client) GetApiUrl() string {
 	return c.apiUrl
 }
 
-func (c Client) GetEndpoint() string {
+func (c *Client) GetEndpoint() string {
 	return c.endpoint
 }
 
-func (c Client) GetTransport() http.Transport {
+func (c *Client) GetTransport() http.Transport {
 	return c.transport
 }
 
-func (c Client) ListSpaceResources(secGroup SecurityGroup) (SecurityGroup, error) {
+func (c *Client) ListSpaceResources(secGroup SecurityGroup) (SecurityGroup, error) {
 	var spaces Spaces
 	client := &http.Client{Transport: &c.transport}
 
 	Request, err := http.NewRequest(http.MethodGet, c.apiUrl+"/v3/spaces", nil)
+	if err != nil {
+		return secGroup, err
+	}
 
 	Request.Header.Add("Authorization", c.accessToken)
 
@@ -412,6 +450,9 @@ func (c Client) ListSpaceResources(secGroup SecurityGroup) (SecurityGroup, error
 	}
 
 	buf, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return secGroup, err
+	}
 
 	if err = json.Unmarshal(buf, &spaces); err != nil {
 		return secGroup, err

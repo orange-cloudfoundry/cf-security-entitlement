@@ -141,6 +141,10 @@ func bindOrUnbindSecGroup(w http.ResponseWriter, req *http.Request, next http.Ha
 
 	if req.Method == http.MethodPost {
 		buf, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			errors.Wrap(err, "Error reading User")
+			return
+		}
 		if err = json.Unmarshal(buf, &dataBody); err != nil {
 			errors.Wrap(err, "Error unmarshaling User")
 			return

@@ -70,6 +70,9 @@ func getOrgSpaces(orgId string) ([]plugin_models.GetOrg_Space, error) {
 	}
 	var spaces client.Spaces
 	err = json.Unmarshal([]byte(joinResult(result)), &spaces)
+	if err != nil {
+		return spaceModel, err
+	}
 
 	for _, space := range spaces.Resources {
 		if space.Relationships["organization"].GUID == orgId {
@@ -132,8 +135,6 @@ func genClient(endpoint string) *client.Client {
 		DialTimeout:       config.DialTimeout(),
 	})
 
-	//info, _, err := ccClientV3.GetInfo()
-
 	if err != nil {
 		messages.Error(err.Error())
 		return nil
@@ -143,5 +144,5 @@ func genClient(endpoint string) *client.Client {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: sslDisable},
 	}
 
-	return client.NewClient(endpoint, ccClientV3, accessToken, apiUrl, *tr)
+	return client.NewClient(endpoint, ccClientV3, accessToken, apiUrl, tr)
 }
