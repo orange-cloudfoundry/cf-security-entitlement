@@ -1,6 +1,7 @@
 package main
 
 import (
+	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
 	"fmt"
 	"os"
 
@@ -21,7 +22,10 @@ func (c *ListCommand) Execute(_ []string) error {
 		return err
 	}
 	messages.Printf("Getting security groups as %s...\n", messages.C.Cyan(username))
-	secGroups, err := client.ListSecGroups()
+	secGroups, err := client.GetSecGroups([]ccv3.Query{}, 0)
+	for i, _ := range secGroups.Resources {
+		_ = client.AddSecGroupRelationShips(&secGroups.Resources[i])
+	}
 	if err != nil {
 		return err
 	}
@@ -35,13 +39,13 @@ func (c *ListCommand) Execute(_ []string) error {
 		subData := make([]string, 0)
 		subData = append(subData, fmt.Sprintf("#%d", iSec))
 		subData = append(subData, secGroup.Name)
-		if len(secGroup.Relationships.Running_spaces.Data) == 0 || len(secGroup.Relationships.Staging_spaces.Data) == 0 {
+		if len(secGroup.Relationships.RunningSpaces.Data) == 0 || len(secGroup.Relationships.StagingSpaces.Data) == 0 {
 			subData = append(subData, "", "", "")
 			data = append(data, subData)
 			continue
 		}
 		// à revoir
-		for iSpace, space := range secGroup.Relationships.Running_spaces.Data {
+		for iSpace, space := range secGroup.Relationships.RunningSpaces.Data {
 			if iSpace > 0 {
 				subData = make([]string, 0)
 				subData = append(subData, "", "")

@@ -70,7 +70,7 @@ func (c *ListEntitlementCommand) Execute(_ []string) error {
 	if !c.InJson {
 		messages.Printf("Getting entitlements security groups as %s...\n", messages.C.Cyan(username))
 	}
-	cEntitlements, err := cfclient.ListSecGroupEntitlements()
+	cEntitlements, err := cfclient.GetSecGroupEntitlements()
 	if err != nil {
 		return err
 	}
