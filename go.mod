@@ -32,10 +32,11 @@ require (
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )
 
+require code.cloudfoundry.org/jsonry v1.1.4
+
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20211005130812-5bb3c17173e5 // indirect
 	code.cloudfoundry.org/cli-plugin-repo v0.0.0-20220208212925-633e698c93c0 // indirect
-	code.cloudfoundry.org/jsonry v1.1.4 // indirect
 	code.cloudfoundry.org/rfc5424 v0.0.0-20201103192249-000122071b78 // indirect
 	code.cloudfoundry.org/tlsconfig v0.0.0-20220621140725-0e6fbd869921 // indirect
 	github.com/ArthurHlt/logrus-cef-formatter v1.0.0 // indirect
