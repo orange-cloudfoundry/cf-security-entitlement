@@ -59,7 +59,7 @@ func (c *BindCommand) Execute(_ []string) error {
 		}
 	}
 	messages.Println(messages.C.Green("OK\n"))
-	messages.Println("TIP: Changes require an app restart (for running) or restage (for staging) to apply to existing applications.")
+	messages.Println("TIP: If Dynamic ASG's are enabled, changes will automatically apply for running and staging applications. Otherwise, changes will require an app restart (for running) or restage (for staging) to apply to existing applications.")
 	return nil
 }
 

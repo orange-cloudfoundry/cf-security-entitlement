@@ -1,84 +1,89 @@
 package client
 
 import (
+	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
+	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/constant"
+	"code.cloudfoundry.org/cli/resources"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-
-	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
-	"code.cloudfoundry.org/cli/resources"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/model"
 	"github.com/pkg/errors"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"strings"
 )
 
 type Spaces struct {
-	Resources []Space `json:"resources"`
+	Paginated
+	Resources []Space                `jsonry:"resources"`
+	Included  ccv3.IncludedResources `jsonry:"included"`
 }
 
 type Space struct {
-	GUID          string                  `json:"guid,omitempty"`
-	Name          string                  `json:"name"`
-	CreatedAt     string                  `json:"created_at"`
-	UpdatedAt     string                  `json:"updated_at"`
-	Relationships resources.Relationships `json:"relationships,omitempty"`
+	resources.Space
 }
 
 type Data struct {
 	GUID      string `jsonry:"guid,omitempty"`
-	SpaceName string `json:"spacename,omitempty"`
-	OrgGUID   string `json:"orgguid,omitempty"`
-	OrgName   string `json:"orgname,omitempty"`
+	SpaceName string `jsonry:"spacename,omitempty"`
+	OrgGUID   string `jsonry:"orgguid,omitempty"`
+	OrgName   string `jsonry:"orgname,omitempty"`
+}
+
+type Entitlements struct {
+	Resources []model.EntitlementSecGroup `jsonry:"resources"`
 }
 
 type Organization struct {
-	GUID      string `json:"guid,omitempty"`
-	Name      string `json:"name"`
-	CreatedAt string `json:"created_at"`
-	UpdatedAt string `json:"updated_at"`
-	QuotaGUID string `json:"-"`
+	resources.Organization
+}
+
+type Paginated struct {
+	Pagination struct {
+		Next struct {
+			HREF string `jsonry:"href"`
+		} `jsonry:"next"`
+	} `jsonry:"pagination"`
 }
 
 type SecurityGroups struct {
+	Paginated
 	Resources []SecurityGroup `jsonry:"resources,omitempty"`
 }
 
 type SecurityGroup struct {
-	Name             string `jsonry:"name,omitempty"`
-	GUID             string `jsonry:"guid,omitempty"`
-	CreatedAt        string `json:"created_at"`
-	UpdatedAt        string `json:"updated_at"`
-	Rules            []Rule `jsonry:"rules,omitempty"`
-	Globally_Enabled struct {
-		Running bool `json:"running"`
-		Staging bool `json:"staging"`
-	}
-	Relationships struct {
-		Running_spaces struct {
-			Data []Data
-		}
-
-		Staging_spaces struct {
-			Data []Data
-		}
-	}
+	Name                   string `jsonry:"name,omitempty"`
+	GUID                   string `jsonry:"guid,omitempty"`
+	Rules                  []Rule `jsonry:"rules,omitempty"`
+	StagingGloballyEnabled *bool  `jsonry:"globally_enabled.staging,omitempty"`
+	RunningGloballyEnabled *bool  `jsonry:"globally_enabled.running,omitempty"`
+	Relationships          struct {
+		RunningSpaces struct {
+			Data []Data `jsonry:"data"`
+		} `jsonry:"running_spaces"`
+		StagingSpaces struct {
+			Data []Data `jsonry:"data"`
+		} `jsonry:"staging_spaces"`
+	} `jsonry:"relationships,omitempty"`
 }
 type Rule struct {
-	Protocol    string `json:"protocol"`
-	Destination string `json:"destination"`
-	Ports       string `json:"ports,omitempty"`
+	Protocol    string `jsonry:"protocol"`
+	Destination string `jsonry:"destination"`
+	Ports       string `jsonry:"ports,omitempty"`
 }
 
 type User struct {
+	Paginated
 	Resources []struct {
 		GUID          string `jsonry:"guid,omitempty"`
-		CreatedAt     string `json:"created_at"`
-		UpdatedAt     string `json:"updated_at"`
+		CreatedAt     string `jsonry:"created_at"`
+		UpdatedAt     string `jsonry:"updated_at"`
 		Type          string `jsonry:"type,omitempty"`
 		Relationships struct {
 			User struct {
 				Data struct {
-					GUID string `json:"guid"`
+					GUID string `jsonry:"guid"`
 				}
 			}
 		}
@@ -86,25 +91,26 @@ type User struct {
 }
 
 type UserRoles struct {
+	Paginated
 	Resources []struct {
 		GUID          string `jsonry:"guid,omitempty"`
-		CreatedAt     string `json:"created_at"`
-		UpdatedAt     string `json:"updated_at"`
+		CreatedAt     string `jsonry:"created_at"`
+		UpdatedAt     string `jsonry:"updated_at"`
 		Type          string `jsonry:"type,omitempty"`
 		Relationships struct {
 			User struct {
 				Data struct {
-					GUID string `json:"guid"`
+					GUID string `jsonry:"guid"`
 				}
 			}
 			Space struct {
 				Data struct {
-					GUID string `json:"guid"`
+					GUID string `jsonry:"guid"`
 				}
 			}
 			Organization struct {
 				Data struct {
-					GUID string `json:"guid"`
+					GUID string `jsonry:"guid"`
 				}
 			}
 		}
@@ -121,285 +127,171 @@ var orderByTimestampDesc = ccv3.Query{
 	Values: []string{"-created_at"},
 }
 
-func (c *Client) ListSecGroups(query ...ccv3.Query) (SecurityGroups, error) {
-	SecGroup := SecurityGroups{}
-
+func (c *Client) doRequest(method string, url string, body io.Reader) ([]byte, error) {
 	client := &http.Client{Transport: &c.transport}
-
-	Request, err := http.NewRequest(http.MethodGet, c.endpoint+"/v3/security_groups", nil)
+	request, err := http.NewRequest(method, url, body)
 	if err != nil {
-		return SecGroup, err
+		return nil, err
 	}
-	Request.Header.Add("Authorization", c.accessToken)
-
-	resp, err := client.Do(Request)
+	request.Header.Set("Authorization", c.accessToken)
+	response, err := client.Do(request)
 	if err != nil {
-		return SecGroup, err
+		return nil, err
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return nil, errors.Wrap(err, "http error")
+	}
+	return ioutil.ReadAll(response.Body)
+
+}
+
+func (c *Client) generateUrl(baseUrl string, queries []ccv3.Query, page int) string {
+	curQueries := queries
+	curQueries = append(curQueries, large)
+	if page > 0 {
+		curQueries = append(curQueries, ccv3.Query{
+			Key:    "page",
+			Values: []string{fmt.Sprintf("%d", page)},
+		})
 	}
 
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return SecGroup, errors.Wrap(err, "http error")
+	// Build queryString
+	var queryParams []string
+	for key, value := range ccv3.FormatQueryParameters(curQueries) {
+		queryParams = append(queryParams, fmt.Sprintf("%s=%s", key, value[0]))
 	}
-	buf, err := ioutil.ReadAll(resp.Body)
+	queryString := ""
+	if len(queryParams) > 0 {
+		queryString = "?" + strings.Join(queryParams, "&")
+	}
+
+	return baseUrl + queryString
+
+}
+
+func (c *Client) GetSecGroups(queries []ccv3.Query, page int) (SecurityGroups, error) {
+	SecGroups := SecurityGroups{}
+	buffer, err := c.doRequest(http.MethodGet, c.generateUrl(c.endpoint+"/v3/security_groups", queries, page), nil)
 	if err != nil {
-		return SecGroup, err
+		return SecGroups, err
 	}
-	if err = json.Unmarshal(buf, &SecGroup); err != nil {
-		return SecGroup, errors.Wrap(err, "Error unmarshaling security group")
+	if err = json.Unmarshal(buffer, &SecGroups); err != nil {
+		return SecGroups, errors.Wrap(err, "Error unmarshaling security groups")
 	}
-	return SecGroup, err
-
+	if SecGroups.Pagination.Next.HREF != "" {
+		NextPage, err := c.GetSecGroups(queries, page+1)
+		if err != nil {
+			return SecGroups, err
+		}
+		SecGroups.Resources = append(SecGroups.Resources, NextPage.Resources...)
+	}
+	return SecGroups, err
 }
 
 func (c *Client) GetSecGroupByName(name string) (SecurityGroup, error) {
-	var SecGroup SecurityGroups
-	var errorSecGroup SecurityGroup
-
-	client := &http.Client{Transport: &c.transport}
-
-	Request, err := http.NewRequest(http.MethodGet, c.endpoint+"/v3/security_groups?names="+name, nil)
+	queries := []ccv3.Query{
+		{
+			Key:    ccv3.NameFilter,
+			Values: []string{name},
+		},
+	}
+	securityGroups, err := c.GetSecGroups(queries, 0)
 	if err != nil {
-		return errorSecGroup, err
+		return SecurityGroup{}, err
 	}
-	Request.Header.Add("Authorization", c.accessToken)
-
-	resp, err := client.Do(Request)
-	if err != nil {
-		return errorSecGroup, err
+	if len(securityGroups.Resources) == 0 {
+		return SecurityGroup{}, errors.New("security group " + name + " not found")
 	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return errorSecGroup, err
-	}
-	buf, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return errorSecGroup, err
-	}
-
-	if err = json.Unmarshal(buf, &SecGroup); err != nil {
-		return errorSecGroup, errors.Wrap(err, "Error unmarshaling security group")
-	}
-
-	if len(SecGroup.Resources) == 0 {
-		return errorSecGroup, fmt.Errorf("No security group with name %v found", name)
-	}
-
-	SecGroupRelation, err := c.ListSpaceResources(SecGroup.Resources[0])
-	if err != nil {
-		return SecGroupRelation, err
-	}
-
-	return SecGroupRelation, nil
+	return securityGroups.Resources[0], nil
 }
 
 func (c *Client) GetSecGroupByGuid(guid string) (SecurityGroup, error) {
-	var SecGroup SecurityGroup
-
-	client := &http.Client{Transport: &c.transport}
-
-	Request, err := http.NewRequest(http.MethodGet, c.apiUrl+"/v3/security_groups/"+guid, nil)
+	queries := []ccv3.Query{
+		{Key: ccv3.GUIDFilter, Values: []string{guid}},
+	}
+	securityGroups, err := c.GetSecGroups(queries, 0)
 	if err != nil {
-		return SecGroup, err
+		return SecurityGroup{}, err
 	}
-	Request.Header.Add("Authorization", c.accessToken)
-
-	resp, err := client.Do(Request)
-	if err != nil {
-		return SecGroup, err
+	if len(securityGroups.Resources) == 0 {
+		return SecurityGroup{}, errors.New("security group " + guid + " not found")
 	}
-
-	defer resp.Body.Close()
-
-	buf, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return SecGroup, err
-	}
-	if err = json.Unmarshal(buf, &SecGroup); err != nil {
-		return SecGroup, errors.Wrap(err, "Error unmarshaling Security Group")
-	}
-
-	SecGroupRelation, err := c.ListSpaceResources(SecGroup)
-	if err != nil {
-		return SecGroupRelation, err
-	}
-
-	return SecGroupRelation, nil
+	return securityGroups.Resources[0], nil
 }
 
 func (c *Client) GetOrgByGuid(guid string) (Organization, error) {
-
-	org := Organization{}
-
-	client := &http.Client{Transport: &c.transport}
-
-	Request, err := http.NewRequest(http.MethodGet, c.apiUrl+"/v3/organizations/"+guid, nil)
+	var orgs []Organization
+	_, _, err := c.ccv3Client.MakeListRequest(ccv3.RequestParams{
+		RequestName:  "GetOrganizations",
+		Query:        []ccv3.Query{{Key: ccv3.GUIDFilter, Values: []string{guid}}, {Key: ccv3.PerPage, Values: []string{"1"}}},
+		ResponseBody: Organization{},
+		AppendToList: func(item interface{}) error {
+			orgs = append(orgs, item.(Organization))
+			return nil
+		},
+	})
 	if err != nil {
-		return org, err
+		return Organization{}, err
 	}
-	Request.Header.Add("Authorization", c.accessToken)
-
-	resp, err := client.Do(Request)
-	if err != nil {
-		return org, err
+	if len(orgs) == 0 {
+		return Organization{}, errors.New("Organization " + guid + " not found")
 	}
-
-	defer resp.Body.Close()
-
-	buf, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return org, err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return org, fmt.Errorf("http error")
-	}
-	if err = json.Unmarshal(buf, &org); err != nil {
-		return org, errors.Wrap(err, "Error unmarshaling Org")
-	}
-	return org, nil
+	return orgs[0], nil
 }
 
 func (c *Client) GetSpaceByGuid(guid string) (Space, error) {
-	var space Space
-
-	client := &http.Client{Transport: &c.transport}
-
-	Request, err := http.NewRequest(http.MethodGet, c.apiUrl+"/v3/spaces/"+guid, nil)
+	spaces, err := c.GetSpacesWithOrg([]ccv3.Query{{Key: ccv3.GUIDFilter, Values: []string{guid}}}, 0)
 	if err != nil {
-		return space, err
+		return Space{}, err
 	}
-	Request.Header.Add("Authorization", c.accessToken)
-
-	resp, err := client.Do(Request)
-	if err != nil {
-		return space, err
+	if len(spaces.Resources) == 0 {
+		return Space{}, errors.New("Space " + guid + " not found")
 	}
-
-	defer resp.Body.Close()
-
-	buf, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return space, err
-	}
-	if err = json.Unmarshal(buf, &space); err != nil {
-		return space, errors.Wrap(err, "Error unmarshaling Space")
-	}
-	return space, nil
+	return spaces.Resources[0], nil
 
 }
 
-func (c *Client) GetSecGroupSpaces(guid string) (Spaces, error) {
-	var spaces Spaces
-	var space Space
+func (c *Client) GetUserManagedOrgs(userGuid string, page int) (UserRoles, error) {
+	var userRoles UserRoles
 
-	secgroup, err := c.GetSecGroupByGuid(guid)
-	if err != nil {
-		return spaces, err
-	}
-
-	for _, spaceData := range secgroup.Relationships.Running_spaces.Data {
-		space.GUID = spaceData.GUID
-		spaces.Resources = append(spaces.Resources, space)
-	}
-
-	return spaces, nil
-}
-
-func (c *Client) ListUserManagedOrgs(userGuid string) (UserRoles, error) {
-	userRoles := UserRoles{}
-	client := &http.Client{Transport: &c.transport}
-
-	Request, err := http.NewRequest(http.MethodGet, c.apiUrl+"/v3/roles?user_guids="+userGuid, nil)
+	url := c.generateUrl(c.apiUrl+"/v3/roles", []ccv3.Query{large, {Key: ccv3.UserGUIDFilter, Values: []string{userGuid}}}, 0)
+	buffer, err := c.doRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return userRoles, err
 	}
-	Request.Header.Add("Authorization", c.accessToken)
-
-	resp, err := client.Do(Request)
-	if err != nil {
-		return userRoles, err
-	}
-
-	defer resp.Body.Close()
-	buf, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return userRoles, err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return userRoles, fmt.Errorf("http error")
-	}
-	if err = json.Unmarshal(buf, &userRoles); err != nil {
+	if err = json.Unmarshal(buffer, &userRoles); err != nil {
 		return userRoles, errors.Wrap(err, "Error unmarshaling User Roles")
+	}
+	if userRoles.Pagination.Next.HREF != "" {
+		NextPage, err := c.GetUserManagedOrgs(userGuid, page+1)
+		if err != nil {
+			return userRoles, err
+		}
+		userRoles.Resources = append(userRoles.Resources, NextPage.Resources...)
 	}
 	return userRoles, nil
 }
 
-func (c *Client) ListOrgManagers(orgGuid string) (User, error) {
+func (c *Client) GetOrgManagers(orgGuid string, page int) (User, error) {
 	user := User{}
-	client := &http.Client{Transport: &c.transport}
 
-	Request, err := http.NewRequest(http.MethodGet, c.apiUrl+"/v3/roles?organization_guids="+orgGuid, nil)
-	if err != nil {
-		return user, err
-	}
-	Request.Header.Add("Authorization", c.accessToken)
+	url := c.generateUrl(c.apiUrl+"/v3/roles", []ccv3.Query{large, {Key: ccv3.OrganizationGUIDFilter, Values: []string{orgGuid}}}, page)
+	buffer, err := c.doRequest(http.MethodGet, url, nil)
 
-	resp, err := client.Do(Request)
-	if err != nil {
-		return user, err
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return user, fmt.Errorf("http error")
-	}
-
-	buf, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return user, err
-	}
-
-	if err = json.Unmarshal(buf, &user); err != nil {
+	if err = json.Unmarshal(buffer, &user); err != nil {
 		return user, errors.Wrap(err, "Error unmarshaling User")
 	}
+
+	if user.Pagination.Next.HREF != "" {
+		NextPage, err := c.GetOrgManagers(orgGuid, page+1)
+		if err != nil {
+			return user, err
+		}
+		user.Resources = append(user.Resources, NextPage.Resources...)
+	}
+
 	return user, nil
-}
-
-func (c *Client) GetInfo() (model.Info, error) {
-	info := model.Info{}
-
-	client := &http.Client{Transport: &c.transport}
-
-	Request, err := http.NewRequest(http.MethodGet, c.apiUrl, nil)
-	if err != nil {
-		return info, err
-	}
-
-	resp, err := client.Do(Request)
-	if err != nil {
-		return info, err
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return info, fmt.Errorf("http error")
-	}
-	buf, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return info, err
-	}
-
-	if err = json.Unmarshal(buf, &info); err != nil {
-		return info, errors.Wrap(err, "Error unmarshaling User")
-	}
-	return info, nil
 }
 
 func (c *Client) GetAccessToken() *string {
@@ -422,66 +314,72 @@ func (c *Client) GetTransport() http.Transport {
 	return c.transport
 }
 
-func (c *Client) ListSpaceResources(secGroup SecurityGroup) (SecurityGroup, error) {
+func (c *Client) GetSpacesWithOrg(queries []ccv3.Query, page int) (Spaces, error) {
+	curQueries := queries
+	curQueries = append(curQueries, ccv3.Query{Key: ccv3.Include, Values: []string{"organization"}})
+	curQueries = append(curQueries, large)
 	var spaces Spaces
-	client := &http.Client{Transport: &c.transport}
-
-	Request, err := http.NewRequest(http.MethodGet, c.apiUrl+"/v3/spaces", nil)
+	url := c.generateUrl(c.apiUrl+"/v3/spaces", curQueries, page)
+	buffer, err := c.doRequest(http.MethodGet, url, nil)
 	if err != nil {
-		return secGroup, err
+		return spaces, err
 	}
+	if err = json.Unmarshal(buffer, &spaces); err != nil {
+		return spaces, errors.Wrap(err, "Error unmarshaling Spaces")
+	}
+	if spaces.Pagination.Next.HREF != "" {
+		NextPage, err := c.GetSpacesWithOrg(queries, page+1)
+		if err != nil {
+			return spaces, err
+		}
+		spaces.Resources = append(spaces.Resources, NextPage.Resources...)
+	}
+	return spaces, nil
 
-	Request.Header.Add("Authorization", c.accessToken)
+}
 
-	resp, err := client.Do(Request)
+func (c *Client) GetSecGroupSpaces(secGroup *SecurityGroup) (Spaces, error) {
+	var runningSpaceGuids []string
+	var stagingSpaceGuids []string
+	for _, data := range secGroup.Relationships.RunningSpaces.Data {
+		runningSpaceGuids = append(runningSpaceGuids, data.GUID)
+	}
+	for _, data := range secGroup.Relationships.StagingSpaces.Data {
+		stagingSpaceGuids = append(stagingSpaceGuids, data.GUID)
+	}
+	spaces, err := c.GetSpacesWithOrg([]ccv3.Query{{Key: ccv3.GUIDFilter, Values: append(runningSpaceGuids, stagingSpaceGuids...)}, {Key: ccv3.Include, Values: []string{"organization"}}}, 0)
+	return spaces, err
+}
+
+func (c *Client) AddSecGroupRelationShips(secGroup *SecurityGroup) error {
+	spaces, err := c.GetSecGroupSpaces(secGroup)
 	if err != nil {
-		return secGroup, err
+		return err
 	}
-
-	if resp.StatusCode >= http.StatusBadRequest {
-		_, err := c.handleError(resp)
-		return secGroup, err
-	}
-
-	defer resp.Body.Close()
-
-	if err != nil {
-		return secGroup, err
-	}
-
-	buf, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return secGroup, err
-	}
-
-	if err = json.Unmarshal(buf, &spaces); err != nil {
-		return secGroup, err
-	}
-
 	for _, space := range spaces.Resources {
-		for i, secGroupSpaceRunning := range secGroup.Relationships.Running_spaces.Data {
-			if space.GUID == secGroupSpaceRunning.GUID {
-				secGroup.Relationships.Running_spaces.Data[i].OrgGUID = space.Relationships["organization"].GUID
-				secGroup.Relationships.Running_spaces.Data[i].SpaceName = space.Name
-				org, err := c.GetOrgByGuid(space.Relationships["organization"].GUID)
-				if err != nil {
-					return secGroup, err
-				}
-				secGroup.Relationships.Running_spaces.Data[i].OrgName = org.Name
+		var orgName string
+		var orgGuid string
+		for _, org := range spaces.Included.Organizations {
+			if org.GUID == space.Relationships[constant.RelationshipTypeOrganization].GUID {
+				orgName = org.Name
+				orgGuid = org.GUID
+				break
 			}
 		}
-
-		for j, secGroupSpaceStaging := range secGroup.Relationships.Staging_spaces.Data {
-			if space.GUID == secGroupSpaceStaging.GUID {
-				secGroup.Relationships.Staging_spaces.Data[j].OrgGUID = space.Relationships["organization"].GUID
-				secGroup.Relationships.Staging_spaces.Data[j].SpaceName = space.Name
-				org, err := c.GetOrgByGuid(space.Relationships["organization"].GUID)
-				if err != nil {
-					return secGroup, err
-				}
-				secGroup.Relationships.Staging_spaces.Data[j].OrgName = org.Name
+		for i, data := range secGroup.Relationships.RunningSpaces.Data {
+			if data.GUID == space.GUID {
+				secGroup.Relationships.RunningSpaces.Data[i].SpaceName = space.Name
+				secGroup.Relationships.RunningSpaces.Data[i].OrgName = orgName
+				secGroup.Relationships.RunningSpaces.Data[i].OrgGUID = orgGuid
+			}
+		}
+		for i, data := range secGroup.Relationships.StagingSpaces.Data {
+			if data.GUID == space.GUID {
+				secGroup.Relationships.StagingSpaces.Data[i].SpaceName = space.Name
+				secGroup.Relationships.StagingSpaces.Data[i].OrgName = orgName
+				secGroup.Relationships.StagingSpaces.Data[i].OrgGUID = orgGuid
 			}
 		}
 	}
-	return secGroup, err
+	return nil
 }

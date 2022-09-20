@@ -30,7 +30,8 @@ func (c *GetCommand) Execute(_ []string) error {
 		messages.C.Cyan(username),
 	)
 	secGroup, err := client.GetSecGroupByName(c.GetOptions.SecurityGroup)
-	if err != nil {
+	errRelShips := client.AddSecGroupRelationShips(&secGroup)
+	if err != nil || errRelShips != nil {
 		return err
 	}
 	messages.Println(
@@ -42,7 +43,7 @@ func (c *GetCommand) Execute(_ []string) error {
 	messages.Println("\t" + string(b) + "\n")
 
 	data := make([][]string, 0)
-	for i, space := range secGroup.Relationships.Running_spaces.Data {
+	for i, space := range secGroup.Relationships.RunningSpaces.Data {
 		data = append(data, []string{
 			messages.C.Sprintf(messages.C.Cyan("#%d"), i),
 			space.OrgName,
@@ -50,7 +51,7 @@ func (c *GetCommand) Execute(_ []string) error {
 		})
 	}
 
-	for i, space := range secGroup.Relationships.Staging_spaces.Data {
+	for i, space := range secGroup.Relationships.StagingSpaces.Data {
 		data = append(data, []string{
 			messages.C.Sprintf(messages.C.Cyan("#%d"), i),
 			space.OrgName,

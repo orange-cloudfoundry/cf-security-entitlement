@@ -77,19 +77,19 @@ func handleRevokeSecGroup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	secGroupWithOrg, err := cfclient.ListSpaceResources(secGroup)
+	err = cfclient.AddSecGroupRelationShips(&secGroup)
 	if err != nil {
 		panic(err)
 	}
 
-	for _, space := range secGroupWithOrg.Relationships.Running_spaces.Data {
+	for _, space := range secGroup.Relationships.RunningSpaces.Data {
 		if space.OrgGUID == entitlement.OrganizationGUID {
 			serverErrorCode(w, http.StatusUnprocessableEntity, fmt.Errorf("There is still bindings in this organization, please remove all bindings before revoke"))
 			return
 		}
 	}
 
-	for _, space := range secGroupWithOrg.Relationships.Staging_spaces.Data {
+	for _, space := range secGroup.Relationships.StagingSpaces.Data {
 		if space.OrgGUID == entitlement.OrganizationGUID {
 			serverErrorCode(w, http.StatusUnprocessableEntity, fmt.Errorf("There is still bindings in this organization, please remove all bindings before revoke"))
 			return
