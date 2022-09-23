@@ -93,8 +93,8 @@ github.com/cespare/xxhash/v2
 # github.com/charlievieth/fs v0.0.3
 ## explicit; go 1.18
 github.com/charlievieth/fs
-# github.com/cloudfoundry-community/gautocloud v1.1.10
-## explicit; go 1.18
+# github.com/cloudfoundry-community/gautocloud v1.1.11
+## explicit; go 1.19
 github.com/cloudfoundry-community/gautocloud
 github.com/cloudfoundry-community/gautocloud/cloudenv
 github.com/cloudfoundry-community/gautocloud/connectors
