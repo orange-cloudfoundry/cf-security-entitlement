@@ -43,7 +43,7 @@ func (c *GetCommand) Execute(_ []string) error {
 	messages.Println("\t" + string(b) + "\n")
 
 	data := make([][]string, 0)
-	for i, space := range secGroup.Relationships.RunningSpaces.Data {
+	for i, space := range secGroup.Relationships.Running_Spaces.Data {
 		data = append(data, []string{
 			messages.C.Sprintf(messages.C.Cyan("#%d"), i),
 			space.OrgName,
@@ -51,7 +51,7 @@ func (c *GetCommand) Execute(_ []string) error {
 		})
 	}
 
-	for i, space := range secGroup.Relationships.StagingSpaces.Data {
+	for i, space := range secGroup.Relationships.Staging_Spaces.Data {
 		data = append(data, []string{
 			messages.C.Sprintf(messages.C.Cyan("#%d"), i),
 			space.OrgName,

@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/orange-cloudfoundry/cf-security-entitlement/client"
@@ -50,7 +50,7 @@ func handleRevokeSecGroup(w http.ResponseWriter, req *http.Request) {
 
 	accessToken := req.Header.Get("Authorization")
 	tr := cfclient.GetTransport()
-	client := &http.Client{Transport: &tr}
+	cfClient := &http.Client{Transport: &tr}
 
 	Request, err := http.NewRequest(http.MethodGet, apiUrl+"/v3/security_groups/"+entitlement.SecurityGroupGUID, nil)
 	if err != nil {
@@ -59,14 +59,14 @@ func handleRevokeSecGroup(w http.ResponseWriter, req *http.Request) {
 
 	Request.Header.Add("Authorization", accessToken)
 
-	resp, err := client.Do(Request)
+	resp, err := cfClient.Do(Request)
 	if err != nil {
 		panic(err)
 	}
 
 	defer resp.Body.Close()
 
-	buf, err := ioutil.ReadAll(resp.Body)
+	buf, err := io.ReadAll(resp.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -82,14 +82,14 @@ func handleRevokeSecGroup(w http.ResponseWriter, req *http.Request) {
 		panic(err)
 	}
 
-	for _, space := range secGroup.Relationships.RunningSpaces.Data {
+	for _, space := range secGroup.Relationships.Running_Spaces.Data {
 		if space.OrgGUID == entitlement.OrganizationGUID {
 			serverErrorCode(w, http.StatusUnprocessableEntity, fmt.Errorf("There is still bindings in this organization, please remove all bindings before revoke"))
 			return
 		}
 	}
 
-	for _, space := range secGroup.Relationships.StagingSpaces.Data {
+	for _, space := range secGroup.Relationships.Staging_Spaces.Data {
 		if space.OrgGUID == entitlement.OrganizationGUID {
 			serverErrorCode(w, http.StatusUnprocessableEntity, fmt.Errorf("There is still bindings in this organization, please remove all bindings before revoke"))
 			return

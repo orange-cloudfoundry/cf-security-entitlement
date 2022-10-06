@@ -18,7 +18,7 @@ func serverErrorCode(w http.ResponseWriter, code int, err error) {
 	w.Header().Add("Content-Type", "application/json")
 
 	if httpErr, ok := err.(client.CloudFoundryErrorV3); ok {
-		w.WriteHeader(int(httpErr.Code))
+		w.WriteHeader(httpErr.Code)
 
 		b, _ := json.Marshal(client.CloudFoundryErrorV3{
 			Code:   httpErr.Code,
@@ -43,13 +43,6 @@ func isAdmin(groups []string) bool {
 		if g == "cloud_controller.admin" {
 			return true
 		}
-	}
-	return false
-}
-
-func isNotFoundErr(err error) bool {
-	if httpErr, ok := err.(client.CloudFoundryHTTPError); ok {
-		return httpErr.StatusCode == http.StatusNotFound
 	}
 	return false
 }

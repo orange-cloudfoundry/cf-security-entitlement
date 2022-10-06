@@ -79,7 +79,7 @@ func (c *Client) GetSecGroupEntitlements() ([]model.EntitlementSecGroup, error) 
 
 	buffer, err := c.doRequest(http.MethodGet, c.generateUrl(c.endpoint+"/v2/security_entitlement", []ccv3.Query{}, 0), nil)
 	if err = json.Unmarshal(buffer, &entitlements); err != nil {
-		return entitlements, errors.Wrap(err, "Error unmarshaling entitlements")
+		return entitlements, errors.Wrap(err, "Error unmarshalling Entitlements")
 	}
 	return entitlements, nil
 }

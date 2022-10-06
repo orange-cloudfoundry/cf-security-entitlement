@@ -2,10 +2,12 @@ package main
 
 import (
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
+	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/constant"
+	"code.cloudfoundry.org/cli/resources"
 	"code.cloudfoundry.org/jsonry"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"regexp"
 	"strings"
@@ -142,17 +144,17 @@ func bindOrUnbindSecGroup(w http.ResponseWriter, req *http.Request, next http.Ha
 	secGroupGuid := pathSplit[3]
 
 	if req.Method == http.MethodPost {
-		buf, err := ioutil.ReadAll(req.Body)
+		buf, err := io.ReadAll(req.Body)
 		if err != nil {
 			errors.Wrap(err, "Error reading User")
 			return
 		}
 		if err = json.Unmarshal(buf, &dataBody); err != nil {
-			errors.Wrap(err, "Error unmarshaling User")
+			errors.Wrap(err, "Error unmarshalling User")
 			return
 		}
 		if len(dataBody.Data) == 0 {
-			errors.Wrap(err, "Error unmarshaling User")
+			errors.Wrap(err, "Error unmarshalling User")
 		}
 		spaceGuid = dataBody.Data[0].GUID
 	}
@@ -236,7 +238,6 @@ func bindOrUnbindSecGroup(w http.ResponseWriter, req *http.Request, next http.Ha
 }
 
 func findSecGroup(w http.ResponseWriter, req *http.Request, next http.Handler) {
-	path := req.URL.Path
 	userId, err := getUserId(req)
 	if err != nil {
 		serverErrorCode(w, http.StatusBadRequest, err)
@@ -247,9 +248,9 @@ func findSecGroup(w http.ResponseWriter, req *http.Request, next http.Handler) {
 		next.ServeHTTP(w, req)
 		return
 	}
-	pathSplit := strings.Split(path, "/")
-	if len(pathSplit) == 4 && pathSplit[3] != "" {
-		retrieveSecGroup(w, req, pathSplit[3], userId)
+	guid := filterGuid(req)
+	if guid != "" {
+		retrieveSecGroup(w, req, guid, userId)
 		return
 	}
 	retrieveSecGroups(w, req, userId)
@@ -258,140 +259,192 @@ func findSecGroup(w http.ResponseWriter, req *http.Request, next http.Handler) {
 func retrieveSecGroups(w http.ResponseWriter, req *http.Request, userId string) {
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	emptyResp, _ := json.Marshal([]client.SecurityGroups{})
-	userRoles, err := cfclient.GetUserManagedOrgs(userId, 0)
+	response := client.SecurityGroups{}
+	spaces, orgs, err := cfclient.GetUserManagedSpacesAndOrgs(userId)
 	if err != nil {
 		serverError(w, err)
 		return
 	}
-	if len(userRoles.Resources) == 0 {
-		w.Write(emptyResp)
-		return
-	}
-
-	orgIds := make([]string, len(userRoles.Resources))
-	i := 0
-	for _, org := range userRoles.Resources {
-		if org.Type == "organization_manager" {
-			orgIds[i] = org.Relationships.Organization.Data.GUID
-			i++
-		}
+	orgIds := make([]string, len(orgs))
+	for _, org := range orgs {
+		orgIds = append(orgIds, org.GUID)
 	}
 
 	entitlements := make([]model.EntitlementSecGroup, 0)
 	DB.Where("organization_guid in (?)", orgIds).Find(&entitlements)
-	if len(entitlements) == 0 {
-		w.Write(emptyResp)
+	entitledOrgIds := make([]string, len(entitlements))
+	entitledSecGroupIds := make([]string, len(entitlements))
+	for _, entitlement := range entitlements {
+		entitledOrgIds = append(entitledOrgIds, entitlement.OrganizationGUID)
+		entitledSecGroupIds = append(entitledSecGroupIds, entitlement.SecurityGroupGUID)
+	}
+
+	queries := make([]ccv3.Query, 0)
+	queries = append(queries, ccv3.Query{Key: ccv3.GUIDFilter, Values: entitledSecGroupIds})
+	names := filterNames(req)
+	if len(names) > 0 {
+		queries = append(queries, ccv3.Query{Key: ccv3.NameFilter, Values: names})
+	}
+	secGroupsResult, err := cfclient.GetSecGroups(queries, 0)
+
+	DeleteInconsistantEntitlements(entitlements)
+
+	if len(secGroupsResult.Resources) == 0 {
+		serverErrorCode(w, http.StatusNotFound, fmt.Errorf("No security groups found"))
 		return
 	}
 
-	secGroupName := filterName(req)
+	response.Resources = FeedSecGroups(secGroupsResult.Resources, entitlements, spaces, orgs)
 
-	var secGroups client.SecurityGroups
-	var alreadyFoundedSecGroups []string
-	for _, entitlement := range entitlements {
-		secGroup, err := cfclient.GetSecGroupByGuid(entitlement.SecurityGroupGUID)
-		alreadyFounded := false
-		for _, value := range alreadyFoundedSecGroups {
-			if value == secGroup.GUID {
-				alreadyFounded = true
-				break
-			}
-		}
-		if alreadyFounded {
-			continue
-		}
-		alreadyFoundedSecGroups = append(alreadyFoundedSecGroups, secGroup.GUID)
-		if err != nil && isNotFoundErr(err) {
-			DB.Delete(&entitlement)
-			return
-		}
-		if err != nil {
-			continue
-		}
-		if secGroupName != "" && secGroup.Name != secGroupName {
-			continue
-		}
-		users, err := cfclient.GetOrgManagers(entitlement.OrganizationGUID, 0)
-		if err != nil && isNotFoundErr(err) {
-			DB.Delete(&entitlement)
-			return
-		}
-		if err != nil {
-			continue
-		}
-		found := false
-		for _, user := range users.Resources {
-			if user.Relationships.User.Data.GUID == userId { // && user.Type == "organization_manager" {
-				found = true
-				break
-			}
-		}
-		if !found {
-			continue
-		}
+	b, _ := jsonry.Marshal(response)
+	_, _ = w.Write(b)
 
-		spaces, _ := GetSpaceResources(secGroup)
-		finalSpaces := feedSpaces(spaces, orgIds)
-		secGroup.Relationships.RunningSpaces.Data = finalSpaces
-		secGroup.Relationships.StagingSpaces.Data = finalSpaces
-		secGroups.Resources = append(secGroups.Resources, secGroup)
-	}
-	b, _ := jsonry.Marshal(secGroups)
-	w.Write(b)
 }
 
 func retrieveSecGroup(w http.ResponseWriter, req *http.Request, secGroupGuid, userId string) {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	response := client.SecurityGroups{}
+
+	spaces, orgs, err := cfclient.GetUserManagedSpacesAndOrgs(userId)
+	if err != nil {
+		serverError(w, err)
+		return
+	}
+	orgIds := make([]string, len(orgs))
+	for _, org := range orgs {
+		orgIds = append(orgIds, org.GUID)
+	}
+
 	entitlements := make([]model.EntitlementSecGroup, 0)
 	DB.Where(&model.EntitlementSecGroup{
 		SecurityGroupGUID: secGroupGuid,
 	}).Find(&entitlements)
 	if len(entitlements) == 0 {
-		serverErrorCode(w, http.StatusNotFound, fmt.Errorf("Security group not found"))
+		serverErrorCode(w, http.StatusNotFound, fmt.Errorf("No security group found with guid '%s'", secGroupGuid))
 		return
 	}
 
-	orgIds := make([]string, 0)
-	found := false
-	for _, entitlement := range entitlements {
-		users, err := cfclient.GetOrgManagers(entitlement.OrganizationGUID, 0)
-		if err != nil && isNotFoundErr(err) {
-			DB.Delete(&entitlement)
-			return
-		}
-		if err != nil {
-			continue
-		}
-		for _, user := range users.Resources {
-			if user.Relationships.User.Data.GUID == userId {
-				found = true
-				orgIds = append(orgIds, entitlement.OrganizationGUID)
-			}
-		}
-	}
-	if !found {
-		serverErrorCode(w, http.StatusNotFound, fmt.Errorf("Security %s not found", secGroupGuid))
-		return
-	}
 	secGroup, err := cfclient.GetSecGroupByGuid(secGroupGuid)
-	if err != nil && isNotFoundErr(err) {
-		DB.Where(&model.EntitlementSecGroup{
-			SecurityGroupGUID: secGroupGuid,
-		}).Delete(model.EntitlementSecGroup{})
-		return
-	}
 	if err != nil {
 		serverError(w, err)
 		return
 	}
-	spaces, _ := GetSpaceResources(secGroup)
-	finalSpaces := feedSpaces(spaces, orgIds)
-	secGroup.Relationships.RunningSpaces.Data = finalSpaces
-	secGroup.Relationships.StagingSpaces.Data = finalSpaces
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	b, _ := json.Marshal(secGroup)
+
+	DeleteInconsistantEntitlements(entitlements)
+
+	response.Resources = FeedSecGroups([]client.SecurityGroup{secGroup}, entitlements, spaces, orgs)
+	if len(response.Resources) == 0 {
+		serverErrorCode(w, http.StatusNotFound, fmt.Errorf("No security group found with guid '%s'", secGroupGuid))
+		return
+	}
+
+	b, _ := json.Marshal(response.Resources[0])
 	w.Write(b)
+}
+
+func FeedSecGroups(secGroups []client.SecurityGroup, entitlements []model.EntitlementSecGroup, spaces []client.Space, orgs []resources.Organization) []client.SecurityGroup {
+	secGroupOrgIds := make(map[string][]string, 0)
+	for _, entitlements := range entitlements {
+		if _, ok := secGroupOrgIds[entitlements.SecurityGroupGUID]; !ok {
+			secGroupOrgIds[entitlements.SecurityGroupGUID] = make([]string, 0)
+		}
+		secGroupOrgIds[entitlements.SecurityGroupGUID] = append(secGroupOrgIds[entitlements.SecurityGroupGUID], entitlements.OrganizationGUID)
+	}
+
+	for i, secGroup := range secGroups {
+		runningSpaces := make([]client.Data, 0)
+		stagingSpaces := make([]client.Data, 0)
+		alreadyFoundOrgs := make([]string, 0)
+		if orgIds, ok := secGroupOrgIds[secGroup.GUID]; ok {
+			for _, orgId := range orgIds {
+				for _, org := range orgs {
+					if org.GUID == orgId {
+						if funk.ContainsString(alreadyFoundOrgs, org.GUID) {
+							continue
+						}
+						alreadyFoundOrgs = append(alreadyFoundOrgs, org.GUID)
+						orgRunningSpaces := make([]client.Data, 0)
+						orgStagingSpaces := make([]client.Data, 0)
+						alreadyFoundStaging := make([]string, 0)
+						alreadyFoundRunning := make([]string, 0)
+						for _, space := range spaces {
+							if space.Relationships[constant.RelationshipTypeOrganization].GUID == orgId {
+								for _, data := range secGroup.Relationships.Staging_Spaces.Data {
+									if data.GUID == space.GUID {
+										if !funk.ContainsString(alreadyFoundStaging, space.GUID) {
+											orgStagingSpaces = append(orgStagingSpaces, client.Data{
+												GUID:      space.GUID,
+												SpaceName: space.Name,
+												OrgName:   org.Name,
+												OrgGUID:   org.GUID,
+											})
+											alreadyFoundStaging = append(alreadyFoundStaging, space.GUID)
+										}
+									}
+								}
+								for _, data := range secGroup.Relationships.Running_Spaces.Data {
+									if data.GUID == space.GUID {
+										if !funk.ContainsString(alreadyFoundRunning, space.GUID) {
+											orgRunningSpaces = append(orgRunningSpaces, client.Data{
+												GUID:      space.GUID,
+												SpaceName: space.Name,
+												OrgName:   org.Name,
+												OrgGUID:   org.GUID,
+											})
+											alreadyFoundRunning = append(alreadyFoundRunning, space.GUID)
+										}
+									}
+								}
+							}
+						}
+						if len(orgStagingSpaces) <= 0 {
+							orgStagingSpaces = append(orgStagingSpaces, client.Data{
+								GUID:      "",
+								SpaceName: "",
+								OrgName:   org.Name,
+								OrgGUID:   org.GUID,
+							})
+						}
+						if len(orgRunningSpaces) <= 0 {
+							orgRunningSpaces = append(orgRunningSpaces, client.Data{
+								GUID:      "",
+								SpaceName: "",
+								OrgName:   org.Name,
+								OrgGUID:   org.GUID,
+							})
+						}
+						stagingSpaces = append(stagingSpaces, orgStagingSpaces...)
+						runningSpaces = append(runningSpaces, orgRunningSpaces...)
+					}
+				}
+			}
+		}
+		secGroups[i].Relationships.Staging_Spaces.Data = stagingSpaces
+		secGroups[i].Relationships.Running_Spaces.Data = runningSpaces
+	}
+
+	return secGroups
+}
+
+func DeleteInconsistantEntitlements(entitlements []model.EntitlementSecGroup) {
+
+	entitledSecGroupGUIDs := make([]string, 0)
+	for _, entitlement := range entitlements {
+		entitledSecGroupGUIDs = append(entitledSecGroupGUIDs, entitlement.SecurityGroupGUID)
+	}
+	existingSecGroups, _ := cfclient.GetSecGroups([]ccv3.Query{{Key: ccv3.GUIDFilter, Values: entitledSecGroupGUIDs}}, 0)
+
+	existingSecGroupGUIDs := make([]string, 0)
+	for _, secGroup := range existingSecGroups.Resources {
+		existingSecGroupGUIDs = append(existingSecGroupGUIDs, secGroup.GUID)
+	}
+
+	for _, entitlement := range entitlements {
+		if !funk.ContainsString(existingSecGroupGUIDs, entitlement.SecurityGroupGUID) {
+			DB.Delete(&entitlement)
+		}
+	}
 }
 
 func isFilterAuthorized(filter string) bool {
@@ -405,35 +458,28 @@ func isFilterAuthorized(filter string) bool {
 	return false
 }
 
-func filterName(req *http.Request) string {
-	return req.URL.Query().Get("names")
+func filterParam(req *http.Request, param string) []string {
+	res := make([]string, 0)
+	if isFilterAuthorized(param) {
+		for _, v := range strings.Split(req.URL.Query().Get(param), ",") {
+			if v != "" {
+				res = append(res, v)
+			}
+		}
+	}
+	return res
 }
 
-func feedSpaces(spaces []client.Space, orgIds []string) []client.Data {
-	bufOrg := make(map[string]client.Organization)
-	finalSpaces := make([]client.Data, 0)
-	var SpaceResources client.Data
-	for _, space := range spaces {
-		if !funk.ContainsString(orgIds, space.Relationships["organization"].GUID) {
-			continue
-		}
-		var org client.Organization
-		if tmpOrg, ok := bufOrg[space.Relationships["organization"].GUID]; ok && tmpOrg.GUID != "" {
-			org = tmpOrg
-		} else {
-			org, _ = cfclient.GetOrgByGuid(space.Relationships["organization"].GUID)
-			bufOrg[org.GUID] = org
-		}
-		SpaceResources = client.Data{
-			GUID:      space.GUID,
-			SpaceName: space.Name,
-			OrgGUID:   org.GUID,
-			OrgName:   org.Name,
-		}
-		finalSpaces = append(finalSpaces, SpaceResources)
-
+func filterGuid(req *http.Request) string {
+	pathSplit := strings.Split(req.URL.Path, "/")
+	if len(pathSplit) == 4 && pathSplit[3] != "" {
+		return pathSplit[3]
 	}
-	return finalSpaces
+	return ""
+}
+
+func filterNames(req *http.Request) []string {
+	return filterParam(req, "names")
 }
 
 func isUserOrgManager(userId, orgId string) (bool, error) {
@@ -449,13 +495,4 @@ func isUserOrgManager(userId, orgId string) (bool, error) {
 		}
 	}
 	return found, nil
-}
-
-func GetSpaceResources(secGroup client.SecurityGroup) ([]client.Space, error) {
-	var spacesGuid []string
-	for _, space := range secGroup.Relationships.RunningSpaces.Data {
-		spacesGuid = append(spacesGuid, space.GUID)
-	}
-	spaceResults, err := cfclient.GetSpacesWithOrg([]ccv3.Query{{Key: ccv3.GUIDFilter, Values: spacesGuid}}, 0)
-	return spaceResults.Resources, err
 }
