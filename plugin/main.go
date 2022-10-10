@@ -41,7 +41,7 @@ func (p *SecurityPlugin) GetMetadata() plugin.PluginMetadata {
 		Version: plugin.VersionType{
 			Major: 1,
 			Minor: 2,
-			Build: 0,
+			Build: 1,
 		},
 		Commands: []plugin.Command{
 			{

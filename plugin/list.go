@@ -23,7 +23,7 @@ func (c *ListCommand) Execute(_ []string) error {
 	}
 	messages.Printf("Getting security groups as %s...\n", messages.C.Cyan(username))
 	secGroups, err := client.GetSecGroups([]ccv3.Query{}, 0)
-	for i, _ := range secGroups.Resources {
+	for i := range secGroups.Resources {
 		_ = client.AddSecGroupRelationShips(&secGroups.Resources[i])
 	}
 	if err != nil {
@@ -39,13 +39,13 @@ func (c *ListCommand) Execute(_ []string) error {
 		subData := make([]string, 0)
 		subData = append(subData, fmt.Sprintf("#%d", iSec))
 		subData = append(subData, secGroup.Name)
-		if len(secGroup.Relationships.RunningSpaces.Data) == 0 || len(secGroup.Relationships.StagingSpaces.Data) == 0 {
+		if len(secGroup.Relationships.Running_Spaces.Data) == 0 || len(secGroup.Relationships.Staging_Spaces.Data) == 0 {
 			subData = append(subData, "", "", "")
 			data = append(data, subData)
 			continue
 		}
 		// à revoir
-		for iSpace, space := range secGroup.Relationships.RunningSpaces.Data {
+		for iSpace, space := range secGroup.Relationships.Running_Spaces.Data {
 			if iSpace > 0 {
 				subData = make([]string, 0)
 				subData = append(subData, "", "")

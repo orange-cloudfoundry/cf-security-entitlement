@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
@@ -38,7 +37,7 @@ import (
 type OauthToken struct {
 	AccessToken string `json:"access_token,omitempty"`
 	TokenType   string `json:"token_type,omitempty"`
-	Exprires    int    `json:"expires_in,omitempty"`
+	Expires     int    `json:"expires_in,omitempty"`
 	Jti         string `json:"jti,omitempty"`
 }
 
@@ -362,26 +361,26 @@ func shallowDefaultTransport(certs []string, skipVerify bool) *http.Transport {
 func GetInfo(Endpoint string, SkipVerify bool, certs []string) (model.Info, error) {
 	tr := shallowDefaultTransport(certs, SkipVerify)
 
-	client := &http.Client{Transport: tr}
+	cfClient := &http.Client{Transport: tr}
 	info := model.Info{}
 	req, err := http.NewRequest(http.MethodGet, Endpoint, nil)
 	if err != nil {
 		return info, err
 	}
 
-	resp, err := client.Do(req)
+	resp, err := cfClient.Do(req)
 	if err != nil {
 		return info, err
 	}
 
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return info, err
 	}
 
 	if err = json.Unmarshal(body, &info); err != nil {
-		return info, errors.Wrap(err, "Error unmarshaling Info")
+		return info, errors.Wrap(err, "Error unmarshalling Info")
 	}
 	json.Unmarshal(body, &info)
 
@@ -392,7 +391,7 @@ func AuthenticateWithExpire(endpoint string, clientId string, clientSecret strin
 	body := fmt.Sprint("grant_type=client_credentials")
 	var jsonData = []byte(body)
 	accessTokens := OauthToken{}
-	client := &http.Client{Transport: tr}
+	cfClient := &http.Client{Transport: tr}
 	Request, err := http.NewRequest(http.MethodPost, endpoint+"/oauth/token", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return "", time.Now(), err
@@ -401,7 +400,7 @@ func AuthenticateWithExpire(endpoint string, clientId string, clientSecret strin
 	Request.Header.Add("Content-type", "application/x-www-form-urlencoded")
 	Request.Header.Add("Accept", "application/json")
 
-	resp, err := client.Do(Request)
+	resp, err := cfClient.Do(Request)
 	if err != nil {
 		return "", time.Now(), err
 	}
@@ -411,12 +410,12 @@ func AuthenticateWithExpire(endpoint string, clientId string, clientSecret strin
 		return "", time.Now(), err
 	}
 	if err = json.Unmarshal(buf, &accessTokens); err != nil {
-		return "", time.Now(), errors.Wrap(err, "Error unmarshaling Auth")
+		return "", time.Now(), errors.Wrap(err, "Error unmarshalling Auth")
 	}
 
 	accessToken := fmt.Sprintf("bearer %s", accessTokens.AccessToken)
 
-	expiresIn := time.Duration(accessTokens.Exprires) * time.Second
+	expiresIn := time.Duration(accessTokens.Expires) * time.Second
 	expires := time.Now().Add(expiresIn)
 
 	// Taking 10 minute off the timer to have a margin of error

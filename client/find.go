@@ -39,6 +39,11 @@ type Organization struct {
 	resources.Organization
 }
 
+type Organizations struct {
+	Paginated
+	Resources []Organization `jsonry:"resources"`
+}
+
 type Paginated struct {
 	Pagination struct {
 		Next struct {
@@ -59,10 +64,10 @@ type SecurityGroup struct {
 	StagingGloballyEnabled *bool  `jsonry:"globally_enabled.staging,omitempty"`
 	RunningGloballyEnabled *bool  `jsonry:"globally_enabled.running,omitempty"`
 	Relationships          struct {
-		RunningSpaces struct {
+		Running_Spaces struct {
 			Data []Data `jsonry:"data"`
 		} `jsonry:"running_spaces"`
-		StagingSpaces struct {
+		Staging_Spaces struct {
 			Data []Data `jsonry:"data"`
 		} `jsonry:"staging_spaces"`
 	} `jsonry:"relationships,omitempty"`
@@ -101,20 +106,20 @@ type UserRoles struct {
 			User struct {
 				Data struct {
 					GUID string `jsonry:"guid"`
-				}
-			}
+				} `jsonry:"data"`
+			} `jsonry:"user"`
 			Space struct {
 				Data struct {
 					GUID string `jsonry:"guid"`
-				}
-			}
+				} `jsonry:"data"`
+			} `jsonry:"space"`
 			Organization struct {
 				Data struct {
 					GUID string `jsonry:"guid"`
-				}
-			}
-		}
-	}
+				} `jsonry:"data"`
+			} `jsonry:"organization"`
+		} `jsonry:"relationships"`
+	} `jsonry:"resources"`
 }
 
 var large = ccv3.Query{
@@ -125,6 +130,53 @@ var large = ccv3.Query{
 var orderByTimestampDesc = ccv3.Query{
 	Key:    ccv3.OrderBy,
 	Values: []string{"-created_at"},
+}
+
+func (s *SecurityGroup) FeedOrgsAndSpace(spaces []Space, orgs []resources.Organization, orgGUID string) {
+	stagingRelationShips := make([]Data, 0)
+	runningRelationShips := make([]Data, 0)
+	for _, org := range orgs {
+		if org.GUID == orgGUID {
+			for _, space := range spaces {
+				if space.Relationships[constant.RelationshipTypeOrganization].GUID == orgGUID {
+					for _, data := range s.Relationships.Staging_Spaces.Data {
+						if data.GUID == space.GUID {
+							stagingRelationShips = append(stagingRelationShips, Data{
+								GUID:      space.GUID,
+								SpaceName: space.Name,
+								OrgGUID:   orgGUID,
+								OrgName:   org.Name,
+							})
+						}
+					}
+					for _, data := range s.Relationships.Running_Spaces.Data {
+						if data.GUID == space.GUID {
+							runningRelationShips = append(runningRelationShips, Data{
+								GUID:      space.GUID,
+								SpaceName: space.Name,
+								OrgGUID:   orgGUID,
+								OrgName:   org.Name,
+							})
+						}
+					}
+				}
+			}
+		}
+		if len(stagingRelationShips) <= 0 {
+			stagingRelationShips = append(stagingRelationShips, Data{
+				OrgGUID: orgGUID,
+				OrgName: org.Name,
+			})
+		}
+		if len(runningRelationShips) <= 0 {
+			runningRelationShips = append(runningRelationShips, Data{
+				OrgGUID: orgGUID,
+				OrgName: org.Name,
+			})
+		}
+	}
+	s.Relationships.Staging_Spaces.Data = stagingRelationShips
+	s.Relationships.Running_Spaces.Data = runningRelationShips
 }
 
 func (c *Client) doRequest(method string, url string, body io.Reader) ([]byte, error) {
@@ -165,19 +217,20 @@ func (c *Client) generateUrl(baseUrl string, queries []ccv3.Query, page int) str
 	if len(queryParams) > 0 {
 		queryString = "?" + strings.Join(queryParams, "&")
 	}
-
-	return baseUrl + queryString
+	url := baseUrl + queryString
+	return url
 
 }
 
 func (c *Client) GetSecGroups(queries []ccv3.Query, page int) (SecurityGroups, error) {
 	SecGroups := SecurityGroups{}
-	buffer, err := c.doRequest(http.MethodGet, c.generateUrl(c.endpoint+"/v3/security_groups", queries, page), nil)
+	url := c.generateUrl(c.endpoint+"/v3/security_groups", queries, page)
+	buffer, err := c.doRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return SecGroups, err
 	}
 	if err = json.Unmarshal(buffer, &SecGroups); err != nil {
-		return SecGroups, errors.Wrap(err, "Error unmarshaling security groups")
+		return SecGroups, errors.Wrap(err, "Error unmarshalling Security Groups")
 	}
 	if SecGroups.Pagination.Next.HREF != "" {
 		NextPage, err := c.GetSecGroups(queries, page+1)
@@ -252,7 +305,61 @@ func (c *Client) GetSpaceByGuid(guid string) (Space, error) {
 
 }
 
-func (c *Client) GetUserManagedOrgs(userGuid string, page int) (UserRoles, error) {
+func (c *Client) GetUserManagedSpacesAndOrgs(userGUID string) ([]Space, []resources.Organization, error) {
+	var spacesResult Spaces
+	roles, err := c.GetRoles(
+		[]ccv3.Query{
+			{Key: ccv3.UserGUIDFilter, Values: []string{userGUID}},
+			{Key: ccv3.RoleTypesFilter, Values: []string{string(constant.OrgManagerRole)}},
+		},
+		0)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "Error getting managed spaces")
+	}
+	orgIds := make([]string, len(roles.Resources))
+	for _, role := range roles.Resources {
+		if role.Relationships.Organization.Data.GUID != "" {
+			orgIds = append(orgIds, role.Relationships.Organization.Data.GUID)
+		}
+	}
+	spacesResult, err = c.GetSpacesWithOrg(
+		[]ccv3.Query{{Key: ccv3.OrganizationGUIDFilter, Values: orgIds}},
+		0,
+	)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, fmt.Sprintf("Error getting managed spaces for user %s", userGUID))
+	}
+	orgsResult, err := c.GetOrganizations(
+		[]ccv3.Query{{Key: ccv3.GUIDFilter, Values: orgIds}},
+		0,
+	)
+	for _, org := range orgsResult.Resources {
+		spacesResult.Included.Organizations = append(spacesResult.Included.Organizations, org.Organization)
+	}
+	return spacesResult.Resources, spacesResult.Included.Organizations, nil
+}
+
+func (c *Client) GetRoles(queries []ccv3.Query, page int) (UserRoles, error) {
+	var rolesResult UserRoles
+	url := c.generateUrl(c.apiUrl+"/v3/roles", queries, page)
+	buffer, err := c.doRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return rolesResult, errors.Wrap(err, "Error getting roles")
+	}
+	if err = json.Unmarshal(buffer, &rolesResult); err != nil {
+		return rolesResult, errors.Wrap(err, "Error unmarshalling Roles")
+	}
+	if rolesResult.Pagination.Next.HREF != "" {
+		NextPage, err := c.GetRoles(queries, page+1)
+		if err != nil {
+			return rolesResult, err
+		}
+		rolesResult.Resources = append(rolesResult.Resources, NextPage.Resources...)
+	}
+	return rolesResult, err
+}
+
+func (c *Client) GetOrgManagedUserRoles(userGuid string, page int) (UserRoles, error) {
 	var userRoles UserRoles
 
 	url := c.generateUrl(c.apiUrl+"/v3/roles", []ccv3.Query{large, {Key: ccv3.UserGUIDFilter, Values: []string{userGuid}}}, 0)
@@ -261,10 +368,10 @@ func (c *Client) GetUserManagedOrgs(userGuid string, page int) (UserRoles, error
 		return userRoles, err
 	}
 	if err = json.Unmarshal(buffer, &userRoles); err != nil {
-		return userRoles, errors.Wrap(err, "Error unmarshaling User Roles")
+		return userRoles, errors.Wrap(err, "Error unmarshalling User roles")
 	}
 	if userRoles.Pagination.Next.HREF != "" {
-		NextPage, err := c.GetUserManagedOrgs(userGuid, page+1)
+		NextPage, err := c.GetOrgManagedUserRoles(userGuid, page+1)
 		if err != nil {
 			return userRoles, err
 		}
@@ -280,7 +387,7 @@ func (c *Client) GetOrgManagers(orgGuid string, page int) (User, error) {
 	buffer, err := c.doRequest(http.MethodGet, url, nil)
 
 	if err = json.Unmarshal(buffer, &user); err != nil {
-		return user, errors.Wrap(err, "Error unmarshaling User")
+		return user, errors.Wrap(err, "Error unmarshalling user roles")
 	}
 
 	if user.Pagination.Next.HREF != "" {
@@ -325,7 +432,7 @@ func (c *Client) GetSpacesWithOrg(queries []ccv3.Query, page int) (Spaces, error
 		return spaces, err
 	}
 	if err = json.Unmarshal(buffer, &spaces); err != nil {
-		return spaces, errors.Wrap(err, "Error unmarshaling Spaces")
+		return spaces, errors.Wrap(err, "Error unmarshalling Spaces")
 	}
 	if spaces.Pagination.Next.HREF != "" {
 		NextPage, err := c.GetSpacesWithOrg(queries, page+1)
@@ -333,18 +440,62 @@ func (c *Client) GetSpacesWithOrg(queries []ccv3.Query, page int) (Spaces, error
 			return spaces, err
 		}
 		spaces.Resources = append(spaces.Resources, NextPage.Resources...)
+		spaces.Included.Organizations = append(spaces.Included.Organizations, NextPage.Included.Organizations...)
 	}
 	return spaces, nil
+}
 
+func (c *Client) GetSpaces(queries []ccv3.Query, page int) (Spaces, error) {
+	curQueries := queries
+	curQueries = append(curQueries, large)
+	var spaces Spaces
+	url := c.generateUrl(c.apiUrl+"/v3/spaces", curQueries, page)
+	buffer, err := c.doRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return spaces, err
+	}
+	if err = json.Unmarshal(buffer, &spaces); err != nil {
+		return spaces, errors.Wrap(err, "Error unmarshalling Spaces")
+	}
+	if spaces.Pagination.Next.HREF != "" {
+		NextPage, err := c.GetSpaces(queries, page+1)
+		if err != nil {
+			return spaces, err
+		}
+		spaces.Resources = append(spaces.Resources, NextPage.Resources...)
+	}
+	return spaces, nil
+}
+
+func (c *Client) GetOrganizations(queries []ccv3.Query, page int) (Organizations, error) {
+	curQueries := queries
+	curQueries = append(curQueries, large)
+	var orgs Organizations
+	url := c.generateUrl(c.apiUrl+"/v3/organizations", curQueries, page)
+	buffer, err := c.doRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return orgs, err
+	}
+	if err = json.Unmarshal(buffer, &orgs); err != nil {
+		return orgs, errors.Wrap(err, "Error unmarshalling Organizations")
+	}
+	if orgs.Pagination.Next.HREF != "" {
+		NextPage, err := c.GetOrganizations(queries, page+1)
+		if err != nil {
+			return orgs, err
+		}
+		orgs.Resources = append(orgs.Resources, NextPage.Resources...)
+	}
+	return orgs, nil
 }
 
 func (c *Client) GetSecGroupSpaces(secGroup *SecurityGroup) (Spaces, error) {
 	var runningSpaceGuids []string
 	var stagingSpaceGuids []string
-	for _, data := range secGroup.Relationships.RunningSpaces.Data {
+	for _, data := range secGroup.Relationships.Running_Spaces.Data {
 		runningSpaceGuids = append(runningSpaceGuids, data.GUID)
 	}
-	for _, data := range secGroup.Relationships.StagingSpaces.Data {
+	for _, data := range secGroup.Relationships.Staging_Spaces.Data {
 		stagingSpaceGuids = append(stagingSpaceGuids, data.GUID)
 	}
 	spaces, err := c.GetSpacesWithOrg([]ccv3.Query{{Key: ccv3.GUIDFilter, Values: append(runningSpaceGuids, stagingSpaceGuids...)}, {Key: ccv3.Include, Values: []string{"organization"}}}, 0)
@@ -366,18 +517,18 @@ func (c *Client) AddSecGroupRelationShips(secGroup *SecurityGroup) error {
 				break
 			}
 		}
-		for i, data := range secGroup.Relationships.RunningSpaces.Data {
+		for i, data := range secGroup.Relationships.Running_Spaces.Data {
 			if data.GUID == space.GUID {
-				secGroup.Relationships.RunningSpaces.Data[i].SpaceName = space.Name
-				secGroup.Relationships.RunningSpaces.Data[i].OrgName = orgName
-				secGroup.Relationships.RunningSpaces.Data[i].OrgGUID = orgGuid
+				secGroup.Relationships.Running_Spaces.Data[i].SpaceName = space.Name
+				secGroup.Relationships.Running_Spaces.Data[i].OrgName = orgName
+				secGroup.Relationships.Running_Spaces.Data[i].OrgGUID = orgGuid
 			}
 		}
-		for i, data := range secGroup.Relationships.StagingSpaces.Data {
+		for i, data := range secGroup.Relationships.Staging_Spaces.Data {
 			if data.GUID == space.GUID {
-				secGroup.Relationships.StagingSpaces.Data[i].SpaceName = space.Name
-				secGroup.Relationships.StagingSpaces.Data[i].OrgName = orgName
-				secGroup.Relationships.StagingSpaces.Data[i].OrgGUID = orgGuid
+				secGroup.Relationships.Staging_Spaces.Data[i].SpaceName = space.Name
+				secGroup.Relationships.Staging_Spaces.Data[i].OrgName = orgName
+				secGroup.Relationships.Staging_Spaces.Data[i].OrgGUID = orgGuid
 			}
 		}
 	}

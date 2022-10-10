@@ -77,12 +77,12 @@ func (c *Client) handleError(resp *http.Response) (*http.Response, error) {
 	var cfErrorsV3 CloudFoundryErrorsV3
 	var cfErrorV3 CloudFoundryErrorV3
 	if err := json.Unmarshal(body, &cfErrorsV3); err != nil {
-		return resp, errors.Wrap(err, "Error Unmarshaling Errors")
+		return resp, errors.Wrap(err, "Error unmarshalling Errors")
 	}
 
 	if len(cfErrorsV3.Errors) == 0 {
 		if err := json.Unmarshal(body, &cfErrorV3); err != nil {
-			return resp, errors.Wrap(err, "Error Unmarshaling Errors")
+			return resp, errors.Wrap(err, "Error unmarshalling Errors")
 		}
 	} else {
 		cfErrorV3 = NewCloudFoundryErrorFromV3Errors(cfErrorsV3)
