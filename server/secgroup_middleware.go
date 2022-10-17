@@ -433,7 +433,10 @@ func DeleteInconsistantEntitlements(entitlements []model.EntitlementSecGroup) {
 	for _, entitlement := range entitlements {
 		entitledSecGroupGUIDs = append(entitledSecGroupGUIDs, entitlement.SecurityGroupGUID)
 	}
-	existingSecGroups, _ := cfclient.GetSecGroups([]ccv3.Query{{Key: ccv3.GUIDFilter, Values: entitledSecGroupGUIDs}}, 0)
+	existingSecGroups, err := cfclient.GetSecGroups([]ccv3.Query{{Key: ccv3.GUIDFilter, Values: entitledSecGroupGUIDs}}, 0)
+	if err != nil || len(existingSecGroups.Resources) <= 0 {
+		return
+	}
 
 	existingSecGroupGUIDs := make([]string, 0)
 	for _, secGroup := range existingSecGroups.Resources {
