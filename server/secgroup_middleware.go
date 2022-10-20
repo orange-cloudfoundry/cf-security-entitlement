@@ -279,13 +279,21 @@ func retrieveSecGroups(w http.ResponseWriter, req *http.Request, userId string) 
 		entitledSecGroupIds = append(entitledSecGroupIds, entitlement.SecurityGroupGUID)
 	}
 
-	queries := make([]ccv3.Query, 0)
-	queries = append(queries, ccv3.Query{Key: ccv3.GUIDFilter, Values: entitledSecGroupIds})
-	names := filterNames(req)
-	if len(names) > 0 {
-		queries = append(queries, ccv3.Query{Key: ccv3.NameFilter, Values: names})
+	secGroupsResult := client.SecurityGroups{Resources: make([]client.SecurityGroup, 0)}
+
+	chunkEntitledSecGroupIds := ChunkSlice(entitledSecGroupIds, 20)
+	for _, chunk := range chunkEntitledSecGroupIds {
+		queries := make([]ccv3.Query, 0)
+		queries = append(queries, ccv3.Query{Key: ccv3.GUIDFilter, Values: chunk})
+		names := filterNames(req)
+		if len(names) > 0 {
+			queries = append(queries, ccv3.Query{Key: ccv3.NameFilter, Values: names})
+		}
+		cSecGroupsResult, err := cfclient.GetSecGroups(queries, 0)
+		if err == nil {
+			secGroupsResult.Resources = append(secGroupsResult.Resources, cSecGroupsResult.Resources...)
+		}
 	}
-	secGroupsResult, err := cfclient.GetSecGroups(queries, 0)
 
 	DeleteInconsistantEntitlements(entitlements)
 
@@ -341,6 +349,18 @@ func retrieveSecGroup(w http.ResponseWriter, req *http.Request, secGroupGuid, us
 
 	b, _ := json.Marshal(response.Resources[0])
 	w.Write(b)
+}
+
+func ChunkSlice(slice []string, chunkSize int) [][]string {
+	var chunks [][]string
+	for i := 0; i < len(slice); i += chunkSize {
+		end := i + chunkSize
+		if end > len(slice) {
+			end = len(slice)
+		}
+		chunks = append(chunks, slice[i:end])
+	}
+	return chunks
 }
 
 func FeedSecGroups(secGroups []client.SecurityGroup, entitlements []model.EntitlementSecGroup, spaces []client.Space, orgs []resources.Organization) []client.SecurityGroup {
@@ -433,8 +453,18 @@ func DeleteInconsistantEntitlements(entitlements []model.EntitlementSecGroup) {
 	for _, entitlement := range entitlements {
 		entitledSecGroupGUIDs = append(entitledSecGroupGUIDs, entitlement.SecurityGroupGUID)
 	}
-	existingSecGroups, err := cfclient.GetSecGroups([]ccv3.Query{{Key: ccv3.GUIDFilter, Values: entitledSecGroupGUIDs}}, 0)
-	if err != nil || len(existingSecGroups.Resources) <= 0 {
+
+	existingSecGroups := client.SecurityGroups{Resources: make([]client.SecurityGroup, 0)}
+	chunkedEntitledSecGroupGUIDs := ChunkSlice(entitledSecGroupGUIDs, 20)
+	for _, chunk := range chunkedEntitledSecGroupGUIDs {
+		cExistingSecGroups, err := cfclient.GetSecGroups([]ccv3.Query{{Key: ccv3.GUIDFilter, Values: chunk}}, 0)
+		if err != nil {
+			return
+		}
+		existingSecGroups.Resources = append(existingSecGroups.Resources, cExistingSecGroups.Resources...)
+	}
+
+	if len(existingSecGroups.Resources) <= 0 {
 		return
 	}
 
