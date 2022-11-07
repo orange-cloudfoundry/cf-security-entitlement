@@ -142,6 +142,7 @@ func genClient(endpoint string) *client.Client {
 
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: sslDisable},
+		Proxy:           http.ProxyFromEnvironment,
 	}
 
 	return client.NewClient(endpoint, ccClientV3, accessToken, apiUrl, tr)
