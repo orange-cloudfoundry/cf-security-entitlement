@@ -31,7 +31,7 @@ func getOrgID(orgName string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if Orgs.Resources[0].GUID == "" {
+	if len(Orgs.Resources) == 0 || Orgs.Resources[0].GUID == "" {
 		return "", fmt.Errorf("Org %s not found", orgName)
 	}
 	return Orgs.Resources[0].GUID, nil
