@@ -28,7 +28,7 @@ require (
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.14.0 // indirect
-	github.com/thoas/go-funk v0.9.2
+	github.com/thoas/go-funk v0.9.3
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )
 
