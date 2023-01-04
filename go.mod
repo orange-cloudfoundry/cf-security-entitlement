@@ -21,14 +21,14 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.15 // indirect
 	github.com/o1egl/gormrus v0.0.0-20190416211302-fde1f6a23457
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/orange-cloudfoundry/gobis v1.18.3
-	github.com/orange-cloudfoundry/gobis-middlewares v1.26.5
+	github.com/orange-cloudfoundry/gobis v1.19.0
+	github.com/orange-cloudfoundry/gobis-middlewares v1.27.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/common v0.39.0
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.14.0 // indirect
-	github.com/thoas/go-funk v0.9.2
+	github.com/thoas/go-funk v0.9.3
 	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )
 
@@ -65,7 +65,7 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
-	github.com/gravitational/trace v1.1.19 // indirect
+	github.com/gravitational/trace v1.2.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jonboulle/clockwork v0.3.0 // indirect

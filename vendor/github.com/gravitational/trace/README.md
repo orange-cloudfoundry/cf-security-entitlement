@@ -1,13 +1,13 @@
 # Trace
 
 [![GoDoc](https://godoc.org/github.com/gravitational/trace?status.png)](https://godoc.org/github.com/gravitational/trace)
-
+![Test workflow](https://github.com/gravitational/trace/actions/workflows/test.yaml/badge.svg?branch=master)
 
 Package for error handling and error reporting
 
 Read more here:
 
-http://gravitational.com/blog/golang_error_handling/
+https://goteleport.com/blog/golang-error-handling/
 
 ### Capture file, line and function
 
