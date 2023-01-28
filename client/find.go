@@ -198,6 +198,79 @@ func (c *Client) doRequest(method string, url string, body io.Reader) ([]byte, e
 
 }
 
+func chunkQueries(queries []ccv3.Query, maxValues int) [][]ccv3.Query {
+	// addToChunk
+	addToChunks := func(target []map[ccv3.QueryKey][]string, key ccv3.QueryKey, values [][]string) []map[ccv3.QueryKey][]string {
+		if len(target) == 0 {
+			target = append(target, make(map[ccv3.QueryKey][]string))
+		}
+		newTarget := make([]map[ccv3.QueryKey][]string, 0)
+		for _, chunk := range target {
+			for _, value := range values {
+				newChunk := make(map[ccv3.QueryKey][]string)
+				for k, v := range chunk {
+					newChunk[k] = v
+				}
+				newChunk[key] = value
+				newTarget = append(newTarget, newChunk)
+			}
+		}
+		return newTarget
+	}
+
+	simplified := make(map[ccv3.QueryKey][]string)
+	for _, query := range queries {
+		simplified[query.Key] = append(simplified[query.Key], query.Values...)
+	}
+
+	// find right chunkSize
+	allValues := 0
+	for _, values := range simplified {
+		allValues += len(values)
+	}
+	if allValues <= maxValues {
+		maxValues = allValues
+	}
+	chunkSize := maxValues / len(simplified)
+	if chunkSize <= 1 {
+		chunkSize = 1
+	}
+
+	// Create chunks for each query
+	chunkedBuffers := make(map[ccv3.QueryKey][][]string)
+	for key, values := range simplified {
+		chunks := make([][]string, 0)
+		for i := 0; i < len(values); i += chunkSize {
+			end := i + chunkSize
+			if end > len(values) {
+				end = len(values)
+			}
+			chunks = append(chunks, values[i:end])
+		}
+		chunkedBuffers[key] = chunks
+	}
+
+	// Multiply query chunks
+	target := make([]map[ccv3.QueryKey][]string, 0)
+	for key, chunks := range chunkedBuffers {
+		target = addToChunks(target, key, chunks)
+	}
+
+	// Recreates queries for each chunks
+	chunkedQueries := make([][]ccv3.Query, 0)
+	for _, chunk := range target {
+		chunkedQuery := make([]ccv3.Query, 0)
+		for key, values := range chunk {
+			chunkedQuery = append(chunkedQuery, ccv3.Query{
+				Key:    key,
+				Values: values,
+			})
+		}
+		chunkedQueries = append(chunkedQueries, chunkedQuery)
+	}
+	return chunkedQueries
+}
+
 func (c *Client) generateUrl(baseUrl string, queries []ccv3.Query, page int) string {
 	curQueries := queries
 	curQueries = append(curQueries, large)
