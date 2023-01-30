@@ -11,8 +11,9 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"strings"
 )
+
+const maxValuesPerQueryParam = 20
 
 type Spaces struct {
 	Paginated
@@ -122,7 +123,7 @@ type UserRoles struct {
 	} `jsonry:"resources"`
 }
 
-var large = ccv3.Query{
+var Large = ccv3.Query{
 	Key:    ccv3.PerPage,
 	Values: []string{"5000"},
 }
@@ -198,7 +199,7 @@ func (c *Client) doRequest(method string, url string, body io.Reader) ([]byte, e
 
 }
 
-func chunkQueries(queries []ccv3.Query, maxValues int) [][]ccv3.Query {
+func chunkQueries(queries []ccv3.Query) [][]ccv3.Query {
 	// addToChunk
 	addToChunks := func(target []map[ccv3.QueryKey][]string, key ccv3.QueryKey, values [][]string) []map[ccv3.QueryKey][]string {
 		if len(target) == 0 {
@@ -228,6 +229,7 @@ func chunkQueries(queries []ccv3.Query, maxValues int) [][]ccv3.Query {
 	for _, values := range simplified {
 		allValues += len(values)
 	}
+	maxValues := maxValuesPerQueryParam
 	if allValues <= maxValues {
 		maxValues = allValues
 	}
@@ -273,7 +275,7 @@ func chunkQueries(queries []ccv3.Query, maxValues int) [][]ccv3.Query {
 
 func (c *Client) generateUrl(baseUrl string, queries []ccv3.Query, page int) string {
 	curQueries := queries
-	curQueries = append(curQueries, large)
+	curQueries = append(curQueries, Large)
 	if page > 0 {
 		curQueries = append(curQueries, ccv3.Query{
 			Key:    "page",
@@ -281,22 +283,23 @@ func (c *Client) generateUrl(baseUrl string, queries []ccv3.Query, page int) str
 		})
 	}
 
-	// Build queryString
-	var queryParams []string
-	for key, value := range ccv3.FormatQueryParameters(curQueries) {
-		queryParams = append(queryParams, fmt.Sprintf("%s=%s", key, value[0]))
-	}
-	queryString := ""
-	if len(queryParams) > 0 {
-		queryString = "?" + strings.Join(queryParams, "&")
-	}
-	url := baseUrl + queryString
+	url := baseUrl + QueriesToQueryString(curQueries)
 	return url
 
 }
 
 func (c *Client) GetSecGroups(queries []ccv3.Query, page int) (SecurityGroups, error) {
 	SecGroups := SecurityGroups{}
+	if chunkedQueries := chunkQueries(queries); len(chunkedQueries) > 1 {
+		for _, chunkedQuery := range chunkedQueries {
+			chunkedResult, err := c.GetSecGroups(chunkedQuery, page)
+			if err != nil {
+				return SecGroups, err
+			}
+			SecGroups.Resources = append(SecGroups.Resources, chunkedResult.Resources...)
+		}
+		return SecGroups, nil
+	}
 	url := c.generateUrl(c.endpoint+"/v3/security_groups", queries, page)
 	buffer, err := c.doRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -414,6 +417,17 @@ func (c *Client) GetUserManagedSpacesAndOrgs(userGUID string) ([]Space, []resour
 
 func (c *Client) GetRoles(queries []ccv3.Query, page int) (UserRoles, error) {
 	var rolesResult UserRoles
+	if chunkedQueries := chunkQueries(queries); len(chunkedQueries) > 1 {
+		for _, chunkedQuery := range chunkedQueries {
+			chunkedResult, err := c.GetRoles(chunkedQuery, page)
+			if err != nil {
+				return rolesResult, err
+			}
+			rolesResult.Resources = append(rolesResult.Resources, chunkedResult.Resources...)
+		}
+		return rolesResult, nil
+	}
+
 	url := c.generateUrl(c.apiUrl+"/v3/roles", queries, page)
 	buffer, err := c.doRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -434,8 +448,7 @@ func (c *Client) GetRoles(queries []ccv3.Query, page int) (UserRoles, error) {
 
 func (c *Client) GetOrgManagedUserRoles(userGuid string, page int) (UserRoles, error) {
 	var userRoles UserRoles
-
-	url := c.generateUrl(c.apiUrl+"/v3/roles", []ccv3.Query{large, {Key: ccv3.UserGUIDFilter, Values: []string{userGuid}}}, 0)
+	url := c.generateUrl(c.apiUrl+"/v3/roles", []ccv3.Query{Large, {Key: ccv3.UserGUIDFilter, Values: []string{userGuid}}}, 0)
 	buffer, err := c.doRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return userRoles, err
@@ -455,8 +468,7 @@ func (c *Client) GetOrgManagedUserRoles(userGuid string, page int) (UserRoles, e
 
 func (c *Client) GetOrgManagers(orgGuid string, page int) (User, error) {
 	user := User{}
-
-	url := c.generateUrl(c.apiUrl+"/v3/roles", []ccv3.Query{large, {Key: ccv3.OrganizationGUIDFilter, Values: []string{orgGuid}}}, page)
+	url := c.generateUrl(c.apiUrl+"/v3/roles", []ccv3.Query{Large, {Key: ccv3.OrganizationGUIDFilter, Values: []string{orgGuid}}}, page)
 	buffer, err := c.doRequest(http.MethodGet, url, nil)
 
 	if err = json.Unmarshal(buffer, &user); err != nil {
@@ -497,8 +509,19 @@ func (c *Client) GetTransport() http.Transport {
 func (c *Client) GetSpacesWithOrg(queries []ccv3.Query, page int) (Spaces, error) {
 	curQueries := queries
 	curQueries = append(curQueries, ccv3.Query{Key: ccv3.Include, Values: []string{"organization"}})
-	curQueries = append(curQueries, large)
+	curQueries = append(curQueries, Large)
 	var spaces Spaces
+	if chunkedQueries := chunkQueries(curQueries); len(chunkedQueries) > 1 {
+		for _, chunkedQuery := range chunkedQueries {
+			chunkedResult, err := c.GetSpacesWithOrg(chunkedQuery, page)
+			if err != nil {
+				return spaces, err
+			}
+			spaces.Resources = append(spaces.Resources, chunkedResult.Resources...)
+			spaces.Included.Organizations = append(spaces.Included.Organizations, chunkedResult.Included.Organizations...)
+		}
+		return spaces, nil
+	}
 	url := c.generateUrl(c.apiUrl+"/v3/spaces", curQueries, page)
 	buffer, err := c.doRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -520,8 +543,18 @@ func (c *Client) GetSpacesWithOrg(queries []ccv3.Query, page int) (Spaces, error
 
 func (c *Client) GetSpaces(queries []ccv3.Query, page int) (Spaces, error) {
 	curQueries := queries
-	curQueries = append(curQueries, large)
+	curQueries = append(curQueries, Large)
 	var spaces Spaces
+	if chunkedQueries := chunkQueries(curQueries); len(chunkedQueries) > 1 {
+		for _, chunkedQuery := range chunkedQueries {
+			chunkedResult, err := c.GetSpaces(chunkedQuery, page)
+			if err != nil {
+				return spaces, err
+			}
+			spaces.Resources = append(spaces.Resources, chunkedResult.Resources...)
+		}
+		return spaces, nil
+	}
 	url := c.generateUrl(c.apiUrl+"/v3/spaces", curQueries, page)
 	buffer, err := c.doRequest(http.MethodGet, url, nil)
 	if err != nil {
@@ -542,8 +575,18 @@ func (c *Client) GetSpaces(queries []ccv3.Query, page int) (Spaces, error) {
 
 func (c *Client) GetOrganizations(queries []ccv3.Query, page int) (Organizations, error) {
 	curQueries := queries
-	curQueries = append(curQueries, large)
+	curQueries = append(curQueries, Large)
 	var orgs Organizations
+	if chunkedQueries := chunkQueries(curQueries); len(chunkedQueries) > 1 {
+		for _, chunkedQuery := range chunkedQueries {
+			chunkedResult, err := c.GetOrganizations(chunkedQuery, page)
+			if err != nil {
+				return orgs, err
+			}
+			orgs.Resources = append(orgs.Resources, chunkedResult.Resources...)
+		}
+		return orgs, nil
+	}
 	url := c.generateUrl(c.apiUrl+"/v3/organizations", curQueries, page)
 	buffer, err := c.doRequest(http.MethodGet, url, nil)
 	if err != nil {
