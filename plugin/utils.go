@@ -58,29 +58,54 @@ func getOrgName(orgId string) (string, error) {
 	return org.Name, nil
 }
 
+func getRawOrgSpaces(orgId string, page int) (client.Spaces, error) {
+	var spaces client.Spaces
+	queries := []ccv3.Query{
+		client.Large,
+		{
+			Key:    "page",
+			Values: []string{fmt.Sprintf("%d", page)},
+		},
+		{
+			Key:    ccv3.OrganizationGUIDFilter,
+			Values: []string{orgId},
+		},
+	}
+	result, err := cliConnection.CliCommandWithoutTerminalOutput(
+		"curl",
+		"/v3/spaces"+client.QueriesToQueryString(queries),
+	)
+	if err != nil {
+		return spaces, err
+	}
+	err = json.Unmarshal([]byte(joinResult(result)), &spaces)
+	if err != nil {
+		return spaces, err
+	}
+
+	if spaces.Pagination.Next.HREF != "" {
+		NextPage, err := getRawOrgSpaces(orgId, page+1)
+		if err != nil {
+			return spaces, err
+		}
+		spaces.Resources = append(spaces.Resources, NextPage.Resources...)
+	}
+
+	return spaces, nil
+}
+
 func getOrgSpaces(orgId string) ([]plugin_models.GetOrg_Space, error) {
 	var spaceResult plugin_models.GetOrg_Space
 	var spaceModel []plugin_models.GetOrg_Space
-	result, err := cliConnection.CliCommandWithoutTerminalOutput(
-		"curl",
-		"/v3/spaces",
-	)
-	if err != nil {
-		return spaceModel, err
-	}
-	var spaces client.Spaces
-	err = json.Unmarshal([]byte(joinResult(result)), &spaces)
+	spaces, err := getRawOrgSpaces(orgId, 1)
 	if err != nil {
 		return spaceModel, err
 	}
 
 	for _, space := range spaces.Resources {
-		if space.Relationships["organization"].GUID == orgId {
-			spaceResult.Guid = space.GUID
-			spaceResult.Name = space.Name
-			spaceModel = append(spaceModel, spaceResult)
-		}
-
+		spaceResult.Guid = space.GUID
+		spaceResult.Name = space.Name
+		spaceModel = append(spaceModel, spaceResult)
 	}
 	return spaceModel, nil
 }
