@@ -122,7 +122,7 @@ type UserRoles struct {
 	} `jsonry:"resources"`
 }
 
-var large = ccv3.Query{
+var Large = ccv3.Query{
 	Key:    ccv3.PerPage,
 	Values: []string{"5000"},
 }
@@ -200,7 +200,7 @@ func (c *Client) doRequest(method string, url string, body io.Reader) ([]byte, e
 
 func (c *Client) generateUrl(baseUrl string, queries []ccv3.Query, page int) string {
 	curQueries := queries
-	curQueries = append(curQueries, large)
+	curQueries = append(curQueries, Large)
 	if page > 0 {
 		curQueries = append(curQueries, ccv3.Query{
 			Key:    "page",
@@ -208,17 +208,21 @@ func (c *Client) generateUrl(baseUrl string, queries []ccv3.Query, page int) str
 		})
 	}
 
-	// Build queryString
+	url := baseUrl + QueriesToQueryString(curQueries)
+	return url
+
+}
+
+func QueriesToQueryString(queries []ccv3.Query) string {
 	var queryParams []string
-	for key, value := range ccv3.FormatQueryParameters(curQueries) {
+	for key, value := range ccv3.FormatQueryParameters(queries) {
 		queryParams = append(queryParams, fmt.Sprintf("%s=%s", key, value[0]))
 	}
 	queryString := ""
 	if len(queryParams) > 0 {
 		queryString = "?" + strings.Join(queryParams, "&")
 	}
-	url := baseUrl + queryString
-	return url
+	return queryString
 
 }
 
@@ -362,7 +366,7 @@ func (c *Client) GetRoles(queries []ccv3.Query, page int) (UserRoles, error) {
 func (c *Client) GetOrgManagedUserRoles(userGuid string, page int) (UserRoles, error) {
 	var userRoles UserRoles
 
-	url := c.generateUrl(c.apiUrl+"/v3/roles", []ccv3.Query{large, {Key: ccv3.UserGUIDFilter, Values: []string{userGuid}}}, 0)
+	url := c.generateUrl(c.apiUrl+"/v3/roles", []ccv3.Query{Large, {Key: ccv3.UserGUIDFilter, Values: []string{userGuid}}}, 0)
 	buffer, err := c.doRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return userRoles, err
@@ -383,7 +387,7 @@ func (c *Client) GetOrgManagedUserRoles(userGuid string, page int) (UserRoles, e
 func (c *Client) GetOrgManagers(orgGuid string, page int) (User, error) {
 	user := User{}
 
-	url := c.generateUrl(c.apiUrl+"/v3/roles", []ccv3.Query{large, {Key: ccv3.OrganizationGUIDFilter, Values: []string{orgGuid}}}, page)
+	url := c.generateUrl(c.apiUrl+"/v3/roles", []ccv3.Query{Large, {Key: ccv3.OrganizationGUIDFilter, Values: []string{orgGuid}}}, page)
 	buffer, err := c.doRequest(http.MethodGet, url, nil)
 
 	if err = json.Unmarshal(buffer, &user); err != nil {
@@ -424,7 +428,7 @@ func (c *Client) GetTransport() http.Transport {
 func (c *Client) GetSpacesWithOrg(queries []ccv3.Query, page int) (Spaces, error) {
 	curQueries := queries
 	curQueries = append(curQueries, ccv3.Query{Key: ccv3.Include, Values: []string{"organization"}})
-	curQueries = append(curQueries, large)
+	curQueries = append(curQueries, Large)
 	var spaces Spaces
 	url := c.generateUrl(c.apiUrl+"/v3/spaces", curQueries, page)
 	buffer, err := c.doRequest(http.MethodGet, url, nil)
@@ -447,7 +451,7 @@ func (c *Client) GetSpacesWithOrg(queries []ccv3.Query, page int) (Spaces, error
 
 func (c *Client) GetSpaces(queries []ccv3.Query, page int) (Spaces, error) {
 	curQueries := queries
-	curQueries = append(curQueries, large)
+	curQueries = append(curQueries, Large)
 	var spaces Spaces
 	url := c.generateUrl(c.apiUrl+"/v3/spaces", curQueries, page)
 	buffer, err := c.doRequest(http.MethodGet, url, nil)
@@ -469,7 +473,7 @@ func (c *Client) GetSpaces(queries []ccv3.Query, page int) (Spaces, error) {
 
 func (c *Client) GetOrganizations(queries []ccv3.Query, page int) (Organizations, error) {
 	curQueries := queries
-	curQueries = append(curQueries, large)
+	curQueries = append(curQueries, Large)
 	var orgs Organizations
 	url := c.generateUrl(c.apiUrl+"/v3/organizations", curQueries, page)
 	buffer, err := c.doRequest(http.MethodGet, url, nil)
