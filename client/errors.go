@@ -5,7 +5,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -63,7 +63,7 @@ func (e CloudFoundryHTTPError) Error() string {
 }
 
 func (c *Client) handleError(resp *http.Response) (*http.Response, error) {
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return resp, CloudFoundryHTTPError{
 			StatusCode: resp.StatusCode,
@@ -77,12 +77,12 @@ func (c *Client) handleError(resp *http.Response) (*http.Response, error) {
 	var cfErrorsV3 CloudFoundryErrorsV3
 	var cfErrorV3 CloudFoundryErrorV3
 	if err := json.Unmarshal(body, &cfErrorsV3); err != nil {
-		return resp, errors.Wrap(err, "Error unmarshalling Errors")
+		return resp, errors.Wrap(err, "Error unmarshalling cloudfoundry errors")
 	}
 
 	if len(cfErrorsV3.Errors) == 0 {
 		if err := json.Unmarshal(body, &cfErrorV3); err != nil {
-			return resp, errors.Wrap(err, "Error unmarshalling Errors")
+			return resp, errors.Wrap(err, "Error unmarshalling cloudfoundry error")
 		}
 	} else {
 		cfErrorV3 = NewCloudFoundryErrorFromV3Errors(cfErrorsV3)

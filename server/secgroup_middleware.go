@@ -146,15 +146,15 @@ func bindOrUnbindSecGroup(w http.ResponseWriter, req *http.Request, next http.Ha
 	if req.Method == http.MethodPost {
 		buf, err := io.ReadAll(req.Body)
 		if err != nil {
-			errors.Wrap(err, "Error reading User")
+			errors.Wrap(errors.Wrap(err, "Error reading body"), "Error binding security group")
 			return
 		}
 		if err = json.Unmarshal(buf, &dataBody); err != nil {
-			errors.Wrap(err, "Error unmarshalling User")
+			errors.Wrap(errors.Wrap(err, "Error unmarshalling body"), "Error binding security group")
 			return
 		}
 		if len(dataBody.Data) == 0 {
-			errors.Wrap(err, "Error unmarshalling User")
+			errors.Wrap(errors.Wrap(err, "Error no data in body"), "Error binding security group")
 		}
 		spaceGuid = dataBody.Data[0].GUID
 	}

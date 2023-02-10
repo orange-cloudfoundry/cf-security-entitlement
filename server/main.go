@@ -379,10 +379,10 @@ func GetInfo(Endpoint string, SkipVerify bool, certs []string) (model.Info, erro
 		return info, err
 	}
 
-	if err = json.Unmarshal(body, &info); err != nil {
-		return info, errors.Wrap(err, "Error unmarshalling Info")
+	err = json.Unmarshal(body, &info)
+	if err != nil {
+		return info, errors.Wrap(errors.Wrap(err, "Error unmarshalling info"), "Error retrieving info from cloud controller api")
 	}
-	json.Unmarshal(body, &info)
 
 	return info, nil
 }
@@ -410,7 +410,7 @@ func AuthenticateWithExpire(endpoint string, clientId string, clientSecret strin
 		return "", time.Now(), err
 	}
 	if err = json.Unmarshal(buf, &accessTokens); err != nil {
-		return "", time.Now(), errors.Wrap(err, "Error unmarshalling Auth")
+		return "", time.Now(), errors.Wrap(errors.Wrap(err, "Error unmarshalling auth"), "Error authenticating on cloud controller api")
 	}
 
 	accessToken := fmt.Sprintf("bearer %s", accessTokens.AccessToken)

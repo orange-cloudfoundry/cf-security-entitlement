@@ -9,7 +9,6 @@ import (
 	"github.com/orange-cloudfoundry/cf-security-entitlement/model"
 	"github.com/pkg/errors"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 )
@@ -194,7 +193,7 @@ func (c *Client) doRequest(method string, url string, body io.Reader) ([]byte, e
 	if response.StatusCode != http.StatusOK {
 		return nil, errors.Wrap(err, "http error")
 	}
-	return ioutil.ReadAll(response.Body)
+	return io.ReadAll(response.Body)
 
 }
 
@@ -234,7 +233,7 @@ func (c *Client) GetSecGroups(queries []ccv3.Query, page int) (SecurityGroups, e
 		return SecGroups, err
 	}
 	if err = json.Unmarshal(buffer, &SecGroups); err != nil {
-		return SecGroups, errors.Wrap(err, "Error unmarshalling Security Groups")
+		return SecGroups, errors.Wrap(errors.Wrap(err, "Error unmarshalling security groups"), "Error retrieving security groups from cloud controller api")
 	}
 	if SecGroups.Pagination.Next.HREF != "" {
 		NextPage, err := c.GetSecGroups(queries, page+1)
@@ -351,7 +350,7 @@ func (c *Client) GetRoles(queries []ccv3.Query, page int) (UserRoles, error) {
 		return rolesResult, errors.Wrap(err, "Error getting roles")
 	}
 	if err = json.Unmarshal(buffer, &rolesResult); err != nil {
-		return rolesResult, errors.Wrap(err, "Error unmarshalling Roles")
+		return rolesResult, errors.Wrap(errors.Wrap(err, "Error unmarshalling roles"), "Error retrieving roles from cloud controller api")
 	}
 	if rolesResult.Pagination.Next.HREF != "" {
 		NextPage, err := c.GetRoles(queries, page+1)
@@ -372,7 +371,7 @@ func (c *Client) GetOrgManagedUserRoles(userGuid string, page int) (UserRoles, e
 		return userRoles, err
 	}
 	if err = json.Unmarshal(buffer, &userRoles); err != nil {
-		return userRoles, errors.Wrap(err, "Error unmarshalling User roles")
+		return userRoles, errors.Wrap(errors.Wrap(err, "Error unmarshalling user roles"), "Error retrieving managed organizations from cloud controller api")
 	}
 	if userRoles.Pagination.Next.HREF != "" {
 		NextPage, err := c.GetOrgManagedUserRoles(userGuid, page+1)
@@ -391,7 +390,7 @@ func (c *Client) GetOrgManagers(orgGuid string, page int) (User, error) {
 	buffer, err := c.doRequest(http.MethodGet, url, nil)
 
 	if err = json.Unmarshal(buffer, &user); err != nil {
-		return user, errors.Wrap(err, "Error unmarshalling user roles")
+		return user, errors.Wrap(errors.Wrap(err, "Error unmarshalling user roles"), "Error retrieving managers from cloud controller api")
 	}
 
 	if user.Pagination.Next.HREF != "" {
@@ -436,7 +435,7 @@ func (c *Client) GetSpacesWithOrg(queries []ccv3.Query, page int) (Spaces, error
 		return spaces, err
 	}
 	if err = json.Unmarshal(buffer, &spaces); err != nil {
-		return spaces, errors.Wrap(err, "Error unmarshalling Spaces")
+		return spaces, errors.Wrap(errors.Wrap(err, "Error unmarshalling spaces"), "Error retrieving spaces and organizations from cloud controller api")
 	}
 	if spaces.Pagination.Next.HREF != "" {
 		NextPage, err := c.GetSpacesWithOrg(queries, page+1)
@@ -459,7 +458,7 @@ func (c *Client) GetSpaces(queries []ccv3.Query, page int) (Spaces, error) {
 		return spaces, err
 	}
 	if err = json.Unmarshal(buffer, &spaces); err != nil {
-		return spaces, errors.Wrap(err, "Error unmarshalling Spaces")
+		return spaces, errors.Wrap(errors.Wrap(err, "Error unmarshalling spaces"), "Error retrieving spaces from cloud controller api")
 	}
 	if spaces.Pagination.Next.HREF != "" {
 		NextPage, err := c.GetSpaces(queries, page+1)
@@ -481,7 +480,7 @@ func (c *Client) GetOrganizations(queries []ccv3.Query, page int) (Organizations
 		return orgs, err
 	}
 	if err = json.Unmarshal(buffer, &orgs); err != nil {
-		return orgs, errors.Wrap(err, "Error unmarshalling Organizations")
+		return orgs, errors.Wrap(errors.Wrap(err, "Error unmarshalling organizations"), "Error retrieving organizations from cloud controller api")
 	}
 	if orgs.Pagination.Next.HREF != "" {
 		NextPage, err := c.GetOrganizations(queries, page+1)
