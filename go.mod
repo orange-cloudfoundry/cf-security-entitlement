@@ -24,7 +24,7 @@ require (
 	github.com/orange-cloudfoundry/gobis v1.22.2
 	github.com/orange-cloudfoundry/gobis-middlewares v1.34.0
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/common v0.41.0
+	github.com/prometheus/common v0.42.0
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.14.0 // indirect
