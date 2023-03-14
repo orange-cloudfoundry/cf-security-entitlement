@@ -167,7 +167,7 @@ github.com/golang-sql/sqlexp
 # github.com/golang/mock v1.6.0
 ## explicit; go 1.11
 github.com/golang/mock/gomock
-# github.com/golang/protobuf v1.5.2
+# github.com/golang/protobuf v1.5.3
 ## explicit; go 1.9
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes/timestamp
@@ -253,7 +253,7 @@ github.com/olekukonko/tablewriter
 # github.com/orange-cloudfoundry/gobis v1.22.3
 ## explicit; go 1.19
 github.com/orange-cloudfoundry/gobis
-# github.com/orange-cloudfoundry/gobis-middlewares v1.34.0
+# github.com/orange-cloudfoundry/gobis-middlewares v1.34.1
 ## explicit; go 1.19
 github.com/orange-cloudfoundry/gobis-middlewares/casbin
 github.com/orange-cloudfoundry/gobis-middlewares/ceftrace
