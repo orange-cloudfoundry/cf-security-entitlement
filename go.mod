@@ -22,7 +22,7 @@ require (
 	github.com/o1egl/gormrus v0.0.0-20190416211302-fde1f6a23457
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/orange-cloudfoundry/gobis v1.22.3
-	github.com/orange-cloudfoundry/gobis-middlewares v1.34.0
+	github.com/orange-cloudfoundry/gobis-middlewares v1.34.1
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/common v0.42.0
 	github.com/prometheus/procfs v0.8.0 // indirect
@@ -61,7 +61,7 @@ require (
 	github.com/gobwas/glob v0.2.3 // indirect
 	github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 // indirect
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
