@@ -502,8 +502,25 @@ func (c *Client) GetSecGroupSpaces(secGroup *SecurityGroup) (Spaces, error) {
 	for _, data := range secGroup.Relationships.Staging_Spaces.Data {
 		stagingSpaceGuids = append(stagingSpaceGuids, data.GUID)
 	}
-	spaces, err := c.GetSpacesWithOrg([]ccv3.Query{{Key: ccv3.GUIDFilter, Values: append(runningSpaceGuids, stagingSpaceGuids...)}, {Key: ccv3.Include, Values: []string{"organization"}}}, 0)
-	return spaces, err
+	spaceGuids := append(runningSpaceGuids, stagingSpaceGuids...)
+	if len(spaceGuids) >= 50 {
+		// chunk spacesGuids
+		var spaces Spaces
+		for i := 0; i < len(spaceGuids); i += 50 {
+			end := i + 50
+			if end > len(spaceGuids) {
+				end = len(spaceGuids)
+			}
+			spacesChunk, err := c.GetSpacesWithOrg([]ccv3.Query{{Key: ccv3.GUIDFilter, Values: spaceGuids[i:end]}, {Key: ccv3.Include, Values: []string{"organization"}}}, 0)
+			if err != nil {
+				return spaces, err
+			}
+			spaces.Resources = append(spaces.Resources, spacesChunk.Resources...)
+			spaces.Included.Organizations = append(spaces.Included.Organizations, spacesChunk.Included.Organizations...)
+		}
+		return spaces, nil
+	}
+	return c.GetSpacesWithOrg([]ccv3.Query{{Key: ccv3.GUIDFilter, Values: spaceGuids}, {Key: ccv3.Include, Values: []string{"organization"}}}, 0)
 }
 
 func (c *Client) AddSecGroupRelationShips(secGroup *SecurityGroup) error {
