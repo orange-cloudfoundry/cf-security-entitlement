@@ -176,30 +176,7 @@ curl "https://cfsecurity.[your-domain.com]/v3/security_groups/23a073f5-00e7-425b
 
 ## Cli plugin
 
-### Installation
-
-
-#### Install from plugin repository (recommended)
-NOTE: This installation method requires that your client computer has access to the internet.
-If internet access is not available from client computer use the manual method.
-
-Verify you have a repo named `CF-Community` registered in your cf client.
-
-```
-cf list-plugin-repos
-```
-If the above command does not show `CF-Community` you can add the repo via:
-
-```
-cf add-plugin-repo CF-Community http://plugins.cloudfoundry.org/
-```
-Now that we have the cloud foundry community repo registered, install `security-entitlement`:
-
-```
-cf install-plugin -r CF-Community "cf-security-entitlement"
-```
-
-#### Installation from release binaries
+### Installation from release binaries
 
 1. Download latest release made for your os here: https://github.com/orange-cloudfoundry/cf-security-entitlement/releases
 2. run `cf install-plugin path/to/previous/binary/downloaded`
