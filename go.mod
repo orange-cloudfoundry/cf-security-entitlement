@@ -1,6 +1,6 @@
 module github.com/orange-cloudfoundry/cf-security-entitlement
 
-go 1.19
+go 1.20
 
 replace github.com/codahale/hdrhistogram => github.com/HdrHistogram/hdrhistogram-go v0.0.0-20210305173142-35c7773a578a
 
