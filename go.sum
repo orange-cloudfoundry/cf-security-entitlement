@@ -392,10 +392,10 @@ github.com/onsi/gomega v1.16.0/go.mod h1:HnhC7FXeEQY45zxNK3PPoIUhzk/80Xly9PcubAl
 github.com/onsi/gomega v1.17.0/go.mod h1:HnhC7FXeEQY45zxNK3PPoIUhzk/80Xly9PcubAlGdZY=
 github.com/onsi/gomega v1.19.0/go.mod h1:LY+I3pBVzYsTBU1AnDwOSxaYi9WoWiqgwooUqq9yPro=
 github.com/onsi/gomega v1.20.0/go.mod h1:DtrZpjmvpn2mPm4YWQa0/ALMDj9v4YxLgojwPeREyVo=
-github.com/onsi/gomega v1.27.5 h1:T/X6I0RNFw/kTqgfkZPcQ5KU6vCnWNBGdtrIx2dpGeQ=
+github.com/onsi/gomega v1.27.6 h1:ENqfyGeS5AX/rlXDd/ETokDz93u0YufY1Pgxuy/PvWE=
 github.com/opencontainers/go-digest v1.0.0-rc1/go.mod h1:cMLVZDEM3+U2I4VmLI6N8jQYUd2OVphdqWwCJHrFt2s=
-github.com/orange-cloudfoundry/gobis v1.22.5 h1:svbOMBJkTxcyzreZPOYoYPBDLhTHdi3QOX3q7dd8e5M=
-github.com/orange-cloudfoundry/gobis v1.22.5/go.mod h1:WgOSKmP2rCLnfg5mYI/FT8YcmgfDlsRqW/v3nVzTWNM=
+github.com/orange-cloudfoundry/gobis v1.22.6 h1:VN5GuxYZEnP7uX3oNkbbDaNG/HLsYKXe9WhTBsRCeC0=
+github.com/orange-cloudfoundry/gobis v1.22.6/go.mod h1:Fv/Dyo9xIF4PdreUVdO0hi/FjPON4ApPNst84sCCrXc=
 github.com/orange-cloudfoundry/gobis-middlewares v1.34.3 h1:o27zpTvHTLF5A6xKscGCiapcyOg7n55KqUClJLnXmEg=
 github.com/orange-cloudfoundry/gobis-middlewares v1.34.3/go.mod h1:PehczCQsksip4oAsliIz43kDv4bJseJrbnbUA9ffv70=
 github.com/pborman/uuid v0.0.0-20180906182336-adf5a7427709/go.mod h1:VyrYX9gd7irzKovcSS6BIIEwPRkP2Wm2m9ufcdFSJ34=
