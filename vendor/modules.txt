@@ -251,7 +251,7 @@ github.com/olekukonko/tablewriter
 # github.com/orange-cloudfoundry/gobis v1.23.0
 ## explicit; go 1.20
 github.com/orange-cloudfoundry/gobis
-# github.com/orange-cloudfoundry/gobis-middlewares v1.38.0
+# github.com/orange-cloudfoundry/gobis-middlewares v1.39.0
 ## explicit; go 1.20
 github.com/orange-cloudfoundry/gobis-middlewares/casbin
 github.com/orange-cloudfoundry/gobis-middlewares/ceftrace
@@ -345,16 +345,16 @@ github.com/xhit/go-str2duration/v2
 ## explicit; go 1.17
 golang.org/x/crypto/md4
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/net v0.9.0
+# golang.org/x/net v0.10.0
 ## explicit; go 1.17
 golang.org/x/net/context
-# golang.org/x/sys v0.7.0
+# golang.org/x/sys v0.8.0
 ## explicit; go 1.17
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/plan9
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/term v0.7.0
+# golang.org/x/term v0.8.0
 ## explicit; go 1.17
 golang.org/x/term
 # golang.org/x/text v0.9.0
