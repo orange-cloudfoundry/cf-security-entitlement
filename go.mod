@@ -21,12 +21,12 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.16 // indirect
 	github.com/o1egl/gormrus v0.0.0-20190416211302-fde1f6a23457
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/orange-cloudfoundry/gobis v1.23.0
+	github.com/orange-cloudfoundry/gobis v1.23.1
 	github.com/orange-cloudfoundry/gobis-middlewares v1.39.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/common v0.43.0
 	github.com/prometheus/procfs v0.9.0 // indirect
-	github.com/sirupsen/logrus v1.9.0
+	github.com/sirupsen/logrus v1.9.1
 	github.com/spf13/viper v1.15.0 // indirect
 	github.com/thoas/go-funk v0.9.3
 )
