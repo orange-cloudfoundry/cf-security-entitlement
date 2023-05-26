@@ -93,6 +93,13 @@ func (p *SecurityPlugin) GetMetadata() plugin.PluginMetadata {
 					Usage: "manager-security-group NAME",
 				},
 			},
+			{
+				Name:     "clean-seucrity-groups",
+				HelpText: "Clean unconsistent security group entitlements",
+				UsageDetails: plugin.Usage{
+					Usage: "clean-security-groups",
+				},
+			},
 		},
 	}
 }

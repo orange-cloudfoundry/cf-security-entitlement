@@ -107,3 +107,39 @@ func handleListSecGroup(w http.ResponseWriter, req *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	w.Write(b)
 }
+
+func handleCleanSecGroup(w http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
+	deleted := make([]model.EntitlementSecGroup, 0)
+	var entitlements []model.EntitlementSecGroup
+	DB.Order("security_group_guid").Find(&entitlements)
+
+	apiUrl := cfclient.GetApiUrl()
+
+	accessToken := req.Header.Get("Authorization")
+	tr := cfclient.GetTransport()
+	cfClient := &http.Client{Transport: &tr}
+
+	for _, entitlement := range entitlements {
+		Request, err := http.NewRequest(http.MethodGet, apiUrl+"/v3/security_groups/"+entitlement.SecurityGroupGUID, nil)
+		if err != nil {
+			panic(err)
+		}
+
+		Request.Header.Add("Authorization", accessToken)
+
+		resp, err := cfClient.Do(Request)
+		if err != nil {
+			panic(err)
+		}
+		defer resp.Body.Close()
+		if resp.StatusCode == 404 {
+			DB.Delete(entitlement.SecurityGroupGUID, entitlement.OrganizationGUID)
+			deleted = append(deleted, entitlement)
+		}
+		b, _ := json.Marshal(deleted)
+		w.Header().Add("Content-Type", "application/json")
+		w.Write(b)
+	}
+
+}

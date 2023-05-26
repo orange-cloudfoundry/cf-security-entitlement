@@ -83,3 +83,12 @@ func (c *Client) GetSecGroupEntitlements() ([]model.EntitlementSecGroup, error) 
 	}
 	return entitlements, nil
 }
+
+func (c *Client) CleanSecGroupEntitlements() ([]model.EntitlementSecGroup, error) {
+	var deleted []model.EntitlementSecGroup
+	buffer, err := c.doRequest(http.MethodPost, c.generateUrl(c.endpoint+"/v2/clean", []ccv3.Query{}, 0), nil)
+	if err = json.Unmarshal(buffer, &deleted); err != nil {
+		return deleted, errors.Wrap(err, "Error unmarshalling deleted entitlements")
+	}
+	return deleted, nil
+}
