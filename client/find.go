@@ -20,6 +20,8 @@ type Spaces struct {
 	Included  ccv3.IncludedResources `jsonry:"included"`
 }
 
+type NotFoundError error
+
 type Space struct {
 	resources.Space
 }
@@ -272,7 +274,7 @@ func (c *Client) GetSecGroupByGuid(guid string) (SecurityGroup, error) {
 		return SecurityGroup{}, err
 	}
 	if len(securityGroups.Resources) == 0 {
-		return SecurityGroup{}, errors.New("security group " + guid + " not found")
+		return SecurityGroup{}, NotFoundError(errors.New("security group " + guid + " not found"))
 	}
 	return securityGroups.Resources[0], nil
 }

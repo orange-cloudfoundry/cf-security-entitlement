@@ -40,8 +40,8 @@ func (p *SecurityPlugin) GetMetadata() plugin.PluginMetadata {
 		Name: "cf-security-entitlement",
 		Version: plugin.VersionType{
 			Major: 1,
-			Minor: 2,
-			Build: 4,
+			Minor: 3,
+			Build: 0,
 		},
 		Commands: []plugin.Command{
 			{
@@ -91,6 +91,13 @@ func (p *SecurityPlugin) GetMetadata() plugin.PluginMetadata {
 				HelpText: "Show a single security group available for an org manager",
 				UsageDetails: plugin.Usage{
 					Usage: "manager-security-group NAME",
+				},
+			},
+			{
+				Name:     "clean-security-group-entitlements",
+				HelpText: "Clean unconsistent security group entitlements",
+				UsageDetails: plugin.Usage{
+					Usage: "clean-security-groups",
 				},
 			},
 		},

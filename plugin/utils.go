@@ -53,7 +53,7 @@ func getOrgName(orgId string) (string, error) {
 		return "", err
 	}
 	if org.Name == "" {
-		return "", fmt.Errorf("Org %s not found", orgId)
+		return "", client.NotFoundError(fmt.Errorf("Org %s not found", orgId))
 	}
 	return org.Name, nil
 }
