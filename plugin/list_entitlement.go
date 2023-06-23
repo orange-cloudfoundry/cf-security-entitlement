@@ -35,7 +35,12 @@ func entitlementsExtract(cfclient *client.Client, entitlements []model.Entitleme
 		if currentSecGroup != entitlement.SecurityGroupGUID {
 			secGroup, err := cfclient.GetSecGroupByGuid(entitlement.SecurityGroupGUID)
 			if err != nil {
-				return entitleSecGroups, err
+				switch err.(type) {
+				case client.NotFoundError:
+					continue
+				default:
+					return entitleSecGroups, err
+				}
 			}
 			entitleSecGroup = EntitleSecGroup{
 				Name: secGroup.Name,
@@ -49,7 +54,12 @@ func entitlementsExtract(cfclient *client.Client, entitlements []model.Entitleme
 		}
 		orgName, err := getOrgName(entitlement.OrganizationGUID)
 		if err != nil {
-			return entitleSecGroups, err
+			switch err.(type) {
+			case client.NotFoundError:
+				continue
+			default:
+				return entitleSecGroups, err
+			}
 		}
 		bufOrg[entitlement.OrganizationGUID] = orgName
 		orgs = append(orgs, orgName)

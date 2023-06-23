@@ -15,6 +15,7 @@ import (
 	ccWrapper "code.cloudfoundry.org/cli/api/cloudcontroller/wrapper"
 	"code.cloudfoundry.org/cli/api/uaa"
 	"code.cloudfoundry.org/cli/util/configv3"
+	"github.com/alecthomas/kingpin/v2"
 	"github.com/cloudfoundry-community/gautocloud"
 	_ "github.com/cloudfoundry-community/gautocloud/connectors/databases/gorm"
 	"github.com/cloudfoundry-community/gautocloud/connectors/generic"
@@ -31,7 +32,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/prometheus/common/version"
 	log "github.com/sirupsen/logrus"
-	"github.com/alecthomas/kingpin/v2"
 )
 
 type OauthToken struct {
@@ -167,7 +167,10 @@ func boot() error {
 		WithMiddlewareParams(jwtConfig, casbinConfig, traceConfig, cefConfig).
 		AddRoute("/v3/security_groups/**", config.CloudFoundry.Endpoint+"/v3/security_groups").
 		WithMethods("POST", "DELETE", "GET").
-		WithMiddlewareParams(jwtConfig, bindingConfig, traceConfig, cefConfig)
+		WithMiddlewareParams(jwtConfig, bindingConfig, traceConfig, cefConfig).
+		AddRouteHandler("/v2/clean", http.HandlerFunc(handleCleanSecGroup)).
+		WithMethods("POST").
+		WithMiddlewareParams(jwtConfig, casbinConfig, traceConfig, cefConfig)
 
 	routes := builder.Build()
 	factory := gobis.NewRouterFactory(

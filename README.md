@@ -184,14 +184,23 @@ curl "https://cfsecurity.[your-domain.com]/v3/security_groups/23a073f5-00e7-425b
 
 ### Commands
 
+#### Admin Role
+
 ```
    disable-security-group                 Revoke an organization to a security group
    enable-security-group                  Entitle an organization to a security group
    entitlement-security-groups            List current security groups entitlements
+   clean-security-group-entitlements      Remove all unconsistent security group entitlements
+```
+
+#### OrgManager Role
+
+```
    manager-security-group                 Show a single security group available for an org manager
    manager-security-groups                List all security groups available for an org manager
    unbind-manager-security-group          Unbind a security group to a particular space, or all existing spaces of an org by an org manager
 ```
+
 
 ## Terraform-provider-cfsecurity 
 
