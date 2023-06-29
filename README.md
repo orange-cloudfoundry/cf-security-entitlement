@@ -198,7 +198,8 @@ curl "https://cfsecurity.[your-domain.com]/v3/security_groups/23a073f5-00e7-425b
 ```
    manager-security-group                 Show a single security group available for an org manager
    manager-security-groups                List all security groups available for an org manager
-   unbind-manager-security-group          Unbind a security group to a particular space, or all existing spaces of an org by an org manager
+   bind-manager-security-group            Bind a security group to a particular space
+   unbind-manager-security-group          Unbind a security group to a particular space
 ```
 
 
