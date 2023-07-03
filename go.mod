@@ -18,14 +18,14 @@ require (
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/mattn/go-colorable v0.1.13
 	github.com/mattn/go-isatty v0.0.19
-	github.com/mattn/go-sqlite3 v1.14.16 // indirect
+	github.com/mattn/go-sqlite3 v1.14.17 // indirect
 	github.com/o1egl/gormrus v0.0.0-20190416211302-fde1f6a23457
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/orange-cloudfoundry/gobis v1.23.5
 	github.com/orange-cloudfoundry/gobis-middlewares v1.40.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/common v0.44.0
-	github.com/prometheus/procfs v0.9.0 // indirect
+	github.com/prometheus/procfs v0.11.0 // indirect
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/viper v1.16.0 // indirect
 	github.com/thoas/go-funk v0.9.3
@@ -37,10 +37,10 @@ require (
 )
 
 require (
-	code.cloudfoundry.org/bytefmt v0.0.0-20211005130812-5bb3c17173e5 // indirect
+	code.cloudfoundry.org/bytefmt v0.0.0-20230612151507-41ef4d1f67a4 // indirect
 	code.cloudfoundry.org/cli-plugin-repo v0.0.0-20220208212925-633e698c93c0 // indirect
 	code.cloudfoundry.org/rfc5424 v0.0.0-20201103192249-000122071b78 // indirect
-	code.cloudfoundry.org/tlsconfig v0.0.0-20230320190829-8f91c367795b // indirect
+	code.cloudfoundry.org/tlsconfig v0.0.0-20230612153104-23c0622de227 // indirect
 	github.com/ArthurHlt/logrus-cef-formatter v1.0.0 // indirect
 	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible // indirect
 	github.com/SermoDigital/jose v0.9.2-0.20161205224733-f6df55f235c2 // indirect
@@ -53,7 +53,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/charlievieth/fs v0.0.3 // indirect
 	github.com/cloudfoundry/bosh-cli v6.4.1+incompatible // indirect
-	github.com/cloudfoundry/bosh-utils v0.0.360 // indirect
+	github.com/cloudfoundry/bosh-utils v0.0.369 // indirect
 	github.com/cppforlife/go-patch v0.2.0 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.3 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
@@ -76,7 +76,7 @@ require (
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.8 // indirect
-	github.com/prometheus/client_golang v1.15.1 // indirect
+	github.com/prometheus/client_golang v1.16.0 // indirect
 	github.com/prometheus/client_model v0.4.0 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06 // indirect
