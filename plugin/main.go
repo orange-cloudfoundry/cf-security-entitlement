@@ -41,7 +41,7 @@ func (p *SecurityPlugin) GetMetadata() plugin.PluginMetadata {
 		Version: plugin.VersionType{
 			Major: 1,
 			Minor: 3,
-			Build: 0,
+			Build: 1,
 		},
 		Commands: []plugin.Command{
 			{
@@ -97,7 +97,7 @@ func (p *SecurityPlugin) GetMetadata() plugin.PluginMetadata {
 				Name:     "clean-security-group-entitlements",
 				HelpText: "Clean unconsistent security group entitlements",
 				UsageDetails: plugin.Usage{
-					Usage: "clean-security-groups",
+					Usage: "clean-security-group-entitlements",
 				},
 			},
 		},
