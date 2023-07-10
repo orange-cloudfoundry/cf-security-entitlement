@@ -66,7 +66,7 @@ func (c *CleanEntitlementCommand) Execute(_ []string) error {
 func init() {
 	desc := `Clean unconsistent security groups entitlements`
 	_, err := parser.AddCommand(
-		"clean-security-groups",
+		"clean-security-group-entitlements",
 		desc,
 		desc,
 		&cleanEntitlementCommand)
