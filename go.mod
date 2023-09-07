@@ -55,7 +55,7 @@ require (
 	github.com/cloudfoundry/bosh-cli v6.4.1+incompatible // indirect
 	github.com/cloudfoundry/bosh-utils v0.0.369 // indirect
 	github.com/cppforlife/go-patch v0.2.0 // indirect
-	github.com/cyphar/filepath-securejoin v0.2.3 // indirect
+	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/form3tech-oss/jwt-go v3.2.5+incompatible // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
