@@ -126,7 +126,7 @@ github.com/cloudfoundry/bosh-utils/system
 # github.com/cppforlife/go-patch v0.2.0
 ## explicit
 github.com/cppforlife/go-patch/patch
-# github.com/cyphar/filepath-securejoin v0.2.3
+# github.com/cyphar/filepath-securejoin v0.2.4
 ## explicit; go 1.13
 # github.com/denisenkom/go-mssqldb v0.12.3
 ## explicit; go 1.13
