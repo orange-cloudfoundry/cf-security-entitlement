@@ -58,7 +58,7 @@ func Wrap(err error, args ...interface{}) Error {
 	if traceErr, ok := err.(Error); ok {
 		trace = traceErr
 	} else {
-		trace = newTrace(err, 2)
+		trace = newTrace(err)
 	}
 	if len(args) > 0 {
 		trace = WithUserMessage(trace, args[0], args[1:]...)
@@ -66,7 +66,15 @@ func Wrap(err error, args ...interface{}) Error {
 	return trace
 }
 
-// Unwrap returns the original error the given error wraps
+// Unwrap returns the original error the given error wraps. It is equivalent to
+// removing all trace layers until the original error is exposed.
+//
+// Unwrap works mainly on trace errors, so it won't unwrap errors wrapped via
+// Go's `%w`.
+//
+// Prefer using higher-level comparison methods, such as the various "IsError"
+// functions in this package or [errors.Is] and [errors.As]. If you want a
+// general error-unwrapping mechanism, consider using [errors.Unwrap] instead.
 func Unwrap(err error) error {
 	if err, ok := err.(ErrorWrapper); ok {
 		return err.OrigError()
@@ -170,7 +178,7 @@ func WrapWithMessage(err error, message interface{}, args ...interface{}) Error 
 	if traceErr, ok := err.(Error); ok {
 		trace = traceErr
 	} else {
-		trace = newTrace(err, 2)
+		trace = newTrace(err)
 	}
 	return WithUserMessage(trace, message, args...)
 }
@@ -180,7 +188,7 @@ func WrapWithMessage(err error, message interface{}, args ...interface{}) Error 
 // callee, line number and function that simplifies debugging
 func Errorf(format string, args ...interface{}) (err error) {
 	err = fmt.Errorf(format, args...)
-	return newTrace(err, 2)
+	return newTrace(err)
 }
 
 // Fatalf - If debug is false Fatalf calls Errorf. If debug is
@@ -193,7 +201,15 @@ func Fatalf(format string, args ...interface{}) error {
 	}
 }
 
-func newTrace(err error, depth int) *TraceErr {
+func newTrace(err error) *TraceErr {
+	// newTrace does not call newTraceWithDepth so the depth value is consistent
+	// between both methods.
+	const depth = 2
+	traces := internal.CaptureTraces(depth)
+	return &TraceErr{Err: err, Traces: traces}
+}
+
+func newTraceWithDepth(err error, depth int) *TraceErr {
 	traces := internal.CaptureTraces(depth)
 	return &TraceErr{Err: err, Traces: traces}
 }
@@ -419,8 +435,7 @@ func WithFields(err Error, fields map[string]interface{}) *TraceErr {
 // NewAggregate creates a new aggregate instance from the specified
 // list of errors
 func NewAggregate(errs ...error) error {
-	// filter out possible nil values
-	var nonNils []error
+	nonNils := make([]error, 0, len(errs))
 	for _, err := range errs {
 		if err != nil {
 			nonNils = append(nonNils, err)
@@ -429,7 +444,7 @@ func NewAggregate(errs ...error) error {
 	if len(nonNils) == 0 {
 		return nil
 	}
-	return newTrace(aggregate(nonNils), 2)
+	return newTrace(aggregate(nonNils))
 }
 
 // NewAggregateFromChannel creates a new aggregate instance from the provided
@@ -468,18 +483,19 @@ type aggregate []error
 
 // Error implements the error interface
 func (r aggregate) Error() string {
-	if len(r) == 0 {
-		return ""
+	buf := &strings.Builder{}
+	for i, e := range r {
+		if i > 0 {
+			buf.WriteString(", ")
+		}
+		buf.WriteString(e.Error())
 	}
-	output := r[0].Error()
-	for i := 1; i < len(r); i++ {
-		output = fmt.Sprintf("%v, %v", output, r[i])
-	}
-	return output
+	return buf.String()
 }
 
 // Is implements the `Is` interface, by iterating through each error in the
 // aggregate and invoking `errors.Is`.
+// Required for Go versions < 1.20 (newer releases support "Unwrap() []error").
 func (r aggregate) Is(t error) bool {
 	for _, err := range r {
 		if errors.Is(err, t) {
@@ -491,6 +507,7 @@ func (r aggregate) Is(t error) bool {
 
 // As implements the `As` interface, by iterating through each error in the
 // aggregate and invoking `errors.As`.
+// Required for Go versions < 1.20 (newer releases support "Unwrap() []error").
 func (r aggregate) As(t interface{}) bool {
 	for _, err := range r {
 		if errors.As(err, t) {
@@ -502,13 +519,21 @@ func (r aggregate) As(t interface{}) bool {
 
 // Errors obtains the list of errors this aggregate combines
 func (r aggregate) Errors() []error {
-	return []error(r)
+	cp := make([]error, len(r))
+	copy(cp, r)
+	return cp
 }
 
-// IsAggregate returns whether this error of Aggregate error type
+// Unwrap returns the underlying aggregated errors.
+func (r aggregate) Unwrap() []error {
+	return r.Errors()
+}
+
+// IsAggregate returns true if `err` contains an [Aggregate] error in its
+// chain.
 func IsAggregate(err error) bool {
-	_, ok := Unwrap(err).(Aggregate)
-	return ok
+	var other Aggregate
+	return errors.As(err, &other)
 }
 
 // wrapProxy wraps the specified error as a new error trace
@@ -518,7 +543,7 @@ func wrapProxy(err error) Error {
 	}
 	return proxyError{
 		// Do not include ReadError in the trace
-		TraceErr: newTrace(err, 3),
+		TraceErr: newTraceWithDepth(err, 3),
 	}
 }
 
