@@ -5,7 +5,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -63,7 +63,7 @@ func (e CloudFoundryHTTPError) Error() string {
 }
 
 func (c *Client) handleError(resp *http.Response) (*http.Response, error) {
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return resp, CloudFoundryHTTPError{
 			StatusCode: resp.StatusCode,

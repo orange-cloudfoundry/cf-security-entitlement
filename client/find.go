@@ -9,7 +9,6 @@ import (
 	"github.com/orange-cloudfoundry/cf-security-entitlement/model"
 	"github.com/pkg/errors"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 )
@@ -196,7 +195,7 @@ func (c *Client) doRequest(method string, url string, body io.Reader) ([]byte, e
 	if response.StatusCode != http.StatusOK {
 		return nil, errors.Wrap(err, "http error")
 	}
-	return ioutil.ReadAll(response.Body)
+	return io.ReadAll(response.Body)
 
 }
 
