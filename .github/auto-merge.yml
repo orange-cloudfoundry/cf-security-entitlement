@@ -1,3 +1,5 @@
 - match:
     dependency_type: all
-    update_type: ["version-update:semver-minor", "version-update:semver-major"]
+    update_type:
+    - "minor"
+    - "major"
