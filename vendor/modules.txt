@@ -251,7 +251,7 @@ github.com/olekukonko/tablewriter
 # github.com/orange-cloudfoundry/gobis v1.26.0
 ## explicit; go 1.21
 github.com/orange-cloudfoundry/gobis
-# github.com/orange-cloudfoundry/gobis-middlewares v1.47.0
+# github.com/orange-cloudfoundry/gobis-middlewares v1.48.0
 ## explicit; go 1.21
 github.com/orange-cloudfoundry/gobis-middlewares/casbin
 github.com/orange-cloudfoundry/gobis-middlewares/ceftrace
