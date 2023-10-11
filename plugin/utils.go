@@ -37,27 +37,6 @@ func getOrgID(orgName string) (string, error) {
 	return Orgs.Resources[0].GUID, nil
 }
 
-func getOrgName(orgId string) (string, error) {
-	result, err := cliConnection.CliCommandWithoutTerminalOutput(
-		"curl",
-		"/v3/organizations/"+orgId,
-	)
-	if err != nil {
-		return "", err
-	}
-	var org struct {
-		Name string `json:"name"`
-	}
-	err = json.Unmarshal([]byte(joinResult(result)), &org)
-	if err != nil {
-		return "", err
-	}
-	if org.Name == "" {
-		return "", client.NotFoundError(fmt.Errorf("Org %s not found", orgId))
-	}
-	return org.Name, nil
-}
-
 func getRawOrgSpaces(orgId string, page int) (client.Spaces, error) {
 	var spaces client.Spaces
 	queries := []ccv3.Query{

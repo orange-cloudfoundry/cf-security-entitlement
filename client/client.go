@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
+	"github.com/prometheus/common/version"
 )
 
 const (
@@ -19,11 +20,20 @@ type Client struct {
 	ccv3Client  *ccv3.Client
 	accessToken string
 	apiUrl      string
-	transport   http.Transport
+	transport   CustomTransport
 }
 
 func NewClient(endpoint string, ccv3Client *ccv3.Client, accessToken string, apiUrl string, transport *http.Transport) *Client {
-	return &Client{endpoint: endpoint, ccv3Client: ccv3Client, accessToken: accessToken, apiUrl: apiUrl, transport: *transport}
+	return &Client{endpoint: endpoint, ccv3Client: ccv3Client, accessToken: accessToken, apiUrl: apiUrl, transport: CustomTransport{transport}}
+}
+
+type CustomTransport struct {
+	transport *http.Transport
+}
+
+func (ct *CustomTransport) RoundTrip(r *http.Request) (*http.Response, error) {
+	r.Header.Add("User-Agent", "cfsecurity/"+version.Version)
+	return ct.transport.RoundTrip(r)
 }
 
 func (c *Client) CurrentUserIsAdmin() (bool, error) {

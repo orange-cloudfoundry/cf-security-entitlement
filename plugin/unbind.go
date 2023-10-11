@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages"
 )
@@ -49,7 +50,7 @@ func (c *UnbindCommand) Execute(_ []string) error {
 		if c.BindOptions.Space != "" && c.BindOptions.Space != space.Name {
 			continue
 		}
-		err := client.UnBindSecurityGroup(secGroup.GUID, space.Guid, client.GetEndpoint())
+		err := client.BindUnbindSecurityGroup(secGroup.GUID, space.Guid, http.MethodDelete, client.GetEndpoint())
 		if err != nil {
 			return err
 		}

@@ -2,11 +2,13 @@ package main
 
 import (
 	"net/url"
+	"strconv"
 	"strings"
 
 	"code.cloudfoundry.org/cli/plugin"
 	"github.com/jessevdk/go-flags"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages"
+	"github.com/prometheus/common/version"
 )
 
 type Options struct {
@@ -37,34 +39,9 @@ type SecurityPlugin struct{}
 
 func (p *SecurityPlugin) GetMetadata() plugin.PluginMetadata {
 	return plugin.PluginMetadata{
-		Name: "cf-security-entitlement",
-		Version: plugin.VersionType{
-			Major: 1,
-			Minor: 3,
-			Build: 1,
-		},
+		Name:    "cf-security-entitlement",
+		Version: getVersion(),
 		Commands: []plugin.Command{
-			{
-				Name:     "enable-security-group",
-				HelpText: "Entitle an organization to a security group",
-				UsageDetails: plugin.Usage{
-					Usage: "enable-security-group SECURITY-GROUP ORG",
-				},
-			},
-			{
-				Name:     "disable-security-group",
-				HelpText: "Revoke an organization to a security group",
-				UsageDetails: plugin.Usage{
-					Usage: "disable-security-group SECURITY-GROUP ORG",
-				},
-			},
-			{
-				Name:     "entitlement-security-groups",
-				HelpText: "List current security groups entitlements",
-				UsageDetails: plugin.Usage{
-					Usage: "entitlement-security-groups",
-				},
-			},
 			{
 				Name:     "bind-manager-security-group",
 				HelpText: "Bind a security group to a particular space, or all existing spaces of an org by an org manager",
@@ -91,13 +68,6 @@ func (p *SecurityPlugin) GetMetadata() plugin.PluginMetadata {
 				HelpText: "Show a single security group available for an org manager",
 				UsageDetails: plugin.Usage{
 					Usage: "manager-security-group NAME",
-				},
-			},
-			{
-				Name:     "clean-security-group-entitlements",
-				HelpText: "Clean unconsistent security group entitlements",
-				UsageDetails: plugin.Usage{
-					Usage: "clean-security-group-entitlements",
 				},
 			},
 		},
@@ -131,6 +101,23 @@ func (p *SecurityPlugin) Run(cc plugin.CliConnection, args []string) {
 	err = Parse(args)
 	if err != nil {
 		messages.Fatal(err.Error())
+	}
+}
+
+func getVersion() plugin.VersionType {
+	major, minor, build := 0, 0, 0
+	versions := strings.Split(version.Version, ".")
+
+	if len(versions) == 3 {
+		major, _ = strconv.Atoi(versions[0])
+		minor, _ = strconv.Atoi(versions[1])
+		build, _ = strconv.Atoi(versions[2])
+	}
+
+	return plugin.VersionType{
+		Major: major,
+		Minor: minor,
+		Build: build,
 	}
 }
 
