@@ -1,7 +1,8 @@
 *.db
 *.json
+*.pem
 /server/server
 /plugin/plugin
 /terraform-provider-cfsecurity/terraform-provider-cfsecurity
-/config.yml
+config.yml
 /dist

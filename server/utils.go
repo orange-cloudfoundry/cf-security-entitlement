@@ -7,14 +7,18 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/client"
+	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
 )
 
-func serverError(w http.ResponseWriter, err error) {
-	serverErrorCode(w, http.StatusInternalServerError, err)
+func serverError(w http.ResponseWriter, r *http.Request, err error) {
+	serverErrorCode(w, r, http.StatusInternalServerError, err)
 }
 
-func serverErrorCode(w http.ResponseWriter, code int, err error) {
+func serverErrorCode(w http.ResponseWriter, r *http.Request, code int, err error) {
+	log.Error(err)
 	w.Header().Add("Content-Type", "application/json")
 
 	if httpErr, ok := err.(client.CloudFoundryErrorV3); ok {
@@ -36,8 +40,14 @@ func serverErrorCode(w http.ResponseWriter, code int, err error) {
 		Detail: err.Error(),
 	})
 	w.Write(b)
+	gHttpTotal.With(prometheus.Labels{
+		"endpoint": r.URL.Path,
+		"method":   r.Method,
+		"status":   fmt.Sprintf("%d", code),
+	}).Inc()
 }
 
+/*
 func isAdmin(groups []string) bool {
 	for _, g := range groups {
 		if g == "cloud_controller.admin" {
@@ -45,7 +55,7 @@ func isAdmin(groups []string) bool {
 		}
 	}
 	return false
-}
+}*/
 
 func getUserId(req *http.Request) (string, error) {
 
@@ -73,4 +83,23 @@ func getUserId(req *http.Request) (string, error) {
 		return "", fmt.Errorf("missing user information")
 	}
 	return userIdStruct.UserID, nil
+}
+
+func getSecretEncoded(key string, signingMethod jwt.SigningMethod) (interface{}, error) {
+	bKey := []byte(key)
+	if strings.HasPrefix(signingMethod.Alg(), "HS") {
+		return bKey, nil
+	}
+	if strings.HasPrefix(signingMethod.Alg(), "ES") {
+		encSecret, err := jwt.ParseECPublicKeyFromPEM(bKey)
+		if err == nil {
+			return encSecret, nil
+		}
+		return jwt.ParseECPrivateKeyFromPEM(bKey)
+	}
+	encSecret, err := jwt.ParseRSAPublicKeyFromPEM(bKey)
+	if err == nil {
+		return encSecret, nil
+	}
+	return jwt.ParseRSAPrivateKeyFromPEM(bKey)
 }

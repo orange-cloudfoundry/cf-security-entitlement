@@ -3,156 +3,100 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 
-	"github.com/orange-cloudfoundry/cf-security-entitlement/client"
+	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/constant"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/model"
+
+	"github.com/gorilla/context"
 )
 
+// Deprecated: Entitlements were deleted
 func handleEntitleSecGroup(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
-	var entitlement model.EntitlementSecGroup
-	err := json.NewDecoder(req.Body).Decode(&entitlement)
-	if err != nil {
-		serverError(w, err)
-		return
-	}
-	if entitlement.OrganizationGUID == "" || entitlement.SecurityGroupGUID == "" {
-		serverErrorCode(w, http.StatusBadRequest, fmt.Errorf("organization_guid or security_group_guid not found"))
-		return
-	}
-	var tmpEntitlement model.EntitlementSecGroup
-	DB.Where(&entitlement).First(&tmpEntitlement)
-	if tmpEntitlement.OrganizationGUID != "" {
-		w.WriteHeader(http.StatusOK)
+	if !context.Get(req, ContextIsAdmin).(bool) {
+		serverErrorCode(w, req, http.StatusForbidden, fmt.Errorf("Forbidden"))
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
-	DB.Create(&entitlement)
 }
 
+// Deprecated: Entitlements were deleted
 func handleRevokeSecGroup(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
-	var entitlement model.EntitlementSecGroup
-	var secGroup client.SecurityGroup
-	err := json.NewDecoder(req.Body).Decode(&entitlement)
-	if err != nil {
-		panic(err)
-	}
-
-	if entitlement.OrganizationGUID == "" || entitlement.SecurityGroupGUID == "" {
-		serverErrorCode(w, http.StatusBadRequest, fmt.Errorf("organization_guid or security_group_guid not found"))
+	if !context.Get(req, ContextIsAdmin).(bool) {
+		serverErrorCode(w, req, http.StatusForbidden, fmt.Errorf("Forbidden"))
 		return
 	}
-
-	apiUrl := cfclient.GetApiUrl()
-
-	accessToken := req.Header.Get("Authorization")
-	tr := cfclient.GetTransport()
-	cfClient := &http.Client{Transport: &tr}
-
-	Request, err := http.NewRequest(http.MethodGet, apiUrl+"/v3/security_groups/"+entitlement.SecurityGroupGUID, nil)
-	if err != nil {
-		panic(err)
-	}
-
-	Request.Header.Add("Authorization", accessToken)
-
-	resp, err := cfClient.Do(Request)
-	if err != nil {
-		panic(err)
-	}
-
-	defer resp.Body.Close()
-
-	buf, err := io.ReadAll(resp.Body)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	if err = json.Unmarshal(buf, &secGroup); err != nil {
-		serverErrorCode(w, http.StatusBadRequest, fmt.Errorf("Error unmarshaling Security Group"))
-		return
-	}
-
-	err = cfclient.AddSecGroupRelationShips(&secGroup)
-	if err != nil {
-		panic(err)
-	}
-
-	for _, space := range secGroup.Relationships.Running_Spaces.Data {
-		if space.OrgGUID == entitlement.OrganizationGUID {
-			serverErrorCode(w, http.StatusUnprocessableEntity, fmt.Errorf("There is still bindings in this organization, please remove all bindings before revoke"))
-			return
-		}
-	}
-
-	for _, space := range secGroup.Relationships.Staging_Spaces.Data {
-		if space.OrgGUID == entitlement.OrganizationGUID {
-			serverErrorCode(w, http.StatusUnprocessableEntity, fmt.Errorf("There is still bindings in this organization, please remove all bindings before revoke"))
-			return
-		}
-	}
-
-	DB.Delete(&entitlement)
 }
 
+// Deprecated: Entitlements were deleted
 func handleListSecGroup(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
-	entitlements := make([]model.EntitlementSecGroup, 0)
-	DB.Order("security_group_guid").Find(&entitlements)
-	b, _ := json.Marshal(entitlements)
+	if !context.Get(req, ContextIsAdmin).(bool) {
+		serverErrorCode(w, req, http.StatusForbidden, fmt.Errorf("Forbidden"))
+		return
+	}
 	w.Header().Add("Content-Type", "application/json")
-	w.Write(b)
+	w.Write([]byte("[]"))
 }
 
+// Deprecated: Entitlements were deleted
 func handleCleanSecGroup(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
-	deleted := make([]model.EntitlementSecGroup, 0)
-	var entitlements []model.EntitlementSecGroup
-	DB.Order("security_group_guid").Find(&entitlements)
+	if !context.Get(req, ContextIsAdmin).(bool) {
+		serverErrorCode(w, req, http.StatusForbidden, fmt.Errorf("Forbidden"))
+		return
+	}
+	w.Header().Add("Content-Type", "application/json")
+	w.Write([]byte("[]"))
+}
 
-	apiUrl := cfclient.GetApiUrl()
+// bind or unbind a security group to a space
+func handleBindSecGroup(w http.ResponseWriter, req *http.Request) {
+	defer req.Body.Close()
 
-	accessToken := req.Header.Get("Authorization")
-	tr := cfclient.GetTransport()
-	cfClient := &http.Client{Transport: &tr}
+	var binding model.BindingParams
+	err := json.NewDecoder(req.Body).Decode(&binding)
+	if err != nil {
+		serverError(w, req, err)
+		return
+	}
 
-	for _, entitlement := range entitlements {
-		secGroupRequest, err := http.NewRequest(http.MethodGet, apiUrl+"/v3/security_groups/"+entitlement.SecurityGroupGUID, nil)
+	userId, err := getUserId(req)
+	if err != nil {
+		serverErrorCode(w, req, http.StatusBadRequest, err)
+		return
+	}
+
+	space, err := cfclient.GetSpaceByGuid(binding.SpaceGUID)
+	if err != nil {
+		serverError(w, req, err)
+		return
+	}
+
+	orgGuid := space.Relationships[constant.RelationshipTypeOrganization].GUID
+
+	if !context.Get(req, ContextIsAdmin).(bool) {
+		hasAccess, err := isUserOrgManager(userId, orgGuid)
 		if err != nil {
-			panic(err)
+			serverError(w, req, err)
+			return
 		}
-		secGroupRequest.Header.Add("Authorization", accessToken)
-		resp, err := cfClient.Do(secGroupRequest)
-		if err != nil {
-			panic(err)
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode == 404 {
-
-			DB.Delete(entitlement)
-			deleted = append(deleted, entitlement)
-		} else {
-			orgRequest, err := http.NewRequest(http.MethodGet, apiUrl+"/v3/organizations/"+entitlement.OrganizationGUID, nil)
-			if err != nil {
-				panic(err)
-			}
-			orgRequest.Header.Add("Authorization", accessToken)
-			resp, err = cfClient.Do(orgRequest)
-			if err != nil {
-				panic(err)
-			}
-			defer resp.Body.Close()
-			if resp.StatusCode == 404 {
-				DB.Delete(entitlement)
-				deleted = append(deleted, entitlement)
-			}
+		if !hasAccess {
+			serverErrorCode(w, req, http.StatusUnauthorized, fmt.Errorf(""))
+			return
 		}
 	}
-	b, _ := json.Marshal(deleted)
-	w.Header().Add("Content-Type", "application/json")
-	w.Write(b)
+
+	if req.Method == http.MethodDelete {
+		err = cfclient.UnBindSecurityGroup(binding.SecurityGroupGUID, binding.SpaceGUID, cfclient.GetApiUrl())
+	} else {
+		err = cfclient.BindSecurityGroup(binding.SecurityGroupGUID, binding.SpaceGUID, cfclient.GetApiUrl())
+	}
+	if err != nil {
+		serverError(w, req, err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }

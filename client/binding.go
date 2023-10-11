@@ -35,6 +35,32 @@ func (c *Client) UnBindSecurityGroup(secGroupGUID, spaceGUID string, endpoint st
 	return nil
 }
 
+func (c *Client) BindUnbindSecurityGroup(secGroupGUID, spaceGUID, method, endpoint string) error {
+	var jsonData = []byte(`{"security_group_guid":"` + secGroupGUID + `", "space_guid":"` + spaceGUID + `"}`)
+
+	client := &http.Client{Transport: &c.transport}
+	url := endpoint + "/v3/bindings"
+	Request, err := http.NewRequest(method, url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return err
+	}
+
+	Request.Header.Add("Authorization", c.accessToken)
+	Request.Header.Add("Content-type", "application/json")
+	resp, err := client.Do(Request)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode >= http.StatusBadRequest {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	return nil
+}
+
 func (c *Client) BindRunningSecGroupToSpace(secGroupGUID, spaceGUID string, endpoint string) error {
 	var jsonData = []byte(`{"data":[
 		{"guid":"` + spaceGUID + `"}
