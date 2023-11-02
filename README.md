@@ -1,8 +1,6 @@
 # cf-security-entitlement
 
-#Add an entitlement mechanism similar to [isolation segment](https://docs.cloudfoundry.org/adminguide/isolation-segments.html#relationships) on Cloud Foundry.
-
-This is service allow an org manager to view all the security groups in cloud foundry and permits him to place 
+This service allows an org manager to view all the security groups in cloud foundry and permits him to place 
 security groups himself on space.
 
 This project has 3 parts:
@@ -246,15 +244,6 @@ curl "https://cfsecurity.[your-domain.com]/v3/bindings" \
 
 ### Commands
 
-#### Admin Role
-
-```
-   disable-security-group                 Revoke an organization to a security group
-   enable-security-group                  Entitle an organization to a security group
-   entitlement-security-groups            List current security groups entitlements
-   clean-security-group-entitlements      Remove all unconsistent security group entitlements
-```
-
 #### OrgManager Role
 
 ```
@@ -263,7 +252,6 @@ curl "https://cfsecurity.[your-domain.com]/v3/bindings" \
    bind-manager-security-group            Bind a security group to a particular space
    unbind-manager-security-group          Unbind a security group to a particular space
 ```
-
 
 ## Terraform-provider-cfsecurity 
 
