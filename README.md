@@ -1,15 +1,15 @@
 # cf-security-entitlement
 
-Add an entitlement mechanism similar to [isolation segment](https://docs.cloudfoundry.org/adminguide/isolation-segments.html#relationships) on Cloud Foundry.
+#Add an entitlement mechanism similar to [isolation segment](https://docs.cloudfoundry.org/adminguide/isolation-segments.html#relationships) on Cloud Foundry.
 
-This is providing entitlement on security group which permit to a cloud foundry admin to authorize an org manager to place 
-security groups (previously allowed by an admin) himself on space.
+This is service allow an org manager to view all the security groups in cloud foundry and permits him to place 
+security groups himself on space.
 
 This project has 3 parts:
-- **server**: api which enable entitlement and security groups placement for org manager. 
+- **server**: api which enable security groups placement for org manager
 **Must be deployed beside cc api through the bosh release https://github.com/orange-cloudfoundry/cf-security-entitlement-boshrelease**
 - **cli plugin**: A Cloud Foundry cli plugin which add commands for this api
-- **terraform provider**: A [terraform](http://terraform.io/) provider which use api to entitle security groups and which 
+- **terraform provider**: A [terraform](http://terraform.io/) provider which use api to place security groups and which
 can be combined with [cloud foundry provider](https://github.com/cloudfoundry-community/terraform-provider-cf) **NOW ON ITS OWN REPO AT https://github.com/orange-cloudfoundry/terraform-provider-cfsecurity**
 
 ## Server
@@ -23,7 +23,7 @@ can be combined with [cloud foundry provider](https://github.com/cloudfoundry-co
 Please see doc from cloud foundry http://apidocs.cloudfoundry.org/9.3.0/#security-groups .
 Server only check if user is an authorized org manager before transmitting the request to cc api.
 
-#### POST /v2/security_entitlement
+#### POST /v2/security_entitlement (deprecated)
 
 **Parameters**:
 - `organization_guid`: an organisation guid
@@ -56,7 +56,7 @@ curl "https://cfsecurity.[your-domain.com]/v2/security_entitlement -d '{
 201 Created
 ```
 
-#### GET /v2/security_entitlement
+#### GET /v2/security_entitlement (deprecated)
 
 **Parameters**:
 - `organization_guid`: an organisation guid
@@ -102,7 +102,7 @@ curl "https://cfsecurity.[your-domain.com]/v2/security_entitlement \
 ]
 ```
 
-#### DELETE /v2/security_entitlement
+#### DELETE /v2/security_entitlement (deprecated)
 
 **Parameters**:
 - `organization_guid`: an organisation guid
@@ -172,6 +172,68 @@ curl "https://cfsecurity.[your-domain.com]/v3/security_groups/23a073f5-00e7-425b
   "is_entitled": true,
   "organization_guid": "7e0477b9-fff8-41b1-8fd8-969095ba62e5"
 }
+```
+
+#### POST /v3/bindings
+
+Bind a security group to a particular space
+
+**Url Parameters**:
+- `security_group_guid`: a security guid to bind
+- `space_guid`: a space guid to bind
+
+**Headers**:
+
+```
+Authorization: bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidWFhLWlkLTkiLCJlbWFpbCI6ImVtYWlsLTlAc29tZWRvbWFpbi5jb20iLCJzY29wZSI6WyJjbG91ZF9jb250cm9sbGVyLmFkbWluIl0sImF1ZCI6WyJjbG91ZF9jb250cm9sbGVyIl0sImV4cCI6MTQ2NjAwODg4MX0.r0oLFGpSuuUWDIpqwuZ6X_8xhkqhspKEOhDYQdRzu9Y
+Host: example.org
+Content-Type: application/json
+Cookie: 
+```
+
+**Curl**:
+
+```
+curl "https://cfsecurity.[your-domain.com]/v3/bindings" \
+	-H "Authorization: bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidWFhLWlkLTkiLCJlbWFpbCI6ImVtYWlsLTlAc29tZWRvbWFpbi5jb20iLCJzY29wZSI6WyJjbG91ZF9jb250cm9sbGVyLmFkbWluIl0sImF1ZCI6WyJjbG91ZF9jb250cm9sbGVyIl0sImV4cCI6MTQ2NjAwODg4MX0.r0oLFGpSuuUWDIpqwuZ6X_8xhkqhspKEOhDYQdRzu9Y" \
+	-H "Host: example.org" \
+    -d '{"security_group_guid": "23a073f5-00e7-425b-b046-de45ba9b5456", "space_guid": "4ad3d6c7-80a9-4655-866f-aa0f71d95183"}'
+```
+
+**Response status**:
+```
+200 OK
+```
+
+#### DELETE /v3/bindings
+
+Unbind a security group from a space
+
+**Url Parameters**:
+- `security_group_guid`: a security guid to unbind
+- `space_guid`: a space guid to unbind
+
+**Headers**:
+
+```
+Authorization: bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidWFhLWlkLTkiLCJlbWFpbCI6ImVtYWlsLTlAc29tZWRvbWFpbi5jb20iLCJzY29wZSI6WyJjbG91ZF9jb250cm9sbGVyLmFkbWluIl0sImF1ZCI6WyJjbG91ZF9jb250cm9sbGVyIl0sImV4cCI6MTQ2NjAwODg4MX0.r0oLFGpSuuUWDIpqwuZ6X_8xhkqhspKEOhDYQdRzu9Y
+Host: example.org
+Content-Type: application/json
+Cookie: 
+```
+
+**Curl**:
+
+```
+curl "https://cfsecurity.[your-domain.com]/v3/bindings" \
+	-H "Authorization: bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoidWFhLWlkLTkiLCJlbWFpbCI6ImVtYWlsLTlAc29tZWRvbWFpbi5jb20iLCJzY29wZSI6WyJjbG91ZF9jb250cm9sbGVyLmFkbWluIl0sImF1ZCI6WyJjbG91ZF9jb250cm9sbGVyIl0sImV4cCI6MTQ2NjAwODg4MX0.r0oLFGpSuuUWDIpqwuZ6X_8xhkqhspKEOhDYQdRzu9Y" \
+	-H "Host: example.org" \
+    -d '{"security_group_guid": "23a073f5-00e7-425b-b046-de45ba9b5456", "space_guid": "4ad3d6c7-80a9-4655-866f-aa0f71d95183"}'
+```
+
+**Response status**:
+```
+200 OK
 ```
 
 ## Cli plugin
