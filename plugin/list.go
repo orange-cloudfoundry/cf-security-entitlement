@@ -1,9 +1,11 @@
 package main
 
 import (
-	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
 	"fmt"
 	"os"
+
+	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
+	cli "github.com/orange-cloudfoundry/cf-security-entitlement/client"
 
 	"github.com/olekukonko/tablewriter"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages"
@@ -39,24 +41,51 @@ func (c *ListCommand) Execute(_ []string) error {
 		subData := make([]string, 0)
 		subData = append(subData, fmt.Sprintf("#%d", iSec))
 		subData = append(subData, secGroup.Name)
-		if len(secGroup.Relationships.Running_Spaces.Data) == 0 || len(secGroup.Relationships.Staging_Spaces.Data) == 0 {
+
+		// Merge des infos par security group
+		spaceInfos := make(map[string]cli.Data, 0)
+		for _, space := range secGroup.Relationships.Running_Spaces.Data {
+			if space.OrgName != "" && space.SpaceName != "" {
+				space.Running = true
+				spaceInfos[space.GUID] = space
+			}
+		}
+		for _, space := range secGroup.Relationships.Staging_Spaces.Data {
+			if space.OrgName != "" && space.SpaceName != "" {
+				if val, ok := spaceInfos[space.GUID]; ok {
+					val.Staging = true
+					spaceInfos[space.GUID] = val
+				} else {
+					space.Staging = true
+					spaceInfos[space.GUID] = space
+				}
+			}
+		}
+
+		if len(spaceInfos) == 0 {
 			subData = append(subData, "", "", "")
 			data = append(data, subData)
 			continue
 		}
-		// à revoir
-		for iSpace, space := range secGroup.Relationships.Running_Spaces.Data {
-			if iSpace > 0 {
+
+		nbLines := 0
+		for _, space := range spaceInfos {
+			// a new line is created
+			if nbLines > 0 {
 				subData = make([]string, 0)
 				subData = append(subData, "", "")
 			}
-			subData = append(subData, space.OrgName, space.SpaceName)
-			data = append(data, append(subData, "running"))
-			if iSpace == 0 {
-				subData[0] = ""
-				subData[1] = ""
+			if space.Running {
+				subData = append(subData, space.OrgName, space.SpaceName)
+				data = append(data, append(subData, "running"))
+				subData = make([]string, 0)
+				subData = append(subData, "", "")
 			}
-			data = append(data, append(subData, "staging"))
+			if space.Staging {
+				subData = append(subData, space.OrgName, space.SpaceName)
+				data = append(data, append(subData, "staging"))
+			}
+			nbLines++
 		}
 	}
 
