@@ -18,7 +18,7 @@ require (
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/mattn/go-colorable v0.1.13
 	github.com/mattn/go-isatty v0.0.20
-	github.com/mattn/go-sqlite3 v1.14.19 // indirect
+	github.com/mattn/go-sqlite3 v1.14.20 // indirect
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/common v0.46.0
@@ -40,7 +40,7 @@ require (
 	code.cloudfoundry.org/cli-plugin-repo v0.0.0-20220208212925-633e698c93c0 // indirect
 	code.cloudfoundry.org/jsonry v1.1.4 // indirect
 	code.cloudfoundry.org/rfc5424 v0.0.0-20201103192249-000122071b78 // indirect
-	code.cloudfoundry.org/tlsconfig v0.0.0-20231017135636-f0e44068c22f // indirect
+	code.cloudfoundry.org/tlsconfig v0.0.0-20240116140718-a2c58c2ff70c // indirect
 	github.com/SermoDigital/jose v0.9.2-0.20161205224733-f6df55f235c2 // indirect
 	github.com/azer/snakecase v1.0.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -49,7 +49,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/charlievieth/fs v0.0.3 // indirect
 	github.com/cloudfoundry/bosh-cli v6.4.1+incompatible // indirect
-	github.com/cloudfoundry/bosh-utils v0.0.423 // indirect
+	github.com/cloudfoundry/bosh-utils v0.0.427 // indirect
 	github.com/cppforlife/go-patch v0.2.0 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
@@ -64,7 +64,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.1 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
-	github.com/rivo/uniseg v0.4.4 // indirect
+	github.com/rivo/uniseg v0.4.6 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06 // indirect
 	github.com/sagikazarmark/locafero v0.4.0 // indirect
 	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
@@ -77,7 +77,7 @@ require (
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.18.0 // indirect
-	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc // indirect
+	golang.org/x/exp v0.0.0-20240119083558-1b970713d09a // indirect
 	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/term v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect

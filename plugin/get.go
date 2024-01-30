@@ -30,8 +30,15 @@ func (c *GetCommand) Execute(_ []string) error {
 		messages.C.Cyan(username),
 	)
 	secGroup, err := client.GetSecGroupByName(c.GetOptions.SecurityGroup)
-	errRelShips := client.AddSecGroupRelationShips(&secGroup)
-	if err != nil || errRelShips != nil {
+	if err != nil {
+		return err
+	}
+	spaces, err := client.GetSecGroupSpaces(&secGroup)
+	if err != nil {
+		return err
+	}
+	errRelShips := client.AddSecGroupRelationShips(&secGroup, spaces)
+	if errRelShips != nil {
 		return err
 	}
 	messages.Println(

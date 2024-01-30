@@ -12,7 +12,8 @@ import (
 )
 
 type ListCommand struct {
-	Api string `short:"a" long:"api" description:"api to cf security"`
+	Api    string `short:"a" long:"api" description:"api to cf security"`
+	Silent bool   `short:"s" long:"silent" description:"show only security group names"`
 }
 
 var listCommand ListCommand
@@ -24,12 +25,21 @@ func (c *ListCommand) Execute(_ []string) error {
 		return err
 	}
 	messages.Printf("Getting security groups as %s...\n", messages.C.Cyan(username))
-	secGroups, err := client.GetSecGroups([]ccv3.Query{}, 0)
-	for i := range secGroups.Resources {
-		_ = client.AddSecGroupRelationShips(&secGroups.Resources[i])
+	if c.Silent {
+		messages.Println(messages.C.Cyan("(Silent mode)"))
 	}
+	secGroups, err := client.GetSecGroups([]ccv3.Query{}, 0)
 	if err != nil {
 		return err
+	}
+	if !c.Silent {
+		spaces, err := client.GetSpacesWithOrg([]ccv3.Query{{Key: ccv3.Include, Values: []string{"organization"}}}, 0)
+		if err != nil {
+			return err
+		}
+		for i := range secGroups.Resources {
+			_ = client.AddSecGroupRelationShips(&secGroups.Resources[i], spaces)
+		}
 	}
 	messages.Println(messages.C.Green("OK\n"))
 
