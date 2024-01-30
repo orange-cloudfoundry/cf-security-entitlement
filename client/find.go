@@ -344,11 +344,7 @@ func (c *Client) GetSecGroupSpaces(secGroup *SecurityGroup) (Spaces, error) {
 	return c.GetSpacesWithOrg([]ccv3.Query{{Key: ccv3.GUIDFilter, Values: spaceGuids}, {Key: ccv3.Include, Values: []string{"organization"}}}, 0)
 }
 
-func (c *Client) AddSecGroupRelationShips(secGroup *SecurityGroup) error {
-	spaces, err := c.GetSecGroupSpaces(secGroup)
-	if err != nil {
-		return err
-	}
+func (c *Client) AddSecGroupRelationShips(secGroup *SecurityGroup, spaces Spaces) error {
 	for _, space := range spaces.Resources {
 		var orgName string
 		var orgGuid string

@@ -37,7 +37,7 @@ code.cloudfoundry.org/jsonry/internal/path
 code.cloudfoundry.org/jsonry/internal/tree
 # code.cloudfoundry.org/rfc5424 v0.0.0-20201103192249-000122071b78
 ## explicit
-# code.cloudfoundry.org/tlsconfig v0.0.0-20231017135636-f0e44068c22f
+# code.cloudfoundry.org/tlsconfig v0.0.0-20240116140718-a2c58c2ff70c
 ## explicit; go 1.19
 code.cloudfoundry.org/tlsconfig
 # github.com/SermoDigital/jose v0.9.2-0.20161205224733-f6df55f235c2
@@ -96,7 +96,7 @@ github.com/cloudfoundry-community/go-cfenv
 # github.com/cloudfoundry/bosh-cli v6.4.1+incompatible
 ## explicit
 github.com/cloudfoundry/bosh-cli/director/template
-# github.com/cloudfoundry/bosh-utils v0.0.423
+# github.com/cloudfoundry/bosh-utils v0.0.427
 ## explicit; go 1.21
 github.com/cloudfoundry/bosh-utils/errors
 github.com/cloudfoundry/bosh-utils/logger
@@ -187,8 +187,8 @@ github.com/mattn/go-isatty
 # github.com/mattn/go-runewidth v0.0.15
 ## explicit; go 1.9
 github.com/mattn/go-runewidth
-# github.com/mattn/go-sqlite3 v1.14.19
-## explicit; go 1.16
+# github.com/mattn/go-sqlite3 v1.14.20
+## explicit; go 1.19
 github.com/mattn/go-sqlite3
 # github.com/mitchellh/mapstructure v1.5.0
 ## explicit; go 1.14
@@ -225,7 +225,7 @@ github.com/prometheus/common/version
 github.com/prometheus/procfs
 github.com/prometheus/procfs/internal/fs
 github.com/prometheus/procfs/internal/util
-# github.com/rivo/uniseg v0.4.4
+# github.com/rivo/uniseg v0.4.6
 ## explicit; go 1.18
 github.com/rivo/uniseg
 # github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
@@ -284,7 +284,7 @@ go.uber.org/multierr
 ## explicit; go 1.18
 golang.org/x/crypto/md4
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc
+# golang.org/x/exp v0.0.0-20240119083558-1b970713d09a
 ## explicit; go 1.20
 golang.org/x/exp/constraints
 golang.org/x/exp/slices

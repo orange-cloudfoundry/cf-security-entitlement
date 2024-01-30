@@ -58,9 +58,9 @@ func (p *SecurityPlugin) GetMetadata() plugin.PluginMetadata {
 			},
 			{
 				Name:     "manager-security-groups",
-				HelpText: "List all security groups available for an org manager",
+				HelpText: "List all security groups available for an org manager, silent mode show only security group names",
 				UsageDetails: plugin.Usage{
-					Usage: "manager-security-groups",
+					Usage: "manager-security-groups  [-s|--silent]",
 				},
 			},
 			{
