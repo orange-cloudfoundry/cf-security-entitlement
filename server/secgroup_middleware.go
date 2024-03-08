@@ -11,7 +11,7 @@ import (
 
 	"github.com/cloudfoundry-community/gautocloud"
 	"github.com/gorilla/context"
-	"github.com/orange-cloudfoundry/cf-security-entitlement/model"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/v2/model"
 
 	"github.com/pkg/errors"
 )

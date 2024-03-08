@@ -7,7 +7,7 @@ import (
 
 	"code.cloudfoundry.org/cli/plugin"
 	"github.com/jessevdk/go-flags"
-	"github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/v2/plugin/messages"
 	"github.com/prometheus/common/version"
 )
 

@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/constant"
-	"github.com/orange-cloudfoundry/cf-security-entitlement/model"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/v2/model"
 
 	"github.com/gorilla/context"
 )

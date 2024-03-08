@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/v2/plugin/messages"
 )
 
 type UnbindCommand struct {
