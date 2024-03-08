@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/context"
-	"github.com/orange-cloudfoundry/cf-security-entitlement/model"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/v2/model"
 	log "github.com/sirupsen/logrus"
 )
 

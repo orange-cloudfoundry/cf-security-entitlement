@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/olekukonko/tablewriter"
-	"github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/v2/plugin/messages"
 )
 
 type GetOptions struct {

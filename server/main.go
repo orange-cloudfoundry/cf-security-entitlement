@@ -22,8 +22,8 @@ import (
 	"github.com/gorilla/mux"
 
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/orange-cloudfoundry/cf-security-entitlement/client"
-	"github.com/orange-cloudfoundry/cf-security-entitlement/model"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/v2/client"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/v2/model"
 
 	"github.com/pkg/errors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"

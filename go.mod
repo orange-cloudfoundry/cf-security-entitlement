@@ -1,4 +1,4 @@
-module github.com/orange-cloudfoundry/cf-security-entitlement
+module github.com/orange-cloudfoundry/cf-security-entitlement/v2
 
 go 1.21
 

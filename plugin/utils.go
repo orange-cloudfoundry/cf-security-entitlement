@@ -12,8 +12,8 @@ import (
 	"code.cloudfoundry.org/cli/api/uaa"
 	plugin_models "code.cloudfoundry.org/cli/plugin/models"
 	"code.cloudfoundry.org/cli/util/configv3"
-	"github.com/orange-cloudfoundry/cf-security-entitlement/client"
-	"github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/v2/client"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/v2/plugin/messages"
 )
 
 func getOrgID(orgName string) (string, error) {

@@ -5,10 +5,10 @@ import (
 	"os"
 
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
-	cli "github.com/orange-cloudfoundry/cf-security-entitlement/client"
+	cli "github.com/orange-cloudfoundry/cf-security-entitlement/v2/client"
 
 	"github.com/olekukonko/tablewriter"
-	"github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/v2/plugin/messages"
 )
 
 type ListCommand struct {
