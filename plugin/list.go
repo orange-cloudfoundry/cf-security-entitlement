@@ -53,7 +53,7 @@ func (c *ListCommand) Execute(_ []string) error {
 		subData = append(subData, secGroup.Name)
 
 		// Merge des infos par security group
-		spaceInfos := make(map[string]cli.Data, 0)
+		spaceInfos := make(map[string]cli.Data)
 		for _, space := range secGroup.Relationships.Running_Spaces.Data {
 			if space.OrgName != "" && space.SpaceName != "" {
 				space.Running = true
