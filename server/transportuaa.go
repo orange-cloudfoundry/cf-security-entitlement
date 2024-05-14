@@ -5,7 +5,7 @@ import (
 	"net/url"
 )
 
-// Cf client call /v3/info to retrieve uaa url but this url need to be set to domain given by user
+// TranslateTransport Cf client call /v3/info to retrieve uaa url but this url need to be set to domain given by user
 // this transport change request domain to set correct domain
 type TranslateTransport struct {
 	transport     http.RoundTripper

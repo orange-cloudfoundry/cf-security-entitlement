@@ -15,7 +15,7 @@ import (
 func handleEntitleSecGroup(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	if !context.Get(req, ContextIsAdmin).(bool) {
-		serverErrorCode(w, req, http.StatusForbidden, fmt.Errorf("Forbidden"))
+		serverErrorCode(w, req, http.StatusForbidden, fmt.Errorf("forbidden"))
 		return
 	}
 	w.WriteHeader(http.StatusCreated)
@@ -25,7 +25,7 @@ func handleEntitleSecGroup(w http.ResponseWriter, req *http.Request) {
 func handleRevokeSecGroup(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	if !context.Get(req, ContextIsAdmin).(bool) {
-		serverErrorCode(w, req, http.StatusForbidden, fmt.Errorf("Forbidden"))
+		serverErrorCode(w, req, http.StatusForbidden, fmt.Errorf("forbidden"))
 		return
 	}
 }
@@ -45,7 +45,7 @@ func handleListSecGroup(w http.ResponseWriter, req *http.Request) {
 func handleCleanSecGroup(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
 	if !context.Get(req, ContextIsAdmin).(bool) {
-		serverErrorCode(w, req, http.StatusForbidden, fmt.Errorf("Forbidden"))
+		serverErrorCode(w, req, http.StatusForbidden, fmt.Errorf("forbidden"))
 		return
 	}
 	w.Header().Add("Content-Type", "application/json")
