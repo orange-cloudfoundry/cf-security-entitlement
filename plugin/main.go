@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"net/url"
 	"strconv"
 	"strings"
@@ -22,10 +23,11 @@ var defaultEndpoint string
 func Parse(args []string) error {
 	_, err := parser.ParseArgs(args)
 	if err != nil {
-		if errFlag, ok := err.(*flags.Error); ok && errFlag.Type == flags.ErrCommandRequired {
+		var errFlag *flags.Error
+		if errors.Is(errFlag.Type, flags.ErrCommandRequired) && errors.As(err, &errFlag) {
 			return nil
 		}
-		if errFlag, ok := err.(*flags.Error); ok && errFlag.Type == flags.ErrHelp {
+		if errors.Is(errFlag.Type, flags.ErrHelp) && errors.As(err, &errFlag) {
 			messages.Println(err.Error())
 			return nil
 		}

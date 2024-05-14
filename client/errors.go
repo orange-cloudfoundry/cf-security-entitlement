@@ -27,7 +27,7 @@ type CloudFoundryErrorV3 struct {
 	Detail string `json:"detail"`
 }
 
-// CF APIs v3 can return multiple errors, we take the first one and convert it into a V2 model
+// NewCloudFoundryErrorFromV3Errors CF APIs v3 can return multiple errors, we take the first one and convert it into a V2 model
 func NewCloudFoundryErrorFromV3Errors(cfErrorsV3 CloudFoundryErrorsV3) CloudFoundryErrorV3 {
 	if len(cfErrorsV3.Errors) == 0 {
 		return CloudFoundryErrorV3{

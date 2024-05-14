@@ -126,11 +126,6 @@ var Large = ccv3.Query{
 	Values: []string{"5000"},
 }
 
-var orderByTimestampDesc = ccv3.Query{
-	Key:    ccv3.OrderBy,
-	Values: []string{"-created_at"},
-}
-
 func (c *Client) doRequest(method string, url string, body io.Reader) ([]byte, error) {
 	client := &http.Client{Transport: &c.transport}
 	request, err := http.NewRequest(method, url, body)

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -21,7 +22,8 @@ func serverErrorCode(w http.ResponseWriter, r *http.Request, code int, err error
 	log.Error(err)
 	w.Header().Add("Content-Type", "application/json")
 
-	if httpErr, ok := err.(client.CloudFoundryErrorV3); ok {
+	var httpErr client.CloudFoundryErrorV3
+	if errors.As(err, &httpErr) {
 		w.WriteHeader(httpErr.Code)
 
 		b, _ := json.Marshal(client.CloudFoundryErrorV3{
