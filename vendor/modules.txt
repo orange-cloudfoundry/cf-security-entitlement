@@ -74,8 +74,8 @@ github.com/cespare/xxhash/v2
 # github.com/charlievieth/fs v0.0.3
 ## explicit; go 1.18
 github.com/charlievieth/fs
-# github.com/cloudfoundry-community/gautocloud v1.3.2
-## explicit; go 1.21
+# github.com/cloudfoundry-community/gautocloud v1.4.0
+## explicit; go 1.22.3
 github.com/cloudfoundry-community/gautocloud
 github.com/cloudfoundry-community/gautocloud/cloudenv
 github.com/cloudfoundry-community/gautocloud/connectors
@@ -137,6 +137,9 @@ github.com/golang-sql/sqlexp
 github.com/golang/mock/gomock
 # github.com/google/go-querystring v1.1.0
 ## explicit; go 1.10
+# github.com/google/uuid v1.6.0
+## explicit
+github.com/google/uuid
 # github.com/gorilla/context v1.1.2
 ## explicit; go 1.20
 github.com/gorilla/context
@@ -240,9 +243,6 @@ github.com/sagikazarmark/locafero
 # github.com/sagikazarmark/slog-shim v0.1.0
 ## explicit; go 1.20
 github.com/sagikazarmark/slog-shim
-# github.com/satori/go.uuid v1.2.0
-## explicit
-github.com/satori/go.uuid
 # github.com/sirupsen/logrus v1.9.3
 ## explicit; go 1.13
 github.com/sirupsen/logrus
