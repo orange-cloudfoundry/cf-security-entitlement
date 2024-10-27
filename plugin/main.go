@@ -1,7 +1,7 @@
 package main
 
 import (
-	"errors"
+	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -23,14 +23,16 @@ var defaultEndpoint string
 func Parse(args []string) error {
 	_, err := parser.ParseArgs(args)
 	if err != nil {
-		var errFlag *flags.Error
-		if errors.Is(errFlag.Type, flags.ErrCommandRequired) && errors.As(err, &errFlag) {
+		fmt.Println(err)
+		//var errFlag *flags.Error
+		messages.Println(err.Error())
+		/*if errors.Is(errFlag.Type, flags.ErrCommandRequired) && errors.As(err, &errFlag) {
 			return nil
 		}
 		if errors.Is(errFlag.Type, flags.ErrHelp) && errors.As(err, &errFlag) {
 			messages.Println(err.Error())
 			return nil
-		}
+		}*/
 		return err
 	}
 
@@ -70,6 +72,13 @@ func (p *SecurityPlugin) GetMetadata() plugin.PluginMetadata {
 				HelpText: "Show a single security group available for an org manager",
 				UsageDetails: plugin.Usage{
 					Usage: "manager-security-group NAME",
+				},
+			},
+			{
+				Name:     "manager-search-security-groups",
+				HelpText: "Search IP in security groups",
+				UsageDetails: plugin.Usage{
+					Usage: "manager-search-security-groups DESTINATION [PORT]",
 				},
 			},
 		},
