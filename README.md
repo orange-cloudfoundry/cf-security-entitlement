@@ -247,6 +247,7 @@ curl "https://cfsecurity.[your-domain.com]/v3/bindings" \
 #### OrgManager Role
 
 ```
+   manager-search-security-groups         List all security groups matching an IP and a port
    manager-security-group                 Show a single security group available for an org manager
    manager-security-groups                List all security groups available for an org manager
    bind-manager-security-group            Bind a security group to a particular space

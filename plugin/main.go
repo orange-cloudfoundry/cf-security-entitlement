@@ -72,6 +72,13 @@ func (p *SecurityPlugin) GetMetadata() plugin.PluginMetadata {
 					Usage: "manager-security-group NAME",
 				},
 			},
+			{
+				Name:     "manager-search-security-groups",
+				HelpText: "Search IP in security groups",
+				UsageDetails: plugin.Usage{
+					Usage: "manager-search-security-groups DESTINATION [PORT]",
+				},
+			},
 		},
 	}
 }
