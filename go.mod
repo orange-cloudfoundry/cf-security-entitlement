@@ -7,7 +7,7 @@ replace github.com/codahale/hdrhistogram => github.com/HdrHistogram/hdrhistogram
 require (
 	code.cloudfoundry.org/cli v0.0.0-20210824215059-5ffa262bb2e5
 	github.com/alecthomas/units v0.0.0-20240927000941-0f3dac36c52b // indirect
-	github.com/cloudfoundry-community/gautocloud v1.4.1
+	github.com/cloudfoundry-community/gautocloud v1.5.0
 	github.com/cloudfoundry-community/go-cfenv v1.18.0 // indirect
 	github.com/denisenkom/go-mssqldb v0.12.3 // indirect
 	github.com/go-sql-driver/mysql v1.8.1 // indirect
