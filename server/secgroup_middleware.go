@@ -48,11 +48,11 @@ func secGoupsHandler(w http.ResponseWriter, req *http.Request) {
 
 		accessToken, refreshExpiresAt, err := AuthenticateWithExpire(config.CloudFoundry.UAAEndpoint, config.CloudFoundry.ClientID, config.CloudFoundry.ClientSecret, tr)
 		if err != nil {
-			errors.Wrap(err, "Error when authenticate on cf")
+			_ = errors.Wrap(err, "Error when authenticate on cf")
 			return
 		}
 		if accessToken == "" {
-			errors.Errorf("A pair of username/password or a pair of client_id/client_secret muste be set.")
+			_ = errors.Errorf("A pair of username/password or a pair of client_id/client_secret muste be set.")
 			return
 		}
 
@@ -74,7 +74,7 @@ func secGoupsHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	serverErrorCode(w, req, http.StatusNotImplemented, fmt.Errorf("Fonction inconnue"))
+	serverErrorCode(w, req, http.StatusNotImplemented, fmt.Errorf("fonction inconnue"))
 }
 
 func (SecGroupMiddleware) Schema() interface{} {
@@ -106,7 +106,7 @@ func checkBind(w http.ResponseWriter, req *http.Request) {
 	b, _ := json.MarshalIndent(data, "", "  ")
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(b)
+	_, _ = w.Write(b)
 }
 
 func bindOrUnbindSecGroup(w http.ResponseWriter, req *http.Request) {
@@ -125,15 +125,15 @@ func bindOrUnbindSecGroup(w http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodPost {
 		buf, err := io.ReadAll(req.Body)
 		if err != nil {
-			errors.Wrap(err, "Error reading User")
+			_ = errors.Wrap(err, "Error reading User")
 			return
 		}
 		if err = json.Unmarshal(buf, &dataBody); err != nil {
-			errors.Wrap(err, "Error unmarshalling User")
+			_ = errors.Wrap(err, "Error unmarshalling User")
 			return
 		}
 		if len(dataBody.Data) == 0 {
-			errors.Wrap(err, "Error unmarshalling User")
+			_ = errors.Wrap(err, "Error unmarshalling User")
 		}
 		spaceGuid = dataBody.Data[0].GUID
 	}
@@ -155,7 +155,7 @@ func bindOrUnbindSecGroup(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 		if !hasAccess {
-			serverErrorCode(w, req, http.StatusUnauthorized, fmt.Errorf("Acces denied"))
+			serverErrorCode(w, req, http.StatusUnauthorized, fmt.Errorf("acces denied"))
 			return
 		}
 	}
@@ -179,7 +179,7 @@ func bindOrUnbindSecGroup(w http.ResponseWriter, req *http.Request) {
 			err = cfclient.UnBindRunningSecGroupToSpace(secGroupGuid, spaceGuid, cfclient.GetApiUrl())
 			if err != nil {
 				if strings.Contains(err.Error(), "UnprocessableEntity") {
-					serverErrorCode(w, req, http.StatusUnprocessableEntity, fmt.Errorf("Unable to unbind security group from space with guid '%s'. Ensure the space is bound to this security group.", spaceGuid))
+					serverErrorCode(w, req, http.StatusUnprocessableEntity, fmt.Errorf("unable to unbind security group from space with guid '%s'. Ensure the space is bound to this security group", spaceGuid))
 					return
 				} else {
 					serverError(w, req, err)
@@ -191,7 +191,7 @@ func bindOrUnbindSecGroup(w http.ResponseWriter, req *http.Request) {
 			err = cfclient.UnBindStagingSecGroupToSpace(secGroupGuid, spaceGuid, cfclient.GetApiUrl())
 			if err != nil {
 				if strings.Contains(err.Error(), "UnprocessableEntity") {
-					serverErrorCode(w, req, http.StatusUnprocessableEntity, fmt.Errorf("Unable to unbind security group from space with guid '%s'. Ensure the space is bound to this security group.", spaceGuid))
+					serverErrorCode(w, req, http.StatusUnprocessableEntity, fmt.Errorf("unable to unbind security group from space with guid '%s'. Ensure the space is bound to this security group", spaceGuid))
 					return
 				} else {
 					serverError(w, req, err)
@@ -210,30 +210,7 @@ func findSecGroup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	w.Header().Add("Content-Type", "application/json")
-	w.Write(buffer)
-}
-
-func isFilterAuthorized(filter string) bool {
-	authorizedFilters := []string{"names", "guids", "page", "per_page"}
-	for _, v := range authorizedFilters {
-		if v == filter {
-			return true
-		}
-	}
-
-	return false
-}
-
-func filterParam(req *http.Request, param string) []string {
-	res := make([]string, 0)
-	if isFilterAuthorized(param) {
-		for _, v := range strings.Split(req.URL.Query().Get(param), ",") {
-			if v != "" {
-				res = append(res, v)
-			}
-		}
-	}
-	return res
+	_, _ = w.Write(buffer)
 }
 
 func isUserOrgManager(userId, orgId string) (bool, error) {

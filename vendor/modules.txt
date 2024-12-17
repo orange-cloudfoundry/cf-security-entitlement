@@ -1,4 +1,4 @@
-# code.cloudfoundry.org/bytefmt v0.21.0
+# code.cloudfoundry.org/bytefmt v0.22.0
 ## explicit; go 1.22.0
 code.cloudfoundry.org/bytefmt
 # code.cloudfoundry.org/cli v0.0.0-20210824215059-5ffa262bb2e5
@@ -37,7 +37,7 @@ code.cloudfoundry.org/jsonry/internal/path
 code.cloudfoundry.org/jsonry/internal/tree
 # code.cloudfoundry.org/rfc5424 v0.0.0-20201103192249-000122071b78
 ## explicit
-# code.cloudfoundry.org/tlsconfig v0.12.0
+# code.cloudfoundry.org/tlsconfig v0.13.0
 ## explicit; go 1.22
 code.cloudfoundry.org/tlsconfig
 # filippo.io/edwards25519 v1.1.0
@@ -100,7 +100,7 @@ github.com/cloudfoundry-community/go-cfenv
 # github.com/cloudfoundry/bosh-cli v6.4.1+incompatible
 ## explicit
 github.com/cloudfoundry/bosh-cli/director/template
-# github.com/cloudfoundry/bosh-utils v0.0.511
+# github.com/cloudfoundry/bosh-utils v0.0.515
 ## explicit; go 1.22.0
 github.com/cloudfoundry/bosh-utils/errors
 github.com/cloudfoundry/bosh-utils/logger
@@ -302,9 +302,8 @@ go.uber.org/multierr
 ## explicit; go 1.20
 golang.org/x/crypto/md4
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/exp v0.0.0-20241210194714-1829a127f884
+# golang.org/x/exp v0.0.0-20241215155358-4a5509556b9e
 ## explicit; go 1.22.0
-golang.org/x/exp/constraints
 golang.org/x/exp/slices
 golang.org/x/exp/slog
 golang.org/x/exp/slog/internal
@@ -327,7 +326,7 @@ golang.org/x/text/internal/utf8internal
 golang.org/x/text/runes
 golang.org/x/text/transform
 golang.org/x/text/unicode/norm
-# google.golang.org/protobuf v1.35.2
+# google.golang.org/protobuf v1.36.0
 ## explicit; go 1.21
 google.golang.org/protobuf/encoding/protodelim
 google.golang.org/protobuf/encoding/prototext
@@ -348,6 +347,7 @@ google.golang.org/protobuf/internal/genid
 google.golang.org/protobuf/internal/impl
 google.golang.org/protobuf/internal/order
 google.golang.org/protobuf/internal/pragma
+google.golang.org/protobuf/internal/protolazy
 google.golang.org/protobuf/internal/set
 google.golang.org/protobuf/internal/strs
 google.golang.org/protobuf/internal/version

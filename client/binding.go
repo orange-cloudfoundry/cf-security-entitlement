@@ -135,14 +135,12 @@ func (c *Client) UnBindRunningSecGroupToSpace(secGroupGUID, spaceGUID string, en
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode >= http.StatusBadRequest {
 		_, err := c.handleError(resp)
 		return err
 
 	}
-
-	defer resp.Body.Close()
-
 	return nil
 }
 
@@ -160,13 +158,10 @@ func (c *Client) UnBindStagingSecGroupToSpace(secGroupGUID, spaceGUID string, en
 	if err != nil {
 		return err
 	}
-
+	defer resp.Body.Close()
 	if resp.StatusCode >= http.StatusBadRequest {
 		_, err := c.handleError(resp)
 		return err
 	}
-
-	defer resp.Body.Close()
-
 	return nil
 }

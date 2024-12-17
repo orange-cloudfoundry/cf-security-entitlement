@@ -10,23 +10,27 @@ issues:
 linters:
   disable-all: true
   enable:
-    - deadcode
     - errcheck
     - gofmt
     - gosimple
     - ineffassign
     - misspell
     - staticcheck
-    - structcheck
     - unconvert
     - unused
-    - varcheck
-    - vet
+    - govet
     - bodyclose
+  errcheck:
+    exclude-functions:
+      - os:MkdirAll
+      - net/http:Write
+      - fmt:.*
+      - io:Close
+      - github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages:Printfln
+      - gautocloud:Inject
+      - github.com/hashicorp/terraform-plugin-sdk/helper/schema:ForceNew|Set|Partial|SetPartial
 
 linters-settings:
-  errcheck:
-    ignore: os:MkdirAll,net/http:Write,fmt:.*,io:Close,github.com/orange-cloudfoundry/cf-security-entitlement/plugin/messages:Printfln,gautocloud:Inject,github.com/hashicorp/terraform-plugin-sdk/helper/schema:ForceNew|Set|Partial|SetPartial
   gofmt:
     simplify: false
 

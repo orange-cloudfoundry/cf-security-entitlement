@@ -38,7 +38,7 @@ func handleListSecGroup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	w.Header().Add("Content-Type", "application/json")
-	w.Write([]byte("[]"))
+	_, _ = w.Write([]byte("[]"))
 }
 
 // bind or unbind a security group to a space

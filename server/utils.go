@@ -31,7 +31,7 @@ func serverErrorCode(w http.ResponseWriter, r *http.Request, code int, err error
 			Title:  httpErr.Title,
 			Detail: httpErr.Detail,
 		})
-		w.Write(b)
+		_, _ = w.Write(b)
 		return
 	}
 	w.WriteHeader(code)
@@ -41,7 +41,7 @@ func serverErrorCode(w http.ResponseWriter, r *http.Request, code int, err error
 		Title:  http.StatusText(code),
 		Detail: err.Error(),
 	})
-	w.Write(b)
+	_, _ = w.Write(b)
 	gHttpTotal.With(prometheus.Labels{
 		"endpoint": r.URL.Path,
 		"method":   r.Method,

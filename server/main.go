@@ -231,13 +231,13 @@ func GetInfo(Endpoint string, SkipVerify bool, certs []string) (model.Info, erro
 	if err = json.Unmarshal(body, &info); err != nil {
 		return info, errors.Wrap(err, "Error unmarshalling Info")
 	}
-	json.Unmarshal(body, &info)
+	_ = json.Unmarshal(body, &info)
 
 	return info, nil
 }
 
 func AuthenticateWithExpire(endpoint string, clientId string, clientSecret string, tr *http.Transport) (string, time.Time, error) {
-	body := fmt.Sprint("grant_type=client_credentials")
+	body := "grant_type=client_credentials"
 	var jsonData = []byte(body)
 	accessTokens := OauthToken{}
 	cfClient := &http.Client{Transport: tr}
