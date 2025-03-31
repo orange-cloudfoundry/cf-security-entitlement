@@ -1,16 +1,15 @@
 module github.com/orange-cloudfoundry/cf-security-entitlement/v2
 
 go 1.23.4
-
 replace github.com/codahale/hdrhistogram => github.com/HdrHistogram/hdrhistogram-go v0.0.0-20210305173142-35c7773a578a
 
 require (
 	code.cloudfoundry.org/cli v0.0.0-20210824215059-5ffa262bb2e5
 	github.com/alecthomas/units v0.0.0-20240927000941-0f3dac36c52b // indirect
-	github.com/cloudfoundry-community/gautocloud v1.5.0
+	github.com/cloudfoundry-community/gautocloud v1.6.0
 	github.com/cloudfoundry-community/go-cfenv v1.18.0 // indirect
 	github.com/denisenkom/go-mssqldb v0.12.3 // indirect
-	github.com/go-sql-driver/mysql v1.8.1 // indirect
+	github.com/go-sql-driver/mysql v1.9.1 // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/jessevdk/go-flags v1.6.1
 	github.com/jinzhu/gorm v1.9.16
@@ -24,7 +23,7 @@ require (
 	github.com/prometheus/common v0.63.0
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/sirupsen/logrus v1.9.3
-	github.com/spf13/viper v1.19.0 // indirect
+	github.com/spf13/viper v1.20.1 // indirect
 )
 
 require (
@@ -54,6 +53,8 @@ require (
 	github.com/cppforlife/go-patch v0.2.0 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
+	github.com/go-viper/encoding/hcl v0.1.0 // indirect
+	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
 	github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 // indirect
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
@@ -62,7 +63,6 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
-	github.com/magiconair/properties v1.8.9 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
@@ -70,23 +70,22 @@ require (
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06 // indirect
-	github.com/sagikazarmark/locafero v0.6.0 // indirect
-	github.com/sagikazarmark/slog-shim v0.1.0 // indirect
+	github.com/sagikazarmark/locafero v0.9.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
-	github.com/spf13/afero v1.11.0 // indirect
-	github.com/spf13/cast v1.7.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/spf13/afero v1.14.0 // indirect
+	github.com/spf13/cast v1.7.1 // indirect
+	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/exp v0.0.0-20241210194714-1829a127f884 // indirect
-	golang.org/x/sys v0.30.0 // indirect
-	golang.org/x/term v0.27.0 // indirect
-	golang.org/x/text v0.22.0 // indirect
+	golang.org/x/crypto v0.36.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/term v0.30.0 // indirect
+	golang.org/x/text v0.23.0 // indirect
+	google.golang.org/genproto v0.0.0-20200513103714-09dca8ec2884 // indirect
+	google.golang.org/grpc v1.33.1 // indirect
 	google.golang.org/protobuf v1.36.5 // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
-	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
