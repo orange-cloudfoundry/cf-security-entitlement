@@ -29,7 +29,7 @@ require (
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
-	github.com/golang-jwt/jwt/v5 v5.2.3
+	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/gorilla/context v1.1.2
 	github.com/gorilla/mux v1.8.1
 	github.com/prometheus/client_golang v1.22.0
