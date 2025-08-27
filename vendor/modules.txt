@@ -1,5 +1,5 @@
-# code.cloudfoundry.org/bytefmt v0.39.0
-## explicit; go 1.23.0
+# code.cloudfoundry.org/bytefmt v0.48.0
+## explicit; go 1.24.0
 code.cloudfoundry.org/bytefmt
 # code.cloudfoundry.org/cli v0.0.0-20210824215059-5ffa262bb2e5
 ## explicit; go 1.16
@@ -37,7 +37,7 @@ code.cloudfoundry.org/jsonry/internal/path
 code.cloudfoundry.org/jsonry/internal/tree
 # code.cloudfoundry.org/rfc5424 v0.0.0-20201103192249-000122071b78
 ## explicit
-# code.cloudfoundry.org/tlsconfig v0.26.0
+# code.cloudfoundry.org/tlsconfig v0.34.0
 ## explicit; go 1.23.0
 code.cloudfoundry.org/tlsconfig
 # filippo.io/edwards25519 v1.1.0
@@ -74,8 +74,8 @@ github.com/cespare/xxhash/v2
 # github.com/charlievieth/fs v0.0.3
 ## explicit; go 1.18
 github.com/charlievieth/fs
-# github.com/cloudfoundry-community/gautocloud v1.6.0
-## explicit; go 1.24.1
+# github.com/cloudfoundry-community/gautocloud v1.7.0
+## explicit; go 1.25.0
 github.com/cloudfoundry-community/gautocloud
 github.com/cloudfoundry-community/gautocloud/cloudenv
 github.com/cloudfoundry-community/gautocloud/connectors
@@ -100,7 +100,7 @@ github.com/cloudfoundry-community/go-cfenv
 # github.com/cloudfoundry/bosh-cli v6.4.1+incompatible
 ## explicit
 github.com/cloudfoundry/bosh-cli/director/template
-# github.com/cloudfoundry/bosh-utils v0.0.538
+# github.com/cloudfoundry/bosh-utils v0.0.554
 ## explicit; go 1.23.0
 github.com/cloudfoundry/bosh-utils/errors
 github.com/cloudfoundry/bosh-utils/logger
@@ -117,11 +117,14 @@ github.com/denisenkom/go-mssqldb/internal/cp
 github.com/denisenkom/go-mssqldb/internal/decimal
 github.com/denisenkom/go-mssqldb/internal/querytext
 github.com/denisenkom/go-mssqldb/msdsn
+# github.com/fatih/color v1.18.0
+## explicit; go 1.17
+github.com/fatih/color
 # github.com/fsnotify/fsnotify v1.9.0
 ## explicit; go 1.17
 github.com/fsnotify/fsnotify
 github.com/fsnotify/fsnotify/internal
-# github.com/go-sql-driver/mysql v1.9.2
+# github.com/go-sql-driver/mysql v1.9.3
 ## explicit; go 1.21.0
 github.com/go-sql-driver/mysql
 # github.com/go-viper/encoding/hcl v0.1.0
@@ -201,7 +204,7 @@ github.com/mattn/go-isatty
 # github.com/mattn/go-runewidth v0.0.16
 ## explicit; go 1.9
 github.com/mattn/go-runewidth
-# github.com/mattn/go-sqlite3 v1.14.28
+# github.com/mattn/go-sqlite3 v1.14.32
 ## explicit; go 1.19
 github.com/mattn/go-sqlite3
 # github.com/mitchellh/mapstructure v1.5.0
@@ -210,9 +213,24 @@ github.com/mitchellh/mapstructure
 # github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822
 ## explicit
 github.com/munnerz/goautoneg
-# github.com/olekukonko/tablewriter v0.0.5
-## explicit; go 1.12
+# github.com/olekukonko/cat v0.0.0-20250817074551-3280053e4e00
+## explicit; go 1.21
+github.com/olekukonko/cat
+# github.com/olekukonko/errors v1.1.0
+## explicit; go 1.21
+github.com/olekukonko/errors
+# github.com/olekukonko/ll v0.1.0
+## explicit; go 1.21
+github.com/olekukonko/ll
+github.com/olekukonko/ll/lh
+github.com/olekukonko/ll/lx
+# github.com/olekukonko/tablewriter v1.0.9
+## explicit; go 1.21
 github.com/olekukonko/tablewriter
+github.com/olekukonko/tablewriter/pkg/twwarp
+github.com/olekukonko/tablewriter/pkg/twwidth
+github.com/olekukonko/tablewriter/renderer
+github.com/olekukonko/tablewriter/tw
 # github.com/pelletier/go-toml/v2 v2.2.4
 ## explicit; go 1.21.0
 github.com/pelletier/go-toml/v2
@@ -239,7 +257,7 @@ github.com/prometheus/client_model/go
 github.com/prometheus/common/expfmt
 github.com/prometheus/common/model
 github.com/prometheus/common/version
-# github.com/prometheus/procfs v0.16.1
+# github.com/prometheus/procfs v0.17.0
 ## explicit; go 1.23.0
 github.com/prometheus/procfs
 github.com/prometheus/procfs/internal/fs
@@ -249,27 +267,27 @@ github.com/prometheus/procfs/internal/util
 github.com/rivo/uniseg
 # github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 ## explicit; go 1.13
-# github.com/sagikazarmark/locafero v0.9.0
+# github.com/sagikazarmark/locafero v0.10.0
 ## explicit; go 1.23.0
 github.com/sagikazarmark/locafero
 # github.com/sirupsen/logrus v1.9.3
 ## explicit; go 1.13
 github.com/sirupsen/logrus
-# github.com/sourcegraph/conc v0.3.0
-## explicit; go 1.19
+# github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8
+## explicit; go 1.20
 github.com/sourcegraph/conc
-github.com/sourcegraph/conc/internal/multierror
-github.com/sourcegraph/conc/iter
 github.com/sourcegraph/conc/panics
+github.com/sourcegraph/conc/pool
 # github.com/spf13/afero v1.14.0
 ## explicit; go 1.23.0
 github.com/spf13/afero
 github.com/spf13/afero/internal/common
 github.com/spf13/afero/mem
-# github.com/spf13/cast v1.8.0
-## explicit; go 1.19
+# github.com/spf13/cast v1.9.2
+## explicit; go 1.21.0
 github.com/spf13/cast
-# github.com/spf13/pflag v1.0.6
+github.com/spf13/cast/internal
+# github.com/spf13/pflag v1.0.7
 ## explicit; go 1.12
 github.com/spf13/pflag
 # github.com/spf13/viper v1.20.1
@@ -286,22 +304,19 @@ github.com/subosito/gotenv
 # github.com/xhit/go-str2duration/v2 v2.1.0
 ## explicit; go 1.13
 github.com/xhit/go-str2duration/v2
-# go.uber.org/multierr v1.11.0
-## explicit; go 1.19
-go.uber.org/multierr
-# golang.org/x/crypto v0.37.0
+# golang.org/x/crypto v0.41.0
 ## explicit; go 1.23.0
 golang.org/x/crypto/md4
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/sys v0.33.0
+# golang.org/x/sys v0.35.0
 ## explicit; go 1.23.0
 golang.org/x/sys/plan9
 golang.org/x/sys/unix
 golang.org/x/sys/windows
-# golang.org/x/term v0.31.0
+# golang.org/x/term v0.34.0
 ## explicit; go 1.23.0
 golang.org/x/term
-# golang.org/x/text v0.25.0
+# golang.org/x/text v0.28.0
 ## explicit; go 1.23.0
 golang.org/x/text/encoding
 golang.org/x/text/encoding/internal
@@ -315,8 +330,8 @@ golang.org/x/text/unicode/norm
 ## explicit; go 1.19
 # google.golang.org/grpc v1.56.3
 ## explicit; go 1.17
-# google.golang.org/protobuf v1.36.6
-## explicit; go 1.22
+# google.golang.org/protobuf v1.36.8
+## explicit; go 1.23
 google.golang.org/protobuf/encoding/protodelim
 google.golang.org/protobuf/encoding/prototext
 google.golang.org/protobuf/encoding/protowire

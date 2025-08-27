@@ -100,16 +100,8 @@ func (c *ListCommand) Execute(_ []string) error {
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"#", "name", "organization", "space", "lifecycle"})
-	table.AppendBulk(data)
-	table.SetRowSeparator("")
-	table.SetAutoFormatHeaders(false)
-	table.SetCenterSeparator("")
-	table.SetColumnSeparator("")
-	table.SetBorder(false)
-	table.SetHeaderLine(false)
-	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-	table.SetRowLine(false)
+	table.Header("#", "name", "organization", "space", "lifecycle")
+	table.Bulk(data)
 	table.Render()
 	return nil
 }

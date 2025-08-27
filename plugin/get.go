@@ -67,16 +67,8 @@ func (c *GetCommand) Execute(_ []string) error {
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"#", "organization", "space"})
-	table.AppendBulk(data)
-	table.SetRowSeparator("")
-	table.SetAutoFormatHeaders(false)
-	table.SetCenterSeparator("")
-	table.SetColumnSeparator("")
-	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-	table.SetBorder(false)
-	table.SetHeaderLine(false)
-	table.SetRowLine(false)
+	table.Header("#", "organization", "space")
+	table.Bulk(data)
 	table.Render()
 	return nil
 }

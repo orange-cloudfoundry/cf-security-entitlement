@@ -151,16 +151,8 @@ func (c *SearchCommand) Execute(_ []string) error {
 	}
 	_, _ = messages.Println(text)
 	table := tablewriter.NewWriter(os.Stdout)
-	table.SetHeader([]string{"#", "Name", "Destination", "Port"})
-	table.AppendBulk(data)
-	table.SetRowSeparator("")
-	table.SetAutoFormatHeaders(false)
-	table.SetCenterSeparator("")
-	table.SetColumnSeparator("")
-	table.SetBorder(false)
-	table.SetHeaderLine(false)
-	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-	table.SetRowLine(false)
+	table.Header("#", "Name", "Destination", "Port")
+	table.Bulk(data)
 	table.Render()
 	return nil
 }
