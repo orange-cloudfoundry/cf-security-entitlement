@@ -21,7 +21,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.32 // indirect
 	github.com/olekukonko/tablewriter v1.0.9
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/common v0.65.0
+	github.com/prometheus/common v0.66.0
 	github.com/prometheus/procfs v0.17.0 // indirect
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/viper v1.20.1 // indirect
@@ -62,6 +62,7 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/grafana/regexp v0.0.0-20240518133315-a468a5bfb3bc // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
