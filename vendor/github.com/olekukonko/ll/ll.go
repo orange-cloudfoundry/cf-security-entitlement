@@ -350,6 +350,21 @@ func (l *Logger) Dump(values ...interface{}) {
 	}
 }
 
+// Output logs data in a human-readable JSON format at Info level, including caller file and line information.
+// It is similar to Dbg but formats the output as JSON for better readability. It is thread-safe and respects
+// the logger's configuration (e.g., enabled, level, suspend, handler, middleware).
+// Example:
+//
+//	logger := New("app").Enable()
+//	x := map[string]int{"key": 42}
+//	logger.Output(x) // Output: [app] INFO: [file.go:123] JSON: {"key": 42}
+//
+// Logger method to provide access to Output functionality
+func (l *Logger) Output(values ...interface{}) {
+	o := NewInspector(l)
+	o.Log(2, values...)
+}
+
 // Enable activates logging, allowing logs to be emitted if other conditions (e.g., level,
 // namespace) are met. It is thread-safe using a write lock and returns the logger for chaining.
 // Example:
@@ -480,7 +495,7 @@ func (l *Logger) Fatal(args ...any) {
 		os.Exit(1)
 	}
 
-	l.log(lx.LevelError, lx.ClassText, cat.Space(args...), nil, true)
+	l.log(lx.LevelError, lx.ClassText, cat.Space(args...), nil, false)
 	os.Exit(1)
 }
 
