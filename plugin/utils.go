@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"strings"
 
-	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
-	ccWrapper "code.cloudfoundry.org/cli/api/cloudcontroller/wrapper"
-	"code.cloudfoundry.org/cli/api/uaa"
-	plugin_models "code.cloudfoundry.org/cli/plugin/models"
-	"code.cloudfoundry.org/cli/util/configv3"
+	"code.cloudfoundry.org/cli/v8/api/cloudcontroller/ccv3"
+	ccWrapper "code.cloudfoundry.org/cli/v8/api/cloudcontroller/wrapper"
+	"code.cloudfoundry.org/cli/v8/api/uaa"
+	plugin_models "code.cloudfoundry.org/cli/v8/plugin/models"
+	"code.cloudfoundry.org/cli/v8/util/configv3"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/v2/client"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/v2/plugin/messages"
 )
