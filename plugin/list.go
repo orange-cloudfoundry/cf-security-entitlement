@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
+	"code.cloudfoundry.org/cli/v8/api/cloudcontroller/ccv3"
 	cli "github.com/orange-cloudfoundry/cf-security-entitlement/v2/client"
 
 	"github.com/olekukonko/tablewriter"

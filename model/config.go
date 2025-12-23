@@ -1,6 +1,6 @@
 package model
 
-import "code.cloudfoundry.org/cli/resources"
+import "code.cloudfoundry.org/cli/v8/resources"
 
 type ConfigServer struct {
 	LogLevel              string   `cloud:"log_level"`

@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 
-	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
-	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/constant"
-	"code.cloudfoundry.org/cli/resources"
+	"code.cloudfoundry.org/cli/v8/api/cloudcontroller/ccv3"
+	"code.cloudfoundry.org/cli/v8/api/cloudcontroller/ccv3/constant"
+	"code.cloudfoundry.org/cli/v8/resources"
 	"github.com/pkg/errors"
 )
 

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/constant"
+	"code.cloudfoundry.org/cli/v8/api/cloudcontroller/ccv3/constant"
 	"github.com/gorilla/context"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/v2/model"
 )
