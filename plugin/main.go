@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"code.cloudfoundry.org/cli/plugin"
+	"code.cloudfoundry.org/cli/v8/plugin"
 	"github.com/jessevdk/go-flags"
 	"github.com/orange-cloudfoundry/cf-security-entitlement/v2/plugin/messages"
 	"github.com/prometheus/common/version"
