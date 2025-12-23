@@ -21,27 +21,26 @@ func serverError(w http.ResponseWriter, r *http.Request, err error) {
 func serverErrorCode(w http.ResponseWriter, r *http.Request, code int, err error) {
 	log.Error(err)
 	w.Header().Add("Content-Type", "application/json")
-
 	var httpErr client.CloudFoundryErrorV3
 	if errors.As(err, &httpErr) {
 		w.WriteHeader(httpErr.Code)
-
 		b, _ := json.Marshal(client.CloudFoundryErrorV3{
 			Code:   httpErr.Code,
 			Title:  httpErr.Title,
 			Detail: httpErr.Detail,
 		})
-		w.Write(b)
+		// Fix errcheck: ignore write error (error already logged above)
+		_, _ = w.Write(b)
 		return
 	}
 	w.WriteHeader(code)
-
 	b, _ := json.Marshal(client.CloudFoundryErrorV3{
 		Code:   code,
 		Title:  http.StatusText(code),
 		Detail: err.Error(),
 	})
-	w.Write(b)
+	// Fix errcheck: ignore write error (error already logged above)
+	_, _ = w.Write(b)
 	gHttpTotal.With(prometheus.Labels{
 		"endpoint": r.URL.Path,
 		"method":   r.Method,
@@ -60,26 +59,21 @@ func isAdmin(groups []string) bool {
 }*/
 
 func getUserId(req *http.Request) (string, error) {
-
 	token := req.Header.Get("Authorization")
-
 	tokenSplit := strings.Split(token, ".")
 	if len(tokenSplit) < 3 {
-		return "", fmt.Errorf("Invalid token")
+		return "", fmt.Errorf("invalid token")
 	}
-
 	var userIdStruct struct {
 		UserID string `json:"user_id"`
 	}
 	userInfo, err := base64.RawStdEncoding.DecodeString(tokenSplit[1])
 	if err != nil {
-
-		return "", fmt.Errorf("Invalid token")
+		return "", fmt.Errorf("invalid token")
 	}
-
 	err = json.Unmarshal(userInfo, &userIdStruct)
 	if err != nil {
-		return "", fmt.Errorf("Invalid token")
+		return "", fmt.Errorf("invalid token")
 	}
 	if userIdStruct.UserID == "" {
 		return "", fmt.Errorf("missing user information")

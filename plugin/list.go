@@ -101,8 +101,9 @@ func (c *ListCommand) Execute(_ []string) error {
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.Header("#", "name", "organization", "space", "lifecycle")
-	table.Bulk(data)
-	table.Render()
+	// Fix errcheck: ignore table rendering errors (output to stdout)
+	_ = table.Bulk(data)
+	_ = table.Render()
 	return nil
 }
 

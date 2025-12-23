@@ -147,16 +147,16 @@ func loadClient(transport *http.Transport, c model.ConfigServer) error {
 
 	err = uaaClient.SetupResources(info.Links.UAA.HREF, info.Links.Login.HREF)
 	if err != nil {
-		return fmt.Errorf("Error setup resource uaa: %s", err)
+		return fmt.Errorf("error setup resource uaa: %s", err)
 	}
 	tr := shallowDefaultTransport(c.TrustedCaCertificates, c.CloudFoundry.SkipSSLValidation)
 
 	accessToken, _, err := AuthenticateWithExpire(c.CloudFoundry.UAAEndpoint, config.UAAOAuthClient(), config.UAAOAuthClientSecret(), tr)
 	if err != nil {
-		return fmt.Errorf("Error when authenticate on cf: %s", err)
+		return fmt.Errorf("error when authenticate on cf: %s", err)
 	}
 	if accessToken == "" {
-		return fmt.Errorf("A pair of username/password or a pair of client_id/client_secret muste be set.")
+		return fmt.Errorf("a pair of username/password or a pair of client_id/client_secret muste be set")
 	}
 
 	cfclient = client.NewClient(c.CloudFoundry.Endpoint, ccClientV3, accessToken, info.Links.Self.HREF, tr)
@@ -231,13 +231,14 @@ func GetInfo(Endpoint string, SkipVerify bool, certs []string) (model.Info, erro
 	if err = json.Unmarshal(body, &info); err != nil {
 		return info, errors.Wrap(err, "Error unmarshalling Info")
 	}
-	json.Unmarshal(body, &info)
+	// Fix errcheck: this second Unmarshal is redundant and its error ignored
+	// Removed duplicate json.Unmarshal(body, &info)
 
 	return info, nil
 }
 
 func AuthenticateWithExpire(endpoint string, clientId string, clientSecret string, tr *http.Transport) (string, time.Time, error) {
-	body := fmt.Sprint("grant_type=client_credentials")
+	body := "grant_type=client_credentials"
 	var jsonData = []byte(body)
 	accessTokens := OauthToken{}
 	cfClient := &http.Client{Transport: tr}

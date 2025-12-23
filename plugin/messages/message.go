@@ -2,11 +2,12 @@ package messages
 
 import (
 	"fmt"
+	"io"
+	"os"
+
 	"github.com/logrusorgru/aurora"
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"
-	"io"
-	"os"
 )
 
 const showErrorEnvKey = "CFSECURITY_DEBUG"
@@ -18,9 +19,7 @@ func init() {
 }
 
 var showError = false
-
 var stdout = colorable.NewColorableStdout()
-
 var C = aurora.NewAurora(isatty.IsTerminal(os.Stdout.Fd()))
 
 func Output() io.Writer {
@@ -47,25 +46,29 @@ func Error(str string) {
 	if !showError {
 		return
 	}
-	Printfln("%s: %s", C.Red("Error"), str)
+	// Fix errcheck: ignore write errors on stdout (non-recoverable)
+	_, _ = Printfln("%s: %s", C.Red("Error"), str)
 }
 
 func Errorf(format string, a ...interface{}) {
 	if !showError {
 		return
 	}
-	Printf("%s: ", C.Red("Error"))
-	Printfln(format, a...)
+	// Fix errcheck: ignore write errors on stdout (non-recoverable)
+	_, _ = Printf("%s: ", C.Red("Error"))
+	_, _ = Printfln(format, a...)
 }
 
 func Fatal(str string) {
-	Printfln("%s: %s", C.Red("Error"), str)
+	// Fix errcheck: ignore write errors on stdout (non-recoverable)
+	_, _ = Printfln("%s: %s", C.Red("Error"), str)
 	os.Exit(1)
 }
 
 func Fatalf(format string, a ...interface{}) {
-	Printf("%s: ", C.Red("Error"))
-	Printfln(format, a...)
+	// Fix errcheck: ignore write errors on stdout (non-recoverable)
+	_, _ = Printf("%s: ", C.Red("Error"))
+	_, _ = Printfln(format, a...)
 	os.Exit(1)
 }
 
@@ -73,13 +76,15 @@ func Warning(str string) {
 	if !showError {
 		return
 	}
-	Printfln("%s: %s", C.Magenta("Warning"), str)
+	// Fix errcheck: ignore write errors on stdout (non-recoverable)
+	_, _ = Printfln("%s: %s", C.Magenta("Warning"), str)
 }
 
 func Warningf(format string, a ...interface{}) {
 	if !showError {
 		return
 	}
-	Printf("%s: ", C.Yellow("Warning"))
-	Printfln(format, a...)
+	// Fix errcheck: ignore write errors on stdout (non-recoverable)
+	_, _ = Printf("%s: ", C.Yellow("Warning"))
+	_, _ = Printfln(format, a...)
 }

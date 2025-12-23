@@ -62,7 +62,8 @@ func (c *BindCommand) Execute(_ []string) error {
 		messages.Println("TIP: If Dynamic ASG's are enabled, changes will automatically apply for running and staging applications. Otherwise, changes will require an app restart (for running) or restage (for staging) to apply to existing applications.")
 		return nil
 	}
-	return fmt.Errorf("Space %s not found in org %s", c.BindOptions.Space, c.BindOptions.Org)
+	// Fix staticcheck: error strings should not be capitalized
+	return fmt.Errorf("space %s not found in org %s", c.BindOptions.Space, c.BindOptions.Org)
 
 }
 

@@ -32,7 +32,8 @@ func getOrgID(orgName string) (string, error) {
 		return "", err
 	}
 	if len(Orgs.Resources) == 0 || Orgs.Resources[0].GUID == "" {
-		return "", fmt.Errorf("Org %s not found", orgName)
+		// Fix staticcheck: error strings should not be capitalized
+		return "", fmt.Errorf("org %s not found", orgName)
 	}
 	return Orgs.Resources[0].GUID, nil
 }

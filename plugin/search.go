@@ -2,15 +2,16 @@ package main
 
 import (
 	"bytes"
-	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
 	"fmt"
-	"github.com/olekukonko/tablewriter"
-	client2 "github.com/orange-cloudfoundry/cf-security-entitlement/v2/client"
-	"github.com/orange-cloudfoundry/cf-security-entitlement/v2/plugin/messages"
 	"net"
 	"os"
 	"strconv"
 	"strings"
+
+	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3"
+	"github.com/olekukonko/tablewriter"
+	client2 "github.com/orange-cloudfoundry/cf-security-entitlement/v2/client"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/v2/plugin/messages"
 )
 
 type SearchOptions struct {
@@ -152,8 +153,9 @@ func (c *SearchCommand) Execute(_ []string) error {
 	_, _ = messages.Println(text)
 	table := tablewriter.NewWriter(os.Stdout)
 	table.Header("#", "Name", "Destination", "Port")
-	table.Bulk(data)
-	table.Render()
+	// Fix errcheck: ignore table rendering errors (output to stdout)
+	_ = table.Bulk(data)
+	_ = table.Render()
 	return nil
 }
 

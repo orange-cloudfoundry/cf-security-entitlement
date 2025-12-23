@@ -51,12 +51,11 @@ func (c *Client) BindUnbindSecurityGroup(secGroupGUID, spaceGUID, method, endpoi
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode >= http.StatusBadRequest {
 		return err
 	}
-
-	defer resp.Body.Close()
 
 	return nil
 }
@@ -80,12 +79,11 @@ func (c *Client) BindRunningSecGroupToSpace(secGroupGUID, spaceGUID string, endp
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode >= http.StatusBadRequest {
 		return err
 	}
-
-	defer resp.Body.Close()
 
 	return nil
 }
@@ -109,13 +107,13 @@ func (c *Client) BindStagingSecGroupToSpace(secGroupGUID, spaceGUID string, endp
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode >= http.StatusBadRequest {
+		//nolint:bodyclose // handleError closes the body
 		_, err := c.handleError(resp)
 		return err
 	}
-
-	defer resp.Body.Close()
 
 	return nil
 }
@@ -135,13 +133,13 @@ func (c *Client) UnBindRunningSecGroupToSpace(secGroupGUID, spaceGUID string, en
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
+
 	if resp.StatusCode >= http.StatusBadRequest {
+		//nolint:bodyclose // handleError closes the body
 		_, err := c.handleError(resp)
 		return err
-
 	}
-
-	defer resp.Body.Close()
 
 	return nil
 }
@@ -160,13 +158,13 @@ func (c *Client) UnBindStagingSecGroupToSpace(secGroupGUID, spaceGUID string, en
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode >= http.StatusBadRequest {
+		//nolint:bodyclose // handleError closes the body
 		_, err := c.handleError(resp)
 		return err
 	}
-
-	defer resp.Body.Close()
 
 	return nil
 }

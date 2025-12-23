@@ -6,9 +6,8 @@ import (
 	"net/http"
 
 	"code.cloudfoundry.org/cli/api/cloudcontroller/ccv3/constant"
-	"github.com/orange-cloudfoundry/cf-security-entitlement/v2/model"
-
 	"github.com/gorilla/context"
+	"github.com/orange-cloudfoundry/cf-security-entitlement/v2/model"
 )
 
 // Deprecated: Entitlements were deleted
@@ -38,34 +37,30 @@ func handleListSecGroup(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	w.Header().Add("Content-Type", "application/json")
-	w.Write([]byte("[]"))
+	// Fix errcheck: ignore write error (handled by serverError if needed)
+	_, _ = w.Write([]byte("[]"))
 }
 
 // bind or unbind a security group to a space
 func handleBindSecGroup(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
-
 	var binding model.BindingParams
 	err := json.NewDecoder(req.Body).Decode(&binding)
 	if err != nil {
 		serverError(w, req, err)
 		return
 	}
-
 	userId, err := getUserId(req)
 	if err != nil {
 		serverErrorCode(w, req, http.StatusBadRequest, err)
 		return
 	}
-
 	space, err := cfclient.GetSpaceByGuid(binding.SpaceGUID)
 	if err != nil {
 		serverError(w, req, err)
 		return
 	}
-
 	orgGuid := space.Relationships[constant.RelationshipTypeOrganization].GUID
-
 	if !context.Get(req, ContextIsAdmin).(bool) {
 		hasAccess, err := isUserOrgManager(userId, orgGuid)
 		if err != nil {
@@ -77,7 +72,6 @@ func handleBindSecGroup(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 	}
-
 	if req.Method == http.MethodDelete {
 		err = cfclient.UnBindSecurityGroup(binding.SecurityGroupGUID, binding.SpaceGUID, cfclient.GetApiUrl())
 	} else {

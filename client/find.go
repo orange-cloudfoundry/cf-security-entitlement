@@ -252,7 +252,11 @@ func (c *Client) GetOrgManagers(orgGuid string, page int) (User, error) {
 	user := User{}
 
 	url := c.generateUrl(c.apiUrl+"/v3/roles", []ccv3.Query{Large, {Key: ccv3.OrganizationGUIDFilter, Values: []string{orgGuid}}}, page)
+	// Fix ineffassign: properly handle the error from doRequest
 	buffer, err := c.doRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return user, err
+	}
 
 	if err = json.Unmarshal(buffer, &user); err != nil {
 		return user, errors.Wrap(err, "Error unmarshalling user roles")

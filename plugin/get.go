@@ -57,7 +57,6 @@ func (c *GetCommand) Execute(_ []string) error {
 			space.SpaceName,
 		})
 	}
-
 	for i, space := range secGroup.Relationships.Staging_Spaces.Data {
 		data = append(data, []string{
 			messages.C.Sprintf(messages.C.Cyan("#%d"), i),
@@ -68,8 +67,10 @@ func (c *GetCommand) Execute(_ []string) error {
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.Header("#", "organization", "space")
-	table.Bulk(data)
-	table.Render()
+	// Fix errcheck: ignore table rendering errors (output to stdout)
+	_ = table.Bulk(data)
+	_ = table.Render()
+
 	return nil
 }
 

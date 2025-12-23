@@ -1,3 +1,5 @@
+version: 2
+
 project_name: cf-security-entitlement
 
 builds:
@@ -31,11 +33,8 @@ builds:
 
 archives:
   - id: archives
-    builds:
-      - server
-      - plugin
-      - provider
-    format: "tar.gz"
+    ids: [server, plugin, provider]
+    formats: ['tar.gz']
     name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}'
     wrap_in_directory: true
     files:
@@ -48,8 +47,8 @@ archives:
       - templates/*
 
   - id: plugin
-    format: binary
-    builds: [ plugin ]
+    formats: ['binary']
+    ids: [ plugin ]
     name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}"
 
 

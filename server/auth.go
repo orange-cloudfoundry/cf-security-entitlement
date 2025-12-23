@@ -106,7 +106,7 @@ func ExtractToken(r *http.Request) (*AuthToken, error) {
 	}
 
 	parts := strings.SplitN(token, " ", 2)
-	if (len(parts) != 2) && (false == strings.EqualFold(parts[0], "Bearer")) {
+	if (len(parts) != 2) && (!strings.EqualFold(parts[0], "Bearer")) {
 		return nil, fmt.Errorf("unknown token format")
 	}
 
