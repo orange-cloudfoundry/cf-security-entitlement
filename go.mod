@@ -1,6 +1,6 @@
 module github.com/orange-cloudfoundry/cf-security-entitlement/v2
 
-go 1.25.5
+go 1.25.7
 
 replace github.com/codahale/hdrhistogram => github.com/HdrHistogram/hdrhistogram-go v0.0.0-20210305173142-35c7773a578a
 
@@ -11,7 +11,7 @@ exclude (
 )
 
 require (
-	code.cloudfoundry.org/cli/v8 v8.17.0
+	code.cloudfoundry.org/cli/v8 v8.17.1
 	github.com/alecthomas/units v0.0.0-20240927000941-0f3dac36c52b // indirect
 	github.com/cloudfoundry-community/gautocloud v1.8.0
 	github.com/cloudfoundry-community/go-cfenv v1.18.0 // indirect
@@ -42,9 +42,9 @@ require (
 )
 
 require (
-	code.cloudfoundry.org/bytefmt v0.59.0 // indirect
+	code.cloudfoundry.org/bytefmt v0.60.0 // indirect
 	code.cloudfoundry.org/cli-plugin-repo v0.0.0-20220208212925-633e698c93c0 // indirect
-	code.cloudfoundry.org/clock v1.56.0 // indirect
+	code.cloudfoundry.org/clock v1.57.0 // indirect
 	code.cloudfoundry.org/go-log-cache/v2 v2.0.7 // indirect
 	code.cloudfoundry.org/go-loggregator/v9 v9.2.1 // indirect
 	code.cloudfoundry.org/jsonry v1.1.4 // indirect
@@ -107,9 +107,9 @@ require (
 	golang.org/x/crypto v0.46.0 // indirect
 	golang.org/x/net v0.48.0 // indirect
 	golang.org/x/oauth2 v0.34.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
-	golang.org/x/term v0.38.0 // indirect
-	golang.org/x/text v0.32.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
+	golang.org/x/term v0.39.0 // indirect
+	golang.org/x/text v0.33.0 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20251222181119-0a764e51fe1b // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251222181119-0a764e51fe1b // indirect
