@@ -22,8 +22,8 @@ code.cloudfoundry.org/tlsconfig v0.42.0 h1:XZIHVFZc3MhegXjQP4Uuh/ZeFX9zyhbGyiMJf
 code.cloudfoundry.org/tlsconfig v0.42.0/go.mod h1:Tsb04cCxYkgIgrft3GpojIXBICCgfuqSzPMNqPPbDVM=
 code.cloudfoundry.org/ykk v0.0.0-20170424192843-e4df4ce2fd4d h1:M+zXqtXJqcsmpL76aU0tdl1ho23eYa4axYoM4gD62UA=
 code.cloudfoundry.org/ykk v0.0.0-20170424192843-e4df4ce2fd4d/go.mod h1:YUJiVOr5xl0N/RjMxM1tHmgSpBbi5UM+KoVR5AoejO0=
-filippo.io/edwards25519 v1.1.0 h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
-filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
+filippo.io/edwards25519 v1.1.1 h1:YpjwWWlNmGIDyXOn8zLzqiD+9TyIlPhGFG96P39uBpw=
+filippo.io/edwards25519 v1.1.1/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v0.19.0/go.mod h1:h6H6c8enJmmocHUbLiiGY6sx7f9i+X3m1CHdd5c6Rdw=
 github.com/Azure/azure-sdk-for-go/sdk/azidentity v0.11.0/go.mod h1:HcM1YX14R7CJcghJGOYCgdezslRSVzqwLf/q+4Y2r/0=
 github.com/Azure/azure-sdk-for-go/sdk/internal v0.7.0/go.mod h1:yqy467j36fJxcRV2TzfVZ1pCb5vxm4BtZPUdYWe/Xo8=
