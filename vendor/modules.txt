@@ -121,8 +121,8 @@ github.com/clipperhouse/displaywidth
 # github.com/clipperhouse/uax29/v2 v2.7.0
 ## explicit; go 1.18
 github.com/clipperhouse/uax29/v2/graphemes
-# github.com/cloudfoundry-community/gautocloud v1.8.0
-## explicit; go 1.25.5
+# github.com/cloudfoundry-community/gautocloud v1.9.0
+## explicit; go 1.26
 github.com/cloudfoundry-community/gautocloud
 github.com/cloudfoundry-community/gautocloud/cloudenv
 github.com/cloudfoundry-community/gautocloud/connectors
