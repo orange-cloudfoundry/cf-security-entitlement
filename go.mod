@@ -13,7 +13,7 @@ exclude (
 require (
 	code.cloudfoundry.org/cli/v8 v8.18.3
 	github.com/alecthomas/units v0.0.0-20240927000941-0f3dac36c52b // indirect
-	github.com/cloudfoundry-community/gautocloud v1.8.0
+	github.com/cloudfoundry-community/gautocloud v1.9.0
 	github.com/cloudfoundry-community/go-cfenv v1.18.0 // indirect
 	github.com/denisenkom/go-mssqldb v0.12.3 // indirect
 	github.com/go-sql-driver/mysql v1.10.0 // indirect
