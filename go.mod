@@ -27,7 +27,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.47 // indirect
 	github.com/olekukonko/tablewriter v1.1.4
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/common v0.69.0
+	github.com/prometheus/common v0.70.0
 	github.com/prometheus/procfs v0.21.0 // indirect
 	github.com/sirupsen/logrus v1.9.4
 	github.com/spf13/viper v1.21.0 // indirect
