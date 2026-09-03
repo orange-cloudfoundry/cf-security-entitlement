@@ -1,6 +1,6 @@
 module github.com/orange-cloudfoundry/cf-security-entitlement/v2
 
-go 1.26.4
+go 1.26.7
 
 replace github.com/codahale/hdrhistogram => github.com/HdrHistogram/hdrhistogram-go v0.0.0-20210305173142-35c7773a578a
 
@@ -11,7 +11,7 @@ exclude (
 )
 
 require (
-	code.cloudfoundry.org/cli/v8 v8.18.4
+	code.cloudfoundry.org/cli/v8 v8.19.0
 	github.com/alecthomas/units v0.0.0-20240927000941-0f3dac36c52b // indirect
 	github.com/cloudfoundry-community/gautocloud v1.9.0
 	github.com/cloudfoundry-community/go-cfenv v1.18.0 // indirect
@@ -42,13 +42,13 @@ require (
 )
 
 require (
-	code.cloudfoundry.org/bytefmt v0.78.0 // indirect
+	code.cloudfoundry.org/bytefmt v0.86.0 // indirect
 	code.cloudfoundry.org/cli-plugin-repo v0.0.0-20220208212925-633e698c93c0 // indirect
-	code.cloudfoundry.org/clock v1.76.0 // indirect
+	code.cloudfoundry.org/clock v1.84.0 // indirect
 	code.cloudfoundry.org/go-log-cache/v2 v2.0.7 // indirect
 	code.cloudfoundry.org/go-loggregator/v9 v9.2.1 // indirect
 	code.cloudfoundry.org/jsonry v1.1.4 // indirect
-	code.cloudfoundry.org/tlsconfig v0.60.0 // indirect
+	code.cloudfoundry.org/tlsconfig v0.65.0 // indirect
 	code.cloudfoundry.org/ykk v0.0.0-20170424192843-e4df4ce2fd4d // indirect
 	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
@@ -68,7 +68,7 @@ require (
 	github.com/fatih/color v1.19.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.2 // indirect
-	github.com/go-logr/logr v1.4.3 // indirect
+	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-viper/encoding/hcl v0.1.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/goccy/go-json v0.10.6 // indirect
@@ -80,7 +80,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
-	github.com/mattn/go-runewidth v0.0.24 // indirect
+	github.com/mattn/go-runewidth v0.0.28 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/moby/term v0.5.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
@@ -103,12 +103,12 @@ require (
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/crypto v0.54.0 // indirect
-	golang.org/x/net v0.57.0 // indirect
+	golang.org/x/crypto v0.55.0 // indirect
+	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/term v0.45.0 // indirect
-	golang.org/x/text v0.40.0 // indirect
+	golang.org/x/text v0.41.0 // indirect
 	golang.org/x/time v0.15.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260622175928-b703f567277d // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260622175928-b703f567277d // indirect
@@ -117,8 +117,8 @@ require (
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	k8s.io/apimachinery v0.36.2 // indirect
-	k8s.io/client-go v0.36.2 // indirect
+	k8s.io/apimachinery v0.36.4 // indirect
+	k8s.io/client-go v0.36.4 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260624041617-8f3fa4921821 // indirect
 	k8s.io/utils v0.0.0-20260626114624-be93311217bd // indirect
